@@ -1,0 +1,14 @@
+<RCC>
+    <qresource prefix="/">
+        <file>Project2_Dataset/Image/Kirby_normal/kirby_run_1_L.png</file>
+        <file>Project2_Dataset/Image/Kirby_normal/kirby_run_1_R.png</file>
+        <file>Project2_Dataset/Image/Kirby_normal/kirby_run_2_L.png</file>
+        <file>Project2_Dataset/Image/Kirby_normal/kirby_run_2_R.png</file>
+        <file>Project2_Dataset/Image/Kirby_normal/kirby_run_3_L.png</file>
+        <file>Project2_Dataset/Image/Kirby_normal/kirby_run_3_R.png</file>
+        <file>Project2_Dataset/Image/Kirby_normal/kirby_run_4_L.png</file>
+        <file>Project2_Dataset/Image/Kirby_normal/kirby_run_4_R.png</file>
+        <file>Project2_Dataset/Image/Kirby_normal/kirby_stop_L.png</file>
+        <file>Project2_Dataset/Image/Kirby_normal/kirby_stop_R.png</file>
+    </qresource>
+</RCC>

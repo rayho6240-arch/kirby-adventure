@@ -7,6 +7,8 @@
 #include <QGraphicsRectItem>
 #include <QTimer>
 
+#include <QGraphicsPixmapItem>
+
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
@@ -26,8 +28,10 @@ private:
     Ui::MainWindow *ui;
     QGraphicsScene *scene;
     QGraphicsView *view;
-    QGraphicsRectItem *kirby;
     QTimer *timer;
+
+    QGraphicsPixmapItem *kirby;  // 換成這個
+    int frameCounter = 0;        // 新增：用來算動畫幀
 
     // 簡單的物理變數
     float vx = 0;       // 水平速度

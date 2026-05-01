@@ -22,8 +22,8 @@ MainWindow::MainWindow(QWidget *parent)
     }
 
     // 2. 初始化卡比
-    kirby = new QGraphicsRectItem(0, 0, 50, 50);
-    kirby->setBrush(Qt::magenta);
+    QPixmap kirbyImg(":/Project2_Dataset/Image/Kirby_normal/kirby_stop_R.png");
+    kirby = new QGraphicsPixmapItem(kirbyImg);
     kirby->setPos(400, 100); // 讓它從高一點的地方開始掉
     scene->addItem(kirby);
 
@@ -63,6 +63,26 @@ void MainWindow::gameLoop() {
 
     // 正式更新方塊位置
     kirby->setPos(nextX, nextY);
+
+    // === 新增：卡比動畫處理 ===
+    if (vx != 0) {
+        frameCounter++;
+        // 每 5 幀換一張圖，循環 1~4 幀
+        int runFrame = (frameCounter / 5) % 4 + 1;
+        QString dir = (vx > 0) ? "R" : "L"; // 判斷往左還是往右
+
+        // 動態組合路徑，例如：:/Project2_Dataset/Image/Kirby_normal/kirby_run_1_R.png
+        QString path = QString(":/Project2_Dataset/Image/Kirby_normal/kirby_run_%1_%2.png")
+                        .arg(runFrame).arg(dir);
+        kirby->setPixmap(QPixmap(path));
+    }
+    else {
+        // 沒動時，顯示站立圖 (這裡先預設 R，你也可以記住最後的方向)
+        kirby->setPixmap(QPixmap(":/Project2_Dataset/Image/Kirby_normal/kirby_stop_R.png"));
+    }
+
+
+
 
     // === 3. 攝影機捲動 (Camera Follow) ===
     float viewWidth = view->viewport()->width();
