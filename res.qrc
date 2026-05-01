@@ -10,5 +10,20 @@
         <file>Project2_Dataset/Image/Kirby_normal/kirby_run_4_R.png</file>
         <file>Project2_Dataset/Image/Kirby_normal/kirby_stop_L.png</file>
         <file>Project2_Dataset/Image/Kirby_normal/kirby_stop_R.png</file>
+        <file>Project2_Dataset/Image/Kirby_normal/kirby_attack_L.png</file>
+        <file>Project2_Dataset/Image/Kirby_normal/kirby_attack_R.png</file>
+        <file>Project2_Dataset/Image/Kirby_normal/kirby_attack_star(2).png</file>
+        <file>Project2_Dataset/Image/Kirby_normal/kirby_attack_star_L(1).png</file>
+        <file>Project2_Dataset/Image/Kirby_normal/kirby_attack_star_R(1).png</file>
+        <file>Project2_Dataset/Image/Kirby_normal/kirby_back.png</file>
+        <file>Project2_Dataset/Image/Kirby_normal/kirby_down_L.png</file>
+        <file>Project2_Dataset/Image/Kirby_normal/kirby_down_R.png</file>
+        <file>Project2_Dataset/Image/Kirby_normal/kirby_fly_1_L.png</file>
+        <file>Project2_Dataset/Image/Kirby_normal/kirby_fly_1_R.png</file>
+        <file>Project2_Dataset/Image/Kirby_normal/kirby_fly_2_L.png</file>
+        <file>Project2_Dataset/Image/Kirby_normal/kirby_fly_2_R.png</file>
+        <file>Project2_Dataset/Image/Kirby_normal/kirby_jump(1).png</file>
+        <file>Project2_Dataset/Image/Kirby_normal/kirby_jump(2).png</file>
+        <file>Project2_Dataset/Image/Kirby_normal/kirby_jump(3).png</file>
     </qresource>
 </RCC>

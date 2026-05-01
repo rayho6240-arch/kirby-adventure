@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <QKeyEvent>
+#include <QDebug>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -11,122 +12,109 @@ MainWindow::MainWindow(QWidget *parent)
     // 1. 初始化舞台
     scene = new QGraphicsScene(this);
     scene->setSceneRect(0, 0, 5000, 1080);
-    scene->setBackgroundBrush(Qt::white); // 強制背景為白色，比較好觀察
+    scene->setBackgroundBrush(Qt::white);
 
-
-    // 多放幾個方塊
+    // 簡單地板測試
     for (int i = 0; i < 10; i++) {
         QGraphicsRectItem *ground = new QGraphicsRectItem(i * 300, 850, 200, 50);
         ground->setBrush(Qt::darkGray);
         scene->addItem(ground);
     }
 
-    // 2. 初始化卡比
+    // 2. 初始化卡比 (注意：這裡不要重複宣告 QGraphicsPixmapItem*)
     QPixmap kirbyImg(":/Project2_Dataset/Image/Kirby_normal/kirby_stop_R.png");
     kirby = new QGraphicsPixmapItem(kirbyImg);
-    kirby->setPos(400, 100); // 讓它從高一點的地方開始掉
+    kirby->setPos(400, 100);
     scene->addItem(kirby);
 
     // 3. 設定攝影機
     view = new QGraphicsView(scene, this);
     setCentralWidget(view);
 
-    // 4. 設定遊戲計時器 (60 FPS)
+    // 4. 設定遊戲計時器
     timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, &MainWindow::gameLoop);
-    timer->start(16); // 每 16ms 跑一次循環
+    timer->start(16);
 
     this->setFocusPolicy(Qt::StrongFocus);
     this->setFocus();
-
 }
 
+// ---------------------------------------------------------
+// 萬用換圖函數：處理各種檔名規律
+// ---------------------------------------------------------
+void MainWindow::updateKirbySprite(QString action, QString dir, int frame) {
+    QString path;
+
+    if (action == "jump") {
+        // 針對 kirby_jump(1).png
+        path = QString(":/Project2_Dataset/Image/Kirby_normal/kirby_jump(%1).png").arg(frame);
+    }
+    else if (frame == 0) {
+        // 針對 kirby_stop_R.png
+        path = QString(":/Project2_Dataset/Image/Kirby_normal/kirby_%1_%2.png").arg(action).arg(dir);
+    }
+    else {
+        // 針對 kirby_run_1_R.png
+        path = QString(":/Project2_Dataset/Image/Kirby_normal/kirby_%1_%2_%3.png").arg(action).arg(frame).arg(dir);
+    }
+
+    QPixmap pix(path);
+    if (!pix.isNull()) {
+        kirby->setPixmap(pix);
+    }
+}
+
+// ---------------------------------------------------------
+// 核心遊戲迴圈
+// ---------------------------------------------------------
 void MainWindow::gameLoop() {
-    // === 1. 物理與移動計算 ===
+    // 1. 物理運算
     vy += gravity;
-    float nextY = kirby->y() + vy;
-    float nextX = kirby->x() + vx;
+    kirby->setPos(kirby->x() + vx, kirby->y() + vy);
 
-    // === 2. 邊界與碰撞判定 ===
-    float sceneWidth = scene->sceneRect().width();
-    float kirbyWidth = 50;
-
-    // 角色水平撞牆判定
-    if (nextX < 0) nextX = 0;
-    if (nextX > sceneWidth - kirbyWidth) nextX = sceneWidth - kirbyWidth;
-
-    // 角色地板判定
-    if (nextY > 800) {
-        nextY = 800;
+    // 2. 落地判定
+    if (kirby->y() >= 800) {
+        kirby->setY(800);
         vy = 0;
     }
 
-    // 正式更新方塊位置
-    kirby->setPos(nextX, nextY);
+    // 3. 更新朝向
+    if (vx > 0) isFacingRight = true;
+    else if (vx < 0) isFacingRight = false;
+    QString dir = isFacingRight ? "R" : "L";
 
-    // === 新增：卡比動畫處理 ===
-    if (vx != 0) {
+    // 4. 根據狀態播放動畫
+    if (kirby->y() < 800) {
+        // 空中：跳躍圖
+        updateKirbySprite("jump", dir, 1);
+    }
+    else if (vx != 0) {
+        // 地面移動：跑圖
         frameCounter++;
-        // 每 5 幀換一張圖，循環 1~4 幀
         int runFrame = (frameCounter / 5) % 4 + 1;
-        QString dir = (vx > 0) ? "R" : "L"; // 判斷往左還是往右
-
-        // 動態組合路徑，例如：:/Project2_Dataset/Image/Kirby_normal/kirby_run_1_R.png
-        QString path = QString(":/Project2_Dataset/Image/Kirby_normal/kirby_run_%1_%2.png")
-                        .arg(runFrame).arg(dir);
-        kirby->setPixmap(QPixmap(path));
+        updateKirbySprite("run", dir, runFrame);
     }
     else {
-        // 沒動時，顯示站立圖 (這裡先預設 R，你也可以記住最後的方向)
-        kirby->setPixmap(QPixmap(":/Project2_Dataset/Image/Kirby_normal/kirby_stop_R.png"));
+        // 地面靜止：站立圖
+        frameCounter = 0;
+        updateKirbySprite("stop", dir);
     }
 
-
-
-
-    // === 3. 攝影機捲動 (Camera Follow) ===
-    float viewWidth = view->viewport()->width();
-    float centerX = kirby->x();
-
-    // 鏡頭邊界鎖定 (防止拍到黑影)
-    if (centerX < viewWidth / 2) {
-        centerX = viewWidth / 2;
-    }
-    if (sceneWidth > viewWidth) {
-        if (centerX > sceneWidth - viewWidth / 2) {
-            centerX = sceneWidth - viewWidth / 2;
-        }
-    } else {
-        centerX = sceneWidth / 2;
-    }
-
-    // 更新鏡頭位置
-    view->centerOn(centerX, 540);
+    // 5. 攝影機跟隨
+    view->centerOn(kirby->x(), 540);
 }
 
-
-MainWindow::~MainWindow()
-{
-    delete ui;
-}
-
-
-// 按下按鍵時：設定速度
 void MainWindow::keyPressEvent(QKeyEvent *event) {
-    if (event->key() == Qt::Key_Left) {
-        vx = -7;  // 往左走
-    } else if (event->key() == Qt::Key_Right) {
-        vx = 7;   // 往右走
-    } else if (event->key() == Qt::Key_Up) {
-        if (kirby->y() >= 800) { // 只有在地上才能跳
-            vy = -12;
-        }
-    }
+    if (event->key() == Qt::Key_Left) vx = -7;
+    else if (event->key() == Qt::Key_Right) vx = 7;
+    else if (event->key() == Qt::Key_Up && kirby->y() >= 800) vy = -12;
 }
 
-// 放開按鍵時：速度歸零
 void MainWindow::keyReleaseEvent(QKeyEvent *event) {
-    if (event->key() == Qt::Key_Left || event->key() == Qt::Key_Right) {
-        vx = 0;
-    }
+    if (event->key() == Qt::Key_Left || event->key() == Qt::Key_Right) vx = 0;
+}
+
+MainWindow::~MainWindow() {
+    delete ui;
 }
