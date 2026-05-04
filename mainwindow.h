@@ -26,7 +26,7 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-private slots:
+private slots: //slots 讓這個函數可以被 connect() 連結。//像「收音機」一樣，監聽某個「信號（Signal）」。//這邊用來監視time
     void gameLoop(); // 遊戲每一幀要做的事
 
 
