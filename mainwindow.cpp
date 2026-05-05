@@ -31,6 +31,15 @@ MainWindow::MainWindow(QWidget *parent)
     view = new QGraphicsView(scene, this);  //在家，畫一幅畫
     setCentralWidget(view);   //把這幅畫塞進畫框的最中心，並且填滿它。
 
+
+
+    // [新增] 初始化雙擊計時器(衝刺跑)
+    doubleTapTimer = new QTimer(this);
+    doubleTapTimer->setSingleShot(true); // 設為只觸發一次
+    connect(doubleTapTimer, &QTimer::timeout, this, &MainWindow::onDoubleTapTimerTimeout);
+
+
+
     // 4. 設定遊戲計時器
     timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, &MainWindow::gameLoop); //內建函數: 當 '鬧鐘' '時間到了'，請叫 '我(this)' '去執行 gameLoop。'
@@ -40,6 +49,16 @@ MainWindow::MainWindow(QWidget *parent)
     this->setFocus();                     //this 就是「這個 MainWindow 視窗本人」。
 
 }
+
+
+
+// ---------------------------------------------------------
+// [新增 Slot 函數實作]
+// ---------------------------------------------------------
+void MainWindow::onDoubleTapTimerTimeout() {
+    lastReleasedKey = -1; // 時間到，清空上一次按鍵，雙擊無效
+}
+
 
 
 
@@ -81,13 +100,33 @@ void MainWindow::updateKirbySprite(QString action, QString dir, int frame) {
 // ---------------------------------------------------------
 // 核心遊戲迴圈
 // ---------------------------------------------------------
+//vx 是「玩家的意圖」，而 currentVx 是「物理引擎的最終裁決」
+//vx 是private變數， currentVx 是區域變數，用來算nextX
+//
+//
+//
+//==============================================================
+
 void MainWindow::gameLoop() {
     // 1. 物理運算
-    vy += gravity;
-    // --- 修改開始：邊界檢查邏輯 ---
-    qreal nextX = kirby->x() + vx;
+    if (isFlying) {
+        vy += (gravity * 0.3); // 飛行時重力只有原本的 30%
+    } else {
+        vy += gravity;
+    }
+
+    // 蹲下時不准左右移動
+    // 如果 isDown 為 true，這幀的速度就是 0，否則維持 vx
+    qreal currentVx = isDown ? 0 : vx;
+
+    // --- 邊界檢查邏輯 ---
+    // 使用 qBound 確保 nextX 永遠在 [0, 舞台寬度 - 卡比寬度] 之間
+    // [修改] 我們不再需要這裡的獨立 if判斷，因為 setPos 時會自動攔截
+    qreal nextX = qBound(0.0, kirby->x() + currentVx, 5000.0 - kirby->boundingRect().width());
     qreal nextY = kirby->y() + vy;
 
+    // [修改] 下面的 if 攔截可以註解掉了，因為 qBound 已經處理好
+    /*
     // 左邊界檢查 (0)
     if (nextX < 0) {
         nextX = 0;
@@ -97,6 +136,7 @@ void MainWindow::gameLoop() {
     else if (nextX > 5000 - kirby->boundingRect().width()) {
         nextX = 5000 - kirby->boundingRect().width();
     }
+    */
 
     // 套用位置
     kirby->setPos(nextX, nextY);
@@ -106,17 +146,38 @@ void MainWindow::gameLoop() {
     if (kirby->y() >= 800) {
         kirby->setY(800);
         vy = 0;
+        isFlying = false; // [新增] 落地自動取消飛行狀態
+        // isFlying動畫裡的 flyFrame 落地重置在你的 keyPress 邏輯中處理即可，這裡不需要重複。
     }
 
     // 3. 更新朝向
+    // 就算蹲下不能走，原地按左右鍵還是可以轉頭（因為 vx 還是有值）
     if (vx > 0) isFacingRight = true;
     else if (vx < 0) isFacingRight = false;
     QString dir = isFacingRight ? "R" : "L"; //宣告+定義變數 dir(direction)
 
     // 4. 根據狀態播放動畫
-    if (kirby->y() < 800) {
+    // [修改] 這裡的 if-else 順序非常重要！決定了動畫的「優先權」
+    if (isDown && kirby->y() >= 800) {
+        // [新增] 地面蹲下：蹲下圖 (優先級最高，蹲下就不能播跑步)
+        updateKirbySprite("down", dir, 0); // 傳入 0 讓它走你單張圖的邏輯
+    }
+    else if (isFlying) {
+        // [新增] 空中飛行：這裡直接顯示 flyFrame（這個變數會在你的按一下拍一次 keyPressEvent 裡被切換）
+        updateKirbySprite("fly", dir, flyFrame);
+    }
+    else if (kirby->y() < 800) {
         // 空中：跳躍圖
         updateKirbySprite("jump", dir, 1);
+    }
+    // --- 修改：衝刺動畫狀態 ---
+    else if (isDashing && vx != 0) {
+        // [衝刺] 地面衝刺：我們讓標準跑圖循環快兩倍
+        // 如果你有專用的衝刺圖（如 kirby_run_4，但大多卡比遊戲衝刺只是跑快點的圖），
+        // 這裡可以寫 `updateKirbySprite("run", dir, 4)` 恆定顯示第4幀，
+        // 或者使用 `(frameCounter / 3) % 4 + 1` 讓標準跑循環快兩倍。
+        // 基於你給的圖kirby_run_4，我們恆定顯示衝刺圖的單幀手感通常更好：
+        updateKirbySprite("run", dir, 4);
     }
     else if (vx != 0) {
         // 地面移動：跑圖
@@ -127,7 +188,7 @@ void MainWindow::gameLoop() {
     else {
         // 地面靜止：站立圖
         frameCounter = 0;
-        updateKirbySprite("stop", dir);
+        updateKirbySprite("stop", dir, 0);
     }
 
     // 5. 攝影機跟隨
@@ -140,15 +201,86 @@ void MainWindow::gameLoop() {
 
 // ---------------------------------------------------------
 // 按鈕模塊
-// ---------------------------------------------------------
+//---------------------------------------------------------
+//把簡單的
+//      if (event->key() == Qt::Key_Left) vx = -7;
+//      else if (event->key() == Qt::Key_Right) vx = 7;
+//       換成複雜的衝刺判定
+//
+//加入按鈕防止彈跳，雙擊有衝刺功能
+//
+//
+// =========================================================
 void MainWindow::keyPressEvent(QKeyEvent *event) {
-    if (event->key() == Qt::Key_Left) vx = -7;
-    else if (event->key() == Qt::Key_Right) vx = 7;
-    else if (event->key() == Qt::Key_Up && kirby->y() >= 800) vy = -12;
+    // [關鍵新增] 防彈跳：如果是作業系統長按產生的連發訊號，直接忽略
+    if (event->isAutoRepeat()) {
+        return;
+    }
+
+    int key = event->key();
+
+    // 1. 處理蹲下
+    if (key == Qt::Key_Down) {
+        isDown = true;
+        isDashing = false;
+    }
+    // 2. 處理跳躍與飛行
+    else if (key == Qt::Key_Up) {
+        if (kirby->y() >= 800) {
+            vy = -12;
+        }
+        else {
+            isFlying = true;
+            vy = -8;
+            if (flyFrame == 1) flyFrame = 2;
+            else flyFrame = 1;
+        }
+    }
+    // 3. 處理右鍵
+    else if (key == Qt::Key_Right) {
+        if (doubleTapTimer->isActive() && lastReleasedKey == Qt::Key_Right) {
+            isDashing = true;
+            vx = DASH_SPEED;
+            doubleTapTimer->stop();
+            lastReleasedKey = -1;
+        } else {
+            if (!isDashing) vx = 7;
+        }
+    }
+    // 4. 處理左鍵
+    else if (key == Qt::Key_Left) {
+        if (doubleTapTimer->isActive() && lastReleasedKey == Qt::Key_Left) {
+            isDashing = true;
+            vx = -DASH_SPEED;
+            doubleTapTimer->stop();
+            lastReleasedKey = -1;
+        } else {
+            if (!isDashing) vx = -7;
+        }
+    }
 }
 
 void MainWindow::keyReleaseEvent(QKeyEvent *event) {
-    if (event->key() == Qt::Key_Left || event->key() == Qt::Key_Right) vx = 0;
+    // [關鍵新增] 防彈跳：過濾掉作業系統產生的「假放開」
+    if (event->isAutoRepeat()) {
+        return;
+    }
+
+    int key = event->key();
+
+    // 處理放開蹲下
+    if (key == Qt::Key_Down) {
+        isDown = false;
+    }
+    // 處理放開左右鍵 (啟動雙擊計時)
+    else if (key == Qt::Key_Left || key == Qt::Key_Right) {
+        isDashing = false;
+        vx = 0;
+
+        // 啟動雙擊判定計時器
+        lastReleasedKey = key;
+        doubleTapTimer->start(DOUBLE_TAP_WINDOW);
+    }
 }
 
 
