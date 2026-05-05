@@ -55,6 +55,13 @@ private:
     const qreal DASH_SPEED = 14;      // 衝刺速度（原走路速度 7 的兩倍）
 
 
+
+    bool isInhaling = false; // 是否正在吸氣
+
+
+
+
+
     // 簡單的物理變數
     float vx = 0;       // 水平速度
     float vy = 0;       // 垂直速度

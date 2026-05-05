@@ -110,14 +110,14 @@ void MainWindow::updateKirbySprite(QString action, QString dir, int frame) {
 void MainWindow::gameLoop() {
     // 1. 物理運算
     if (isFlying) {
-        vy += (gravity * 0.3); // 飛行時重力只有原本的 30%
+        vy += (gravity * 0.5); // 飛行時重力只有原本的 50%
     } else {
         vy += gravity;
     }
 
     // 蹲下時不准左右移動
     // 如果 isDown 為 true，這幀的速度就是 0，否則維持 vx
-    qreal currentVx = isDown ? 0 : vx;
+    qreal currentVx = (isDown || isInhaling) ? 0 : vx;
 
     // --- 邊界檢查邏輯 ---
     // 使用 qBound 確保 nextX 永遠在 [0, 舞台寬度 - 卡比寬度] 之間
@@ -157,11 +157,18 @@ void MainWindow::gameLoop() {
     QString dir = isFacingRight ? "R" : "L"; //宣告+定義變數 dir(direction)
 
     // 4. 根據狀態播放動畫
-    // [修改] 這裡的 if-else 順序非常重要！決定了動畫的「優先權」
+    // [修改] 這裡的 if-else 順序非常重要！決定了動畫的「優先權」後續可能用 RTOS架構之類的
     if (isDown && kirby->y() >= 800) {
         // [新增] 地面蹲下：蹲下圖 (優先級最高，蹲下就不能播跑步)
         updateKirbySprite("down", dir, 0); // 傳入 0 讓它走你單張圖的邏輯
     }
+
+    else if (isInhaling) {
+        // [新增] 吸氣動畫優先級也很高！
+        updateKirbySprite("attack", dir, 0); // 替換成你的吸氣圖片名稱
+    }
+
+
     else if (isFlying) {
         // [新增] 空中飛行：這裡直接顯示 flyFrame（這個變數會在你的按一下拍一次 keyPressEvent 裡被切換）
         updateKirbySprite("fly", dir, flyFrame);
@@ -258,6 +265,17 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
             if (!isDashing) vx = -7;
         }
     }
+
+    //處理x吸氣
+    else if (key == Qt::Key_X) { // 假設使用 Z 鍵當作攻擊/吸氣
+        // 通常要在沒有蹲下、沒有飛行的狀態下才能吸氣
+        if (!isDown && !isFlying) {
+            isInhaling = true;
+            isDashing = false; // 強制中斷衝刺
+        }
+    }
+
+
 }
 
 void MainWindow::keyReleaseEvent(QKeyEvent *event) {
@@ -280,6 +298,11 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event) {
         // 啟動雙擊判定計時器
         lastReleasedKey = key;
         doubleTapTimer->start(DOUBLE_TAP_WINDOW);
+    }
+
+     // 處理放開 X鍵
+    else if (key == Qt::Key_X) {
+        isInhaling = false; // 放開按鍵停止吸氣
     }
 }
 
