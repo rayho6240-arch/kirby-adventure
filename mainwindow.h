@@ -45,7 +45,7 @@ private:
     bool isFacingRight = true; //  //不動時朝左或朝右，預設朝右
     bool isDown = false;  // 是否蹲下
     bool isFlying = false; // 是否飛行
-
+    int flapCounter = 0; // 記錄拍翅膀動畫的剩餘幀數
 
 
     bool isDashing = false;  // 是否正在衝刺

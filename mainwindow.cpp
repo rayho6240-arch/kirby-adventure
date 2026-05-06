@@ -70,6 +70,9 @@ void MainWindow::onDoubleTapTimerTimeout() {
 //第一個 .arg(action)：它會掃描字串，找到第一個出現的 %1，然後把 action 變數的內容（例如 "run"）塞進去。
 //第二個 .arg(frame)：它會找 %2，把計算好的數字（例如 1）塞進去。
 //第三個 .arg(dir)：它會找 %3，把方向（例如 "R"）塞進去。
+//新增水平翻轉，最好還是透過改檔名跟截圖素材比較好，但就是紀錄一下有這種工具pix.toImage().mirrored(true, false);
+//
+//
 //==============================================================
 
 void MainWindow::updateKirbySprite(QString action, QString dir, int frame) {
@@ -90,11 +93,17 @@ void MainWindow::updateKirbySprite(QString action, QString dir, int frame) {
 
     QPixmap pix(path);   //是一個obj， pix以(path)為ctor
     if (!pix.isNull()) { //再次檢查，前面邏輯給出的地址不是空的
+
+        // [新增] 如果是跳躍圖片，且面向左邊 (dir == "L")，進行水平翻轉
+        if (action == "jump" && dir == "L") {
+            // toImage() 轉成可編輯格式，mirrored(true, false) 代表水平翻轉
+            QImage flippedImage = pix.toImage().mirrored(true, false);
+            pix = QPixmap::fromImage(flippedImage); // 轉換回 QPixmap
+        }
+
         kirby->setPixmap(pix); //把這個道具給演員'kirby'
     }
 }
-
-
 
 
 // ---------------------------------------------------------
@@ -110,7 +119,7 @@ void MainWindow::updateKirbySprite(QString action, QString dir, int frame) {
 void MainWindow::gameLoop() {
     // 1. 物理運算
     if (isFlying) {
-        vy += (gravity * 0.5); // 飛行時重力只有原本的 50%
+        vy += (gravity * 0.65); // 飛行時重力只有原本的 50%
     } else {
         vy += gravity;
     }
@@ -148,6 +157,7 @@ void MainWindow::gameLoop() {
         vy = 0;
         isFlying = false; // [新增] 落地自動取消飛行狀態
         // isFlying動畫裡的 flyFrame 落地重置在你的 keyPress 邏輯中處理即可，這裡不需要重複。
+        isFlying = false; // [關鍵新增] 一旦碰到地面，強制解除變胖/飛行狀態
     }
 
     // 3. 更新朝向
@@ -168,14 +178,28 @@ void MainWindow::gameLoop() {
         updateKirbySprite("attack", dir, 0); // 替換成你的吸氣圖片名稱
     }
 
-
     else if (isFlying) {
-        // [新增] 空中飛行：這裡直接顯示 flyFrame（這個變數會在你的按一下拍一次 keyPressEvent 裡被切換）
-        updateKirbySprite("fly", dir, flyFrame);
+        //空中飛行：這裡直接顯示 flyFrame（這個變數會在你的按一下拍一次 keyPressEvent 裡被切換）
+        //updateKirbySprite("fly", dir, flyFrame); 修改掉了
+        // [修改] 飛行時的動畫判斷
+        if (flapCounter > 0) {
+            flapCounter--; // 計數器遞減
+            updateKirbySprite("fly", dir, 2); // 顯示翅膀拍下的狀態 (第 2 張)
+        } else {
+            updateKirbySprite("fly", dir, 1); // 沒按按鍵時，維持滑翔/展翅狀態 (第 1 張)
+        }
     }
+
+    //新增下落動畫
     else if (kirby->y() < 800) {
-        // 空中：跳躍圖
-        updateKirbySprite("jump", dir, 1);
+        // [修改] 區分空中上升與下落
+        if (vy > 0) {
+            // 下落中 (vy > 0)：播放下落動畫 (第 3 張圖)
+            updateKirbySprite("jump", dir, 3);
+        } else {
+            // 上升中 (vy <= 0)：播放跳躍動畫 (第 1 張圖)
+            updateKirbySprite("jump", dir, 1);
+        }
     }
     // --- 修改：衝刺動畫狀態 ---
     else if (isDashing && vx != 0) {
@@ -231,18 +255,28 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
         isDown = true;
         isDashing = false;
     }
+
+
     // 2. 處理跳躍與飛行
-    else if (key == Qt::Key_Up) {
-        if (kirby->y() >= 800) {
-            vy = -12;
-        }
-        else {
-            isFlying = true;
-            vy = -8;
-            if (flyFrame == 1) flyFrame = 2;
-            else flyFrame = 1;
+    // [新增] 處理大跳躍 (Z 鍵)，分割跳躍跟飛行邏輯
+    else if (key == Qt::Key_Z) {
+        // 只有在地面上，且沒有在吸氣的時候才能起跳
+        if (kirby->y() >= 800 && !isInhaling) {
+            vy = -15; // 給予較大的初始向上速度 (大跳躍，數值可依手感微調)
+            isFlying = false; // 確保進入的是普通跳躍狀態
         }
     }
+    // [修改] 處理飛行 (Up 鍵)
+    else if (key == Qt::Key_Up) {
+        // 無論在地面還是空中，只要沒在吸氣，按下「上」就強制切換成飛行模式
+        if (!isInhaling) {
+            isFlying = true;
+            vy = -8;          // 拍翅膀給予的向上升力
+            flapCounter = 8;  // 啟動拍翅膀動畫計時器，數字越大拍越快
+        }
+    }
+
+
     // 3. 處理右鍵
     else if (key == Qt::Key_Right) {
         if (doubleTapTimer->isActive() && lastReleasedKey == Qt::Key_Right) {
