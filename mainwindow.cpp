@@ -11,7 +11,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     // 1. 初始化舞台
     scene = new QGraphicsScene(this);
-    scene->setSceneRect(0, 0, 5000, 1080);
+    //[修改] 這邊的 width 到時候要改成是 stage 1 => 4860，stage 2 => 8100
+    scene->setSceneRect(0, 0, 4860, 1080);
     scene->setBackgroundBrush(Qt::white);
 
     // 簡單地板測試
@@ -30,6 +31,8 @@ MainWindow::MainWindow(QWidget *parent)
     // 3. 設定攝影機
     view = new QGraphicsView(scene, this);  //在家，畫一幅畫
     setCentralWidget(view);   //把這幅畫塞進畫框的最中心，並且填滿它。
+    //[新增] 固定這幅畫的大小為1620*1080 pixels
+    view->setFixedSize(1620, 1080);
 
 
 
@@ -131,7 +134,8 @@ void MainWindow::gameLoop() {
     // --- 邊界檢查邏輯 ---
     // 使用 qBound 確保 nextX 永遠在 [0, 舞台寬度 - 卡比寬度] 之間
     // [修改] 我們不再需要這裡的獨立 if判斷，因為 setPos 時會自動攔截
-    qreal nextX = qBound(0.0, kirby->x() + currentVx, 5000.0 - kirby->boundingRect().width());
+    // [修改2] 這邊的舞台寬度在 stage 1 為 4860 pixels，stage 2 為 8100 pixels
+    qreal nextX = qBound(0.0, kirby->x() + currentVx, 4860.0 - kirby->boundingRect().width());
     qreal nextY = kirby->y() + vy;
 
     // [修改] 下面的 if 攔截可以註解掉了，因為 qBound 已經處理好
