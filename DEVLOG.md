@@ -131,6 +131,7 @@
 * **版本控管：** 每日開發結束後進行程式碼備份，並針對碰撞偵測（Collision Box）進行交叉測試。
 
 ---
+<img width="209" height="202" alt="die2" src="https://github.com/user-attachments/assets/64f3be59-6351-4561-9fa1-52de75427b94" />
 
 ## 🛠 技術細節與備註
 * **素材解析度：** 目前卡比的 Sprite 大小設定在 100-150px 區間，需注意與 1620 寬度的場景比例是否協調。
