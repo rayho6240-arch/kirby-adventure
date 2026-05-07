@@ -25,5 +25,6 @@
         <file>Project2_Dataset/Image/Kirby_normal/kirby_jump(1).png</file>
         <file>Project2_Dataset/Image/Kirby_normal/kirby_jump(2).png</file>
         <file>Project2_Dataset/Image/Kirby_normal/kirby_jump(3).png</file>
+        <file>Project2_Dataset/Image/Kirby_normal/kirby_run_5_R.png</file>
     </qresource>
 </RCC>
