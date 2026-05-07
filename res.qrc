@@ -26,5 +26,10 @@
         <file>Project2_Dataset/Image/Kirby_normal/kirby_jump(2).png</file>
         <file>Project2_Dataset/Image/Kirby_normal/kirby_jump(3).png</file>
         <file>Project2_Dataset/Image/Kirby_normal/kirby_run_5_R.png</file>
+        <file>Project2_Dataset/Image/Kirby_normal/kirby_run_5_L.png</file>
+        <file>Project2_Dataset/Image/Kirby_normal/kirby_run_6_L.png</file>
+        <file>Project2_Dataset/Image/Kirby_normal/kirby_run_6_R.png</file>
+        <file>Project2_Dataset/Image/Kirby_normal/kirby_run_7_R.png</file>
+        <file>Project2_Dataset/Image/Kirby_normal/kirby_run_7_L.png</file>
     </qresource>
 </RCC>

@@ -209,7 +209,7 @@ void MainWindow::gameLoop() {
         // 或者使用 `(frameCounter / 3) % 4 + 1` 讓標準跑循環快兩倍。
         // 基於你給的圖kirby_run_4，我們恆定顯示衝刺圖的單幀手感通常更好：
         frameCounter++;
-        int runframe = (frameCounter / 5) % 2 + 4;
+        int runframe = (frameCounter / 7) % 3 + 5;
         updateKirbySprite("run", dir, runframe);
     }
     else if (vx != 0) {
