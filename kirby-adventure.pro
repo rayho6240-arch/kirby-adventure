@@ -9,12 +9,25 @@ CONFIG += c++11
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    Block.cpp \
+    Effect.cpp \
+    Enemy.cpp \
+    HUD.cpp \
     Kirby.cpp \
+    StarBlock.cpp \
+    StarBullet.cpp \
+    WaddleDee.cpp \
     main.cpp \
     mainwindow.cpp
 
 HEADERS += \
+    Block.h \
+    Effect.h \
+    Enemy.h \
+    HUD.h \
     Kirby.h \
+    StarBullet.h \
+    WaddleDee.h \
     mainwindow.h
 
 FORMS += \
