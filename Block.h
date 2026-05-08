@@ -3,9 +3,6 @@
 
 //一般地形與方塊的基底。
 
-
-
-
 #include <QGraphicsRectItem> // 改繼承矩形
 
 class Block : public QGraphicsRectItem {

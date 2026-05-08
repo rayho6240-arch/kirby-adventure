@@ -85,9 +85,20 @@ MainWindow::MainWindow(QWidget *parent)
 
 
     //小方塊敵人
-    dee = new WaddleDee();
-    dee->setPos(800, 500); // 放一個有地板的地方
-    scene->addItem(dee);
+    //dee = new WaddleDee();
+    //dee->setPos(800, 500); // 放一個有地板的地方
+    //scene->addItem(dee);
+
+    // [修改]變成以list儲存後，一口氣生成三個實驗品
+    for (int i = 0; i < 3; ++i) {
+        WaddleDee *newDee = new WaddleDee();
+        newDee->setPos(800 + (i * 500), 500); // 讓他們出生在不同位置
+        scene->addItem(newDee);
+        enemyList.append(newDee); // 把他們通通塞進清單管理
+    }
+
+
+
 
 
 
@@ -109,30 +120,37 @@ void MainWindow::onDoubleTapTimerTimeout() {
 }
 
 // ---------------------------------------------------------
-// 核心遊戲迴圈
+// 核心遊戲迴圈~~~~~~~~~~~~~~~~
 // ---------------------------------------------------------
 void MainWindow::gameLoop() {
     // 1. 更新玩家狀態 (物理與動畫)
     if (player) {
         player->update();
+        player->processInhale(enemyList);// [新增]：讓卡比去「吸」這群敵人
     }
 
-    // 2. 更新敵人狀態 [新增]
-    // 這裡我們檢查指標是否存在，確保不會因為對 NULL 指標操作而閃退
-    if (dee) {
-        dee->update();
+    // 2. 更新敵人狀態
+    // 使用迴圈統一更新，這部分你寫得很棒！
+    for (Enemy *e : enemyList) {
+        e->update();
     }
 
-    // 3. 處理角色間的互動 (互動層) [新增預留]
-    // 這就是架構師的工作：先定義「如果撞到會發生什麼事」的入口
-    if (player && dee && player->collidesWithItem(dee)) {
-        // TODO: 交給同學實作受傷閃爍或是扣血邏輯
-        // qDebug() << "Kirby hit Waddle Dee!";
+    // 3. 處理角色間的互動 (互動層)
+    // [架構師修正]：既然有多個敵人，我們也需要用迴圈來檢查碰撞
+    if (player) {
+        for (Enemy *e : enemyList) {
+            if (player->collidesWithItem(e)) {
+                // TODO: 被撞到的後續處理（例如 player->takeDamage()）
+                // 這裡目前留白，等同學來優化受擊效果
+            }
+        }
     }
 
     // 4. 攝影機跟隨 (最後處理，因為要等所有物件座標都算好)
     if (player) {
-        view->centerOn(player->x(), 540);
+        // [小建議]：這裡可以用 qBound 限制攝影機不超出地圖 0-4860 的範圍
+        qreal camX = qBound(512.0, player->x(), 4860.0 - 512.0);
+        view->centerOn(camX, 540);
     }
 }
 // ---------------------------------------------------------

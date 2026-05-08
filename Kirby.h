@@ -5,6 +5,7 @@
 #include <QPainter>
 #include <QString>
 #include <QImage>
+#include "Enemy.h"
 
 // 讓 Kirby 繼承 QGraphicsPixmapItem，這樣他自己就是一個可以顯示在場景上的演員
 class Kirby : public QGraphicsPixmapItem {
@@ -20,8 +21,14 @@ public:
     void setDashing(bool dashing);
     void setDown(bool down);
 
+
     // --- 核心更新邏輯 ---
     void update();
+
+
+    //卡比面前畫一個「看不見的長方形」，只要敵人在裡面，就會受到吸引力。
+    void processInhale(QList<Enemy*> &enemies); // 接收敵人清單進行處理
+
 
     // 取得卡比目前的 vx，供 MainWindow 判斷左右方向用
     qreal getVx() const { return vx; }
@@ -40,14 +47,14 @@ private:
     bool isInhaling = false;
     bool isOnGround = false;  // 新增這行：記錄卡比是否確實踩在地上
 
+
     int frameCounter = 0;
     int flapCounter = 0;
 
-
-
-
     // 換圖邏輯
     void updateSprite();
+
+
 };
 
 #endif // KIRBY_H

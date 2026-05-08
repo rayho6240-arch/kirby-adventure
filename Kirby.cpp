@@ -129,6 +129,90 @@ void Kirby::update() {
 
 
 
+
+// ---------------------------------------------------------
+// 吸星大法
+// ---------------------------------------------------------
+//這裡我們不使用簡單的碰撞，而是手動計算距離，給予敵人一個指向卡比的加速度。
+//
+//
+//============================================================
+void Kirby::processInhale(QList<Enemy*> &enemies) {
+    if (!isInhaling) return;
+
+    qreal inhaleRange = 300;
+    qreal inhaleHeight = 100;
+    const qreal SWALLOW_DISTANCE = 35.0; // 統一吞掉判定距離
+
+    // 1. 定義偵測矩形
+    QRectF inhaleRect;
+    if (isFacingRight) {
+        // [修正]：面朝右時，偵測區起始點稍微往回縮一點，確保涵蓋嘴巴前方
+        inhaleRect = QRectF(x() + 10, y() - 20, inhaleRange, inhaleHeight);
+    } else {
+        inhaleRect = QRectF(x() - inhaleRange + 30, y() - 20, inhaleRange, inhaleHeight);
+    }
+
+    // 2. 遍歷敵人
+    for (Enemy *e : enemies) {
+        if (!e->isVisible()) continue;
+
+        if (inhaleRect.contains(e->pos())) {
+
+            // [核心修正]：計算「真正的中心距離」
+            // 我們假設卡比圖片寬度大約是 60，方塊寬度大約是 60
+            // dx 代表敵人的幾何中心 與 卡比圖片 (x, y) 的相對關係
+            qreal dx = e->x() - x();
+
+            // --- 吸引力物理 --
+            // 敵人在卡比右邊 (dx > 0)，往左吸 (-6.0)
+            if (dx > 0) e->vx = -6.0;
+            // 敵人在卡比左邊 (dx < 0)，往右吸 (6.0)
+            else e->vx = 6.0;
+
+            // --- [修正]：吞掉判定 (引入朝向補償) ---
+            // 因為圖片左上角點的問題，朝向不同時，嘴巴的「幾何座標」相對於 x() 是不同的。
+            bool shouldSwallow = false;
+
+                //如果朝右還是覺得「太晚消失」（太重疊了），請把 dx 調大
+            if (isFacingRight) {
+                // 面朝右：Block 必須在 Kirby 的右邊 (dx > 0)
+                // 且距離 x() 的位置要在合理範圍 (例如 Block.x 落在 Kirby.x + 10 到 + 40 之間)
+                // 這裡我們取一個讓 Block 稍微重疊 Kirby 身體的值
+                if (dx > 5 && dx < 80) {
+                    shouldSwallow = true;
+                }
+            } else {
+                // 面朝左：Block 必須在 Kirby 的左邊 (dx < 0)
+                // Block.x 落在 Kirby.x - 30 到 0 之間
+                // 我們利用 dx 已經是負值，所以這裡判斷 -dx (即絕對值)
+                if (-dx > 5 && -dx < 40) {
+                    shouldSwallow = true;
+                }
+            }
+
+            if (shouldSwallow) {
+                e->setVisible(false);
+                // 標記死亡，停止物理運算
+                e->vx = 0;
+                e->vy = 0;
+            }
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 // ---------------------------------------------------------
 // 萬用換圖函數：處理各種檔名規律
 // ---------------------------------------------------------
