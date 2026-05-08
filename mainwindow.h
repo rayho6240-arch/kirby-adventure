@@ -9,10 +9,15 @@
 
 // [新增] 引入我們剛剛寫好的卡比類別
 #include "Kirby.h"
+#include "WaddleDee.h"
+
+
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
+
+
 
 class MainWindow : public QMainWindow
 {
@@ -32,6 +37,9 @@ private:
     QGraphicsView *view;
     QTimer *timer;
 
+
+    WaddleDee *dee;
+
     // [修改] 原本的 QGraphicsPixmapItem *kirby; 變成了我們自定義的 Kirby 類別
     Kirby *player;
 
@@ -46,6 +54,7 @@ protected:
     // 讓視窗能夠「聽」到鍵盤的動作
     void keyPressEvent(QKeyEvent *event) override;
     void keyReleaseEvent(QKeyEvent *event) override;
+
 
 };
 
