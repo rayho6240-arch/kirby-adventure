@@ -81,6 +81,18 @@ MainWindow::MainWindow(QWidget *parent)
     Block* wall1 = new Block(2620, 800, 100, 150); // 第二張圖中間突起的那塊牆壁
     scene->addItem(wall1);
 
+
+
+
+    //小方塊敵人
+    dee = new WaddleDee();
+    dee->setPos(800, 500); // 放一個有地板的地方
+    scene->addItem(dee);
+
+
+
+
+
 }
 
 
@@ -100,15 +112,29 @@ void MainWindow::onDoubleTapTimerTimeout() {
 // 核心遊戲迴圈
 // ---------------------------------------------------------
 void MainWindow::gameLoop() {
-    // 讓卡比自己去更新他的物理跟動畫
-    player->update();
+    // 1. 更新玩家狀態 (物理與動畫)
+    if (player) {
+        player->update();
+    }
 
-    // 5. 攝影機跟隨
-    view->centerOn(player->x(), 540);
-    //x() 是 QGraphicsPixmapItem（以及所有 Qt 圖形元件）內建的一個成員函數。
-    //回傳該物件目前在「舞台（Scene）」上的 X 座標（水平位置）。
+    // 2. 更新敵人狀態 [新增]
+    // 這裡我們檢查指標是否存在，確保不會因為對 NULL 指標操作而閃退
+    if (dee) {
+        dee->update();
+    }
+
+    // 3. 處理角色間的互動 (互動層) [新增預留]
+    // 這就是架構師的工作：先定義「如果撞到會發生什麼事」的入口
+    if (player && dee && player->collidesWithItem(dee)) {
+        // TODO: 交給同學實作受傷閃爍或是扣血邏輯
+        // qDebug() << "Kirby hit Waddle Dee!";
+    }
+
+    // 4. 攝影機跟隨 (最後處理，因為要等所有物件座標都算好)
+    if (player) {
+        view->centerOn(player->x(), 540);
+    }
 }
-
 // ---------------------------------------------------------
 // 按鈕模塊
 //---------------------------------------------------------
