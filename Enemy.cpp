@@ -1,6 +1,7 @@
 #include "Enemy.h"
 #include "Block.h"
 #include <QGraphicsScene>
+#include <QList>
 
 Enemy::Enemy(QGraphicsItem *parent) : QGraphicsPixmapItem(parent) {
     vx = 0; vy = 0; gravity = 0.8; isOnGround = false;
@@ -8,45 +9,35 @@ Enemy::Enemy(QGraphicsItem *parent) : QGraphicsPixmapItem(parent) {
 
 void Enemy::handlePhysics(qreal width, qreal height) {
     qreal oldY = y();
-
+    // 1. 先計算下一個位置
     qreal nextX = x() + vx;
 
-    // --- 1. 世界邊界檢查 (0 ~ 4860) ---
-    // 如果快要跑出地圖，強制修正位置並轉向
+    // 2. 世界邊界檢查 (0 ~ 4860) - 架構師的安全鎖
     if (nextX < 0) {
         nextX = 0;
-        vx = -vx; // 往右轉
+        vx = -vx; // 撞到地圖左牆轉向
     } else if (nextX > 4860 - width) {
         nextX = 4860 - width;
-        vx = -vx; // 往左轉
+        vx = -vx; // 撞到地圖右牆轉向
     }
+
+    // 3. 正式設定位置
     setX(nextX);
 
-
-
-
-
-    // --- 1. 水平移動與折返邏輯 ---
-    setX(x() + vx);
-
+    // --- 以下是你原本的方塊碰撞邏輯 ---
     QList<QGraphicsItem *> itemsX = scene()->collidingItems(this);
     for (QGraphicsItem *item : itemsX) {
         Block *block = qgraphicsitem_cast<Block *>(item);
         if (block) {
-            // 根據移動方向修正位置，防止卡進牆裡
-            if (vx > 0) {
-                // 往右撞牆，退回牆左邊
-                setX(block->x() - width - 1);
-            } else {
-                // 往左撞牆，退回牆右邊
-                setX(block->x() + block->boundingRect().width() + 1);
-            }
-
-            // [核心]：折返跑關鍵
+            if (vx > 0) setX(block->x() - width - 1);
+            else setX(block->x() + block->boundingRect().width() + 1);
             vx = -vx;
-            break; // 處理一次碰撞即可，跳出迴圈
+            break;
         }
     }
+
+
+
 
     // 2. 垂直移動 (重力)
     vy += gravity;
@@ -65,4 +56,6 @@ void Enemy::handlePhysics(qreal width, qreal height) {
             }
         }
     }
+
+
 }

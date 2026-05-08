@@ -10,6 +10,8 @@
 // [新增] 引入我們剛剛寫好的卡比類別
 #include "Kirby.h"
 #include "WaddleDee.h"
+//[新增] 一個敵人變軍隊
+#include <QList>
 
 
 
@@ -38,7 +40,8 @@ private:
     QTimer *timer;
 
 
-    WaddleDee *dee;
+    //WaddleDee *dee;
+    QList<Enemy*> enemyList; //把一個敵人變成軍隊，用 list儲存
 
     // [修改] 原本的 QGraphicsPixmapItem *kirby; 變成了我們自定義的 Kirby 類別
     Kirby *player;
