@@ -29,7 +29,8 @@ void Kirby::startInhaling() { if (!isDown && !isFlying) isInhaling = true; isDas
 void Kirby::stopInhaling() { isInhaling = false; }
 
 void Kirby::jump() {
-    if (y() >= 800 && !isInhaling) {
+    // [關鍵修改] 刪除 y() >= 800，完全交給 isOnGround 來判斷！
+    if (isOnGround && !isInhaling) {
         vy = -15;
         isOnGround = false; // 跳起的一瞬間，地面狀態立刻解除
         isFlying = false;

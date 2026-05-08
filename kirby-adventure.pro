@@ -27,6 +27,7 @@ HEADERS += \
     HUD.h \
     Kirby.h \
     StarBullet.h \
+    Starblock.h \
     WaddleDee.h \
     mainwindow.h
 
