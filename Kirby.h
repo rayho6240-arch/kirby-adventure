@@ -38,9 +38,13 @@ private:
     bool isFlying = false;
     bool isDashing = false;
     bool isInhaling = false;
+    bool isOnGround = false;  // 新增這行：記錄卡比是否確實踩在地上
 
     int frameCounter = 0;
     int flapCounter = 0;
+
+
+
 
     // 換圖邏輯
     void updateSprite();

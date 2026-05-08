@@ -3,6 +3,12 @@
 #include <QKeyEvent>
 #include <QDebug>
 
+
+#include "Block.h"
+#include <QGraphicsPixmapItem>
+
+
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -15,12 +21,6 @@ MainWindow::MainWindow(QWidget *parent)
     scene->setSceneRect(0, 0, 4860, 1080);
     scene->setBackgroundBrush(Qt::white);
 
-    // 簡單地板測試
-    for (int i = 0; i < 10; i++) {
-        QGraphicsRectItem *ground = new QGraphicsRectItem(i * 300, 850, 200, 50);  // 創立演員，把圖片給他，還沒上台
-        ground->setBrush(Qt::darkGray); //給演員化妝
-        scene->addItem(ground);  //演員上台
-    }
 
     // 2. 初始化卡比 (交給 Kirby 類別處理細節)
     player = new Kirby();
@@ -45,11 +45,42 @@ MainWindow::MainWindow(QWidget *parent)
 
     this->setFocusPolicy(Qt::StrongFocus);
     this->setFocus();                     //this 就是「這個 MainWindow 視窗本人」。
+
+
+    // --- 1. 鋪設背景大圖 ---
+    // 假設每張圖寬度是 1620，我們把三張圖橫向接在一起
+    QGraphicsPixmapItem* bg1 = new QGraphicsPixmapItem(QPixmap(":/Project2_Dataset/Image/Stage1/Stage1(1).png"));
+    bg1->setPos(0, 0); // 第一張圖在最左邊
+    scene->addItem(bg1);
+
+    QGraphicsPixmapItem* bg2 = new QGraphicsPixmapItem(QPixmap(":/Project2_Dataset/Image/Stage1/Stage1(2).png"));
+    bg2->setPos(1620, 0); // 第二張圖接在後面
+    scene->addItem(bg2);
+
+    QGraphicsPixmapItem* bg3 = new QGraphicsPixmapItem(QPixmap(":/Project2_Dataset/Image/Stage1/Stage1(3).png"));
+    bg3->setPos(3240, 0); // 第三張圖
+    scene->addItem(bg3);
+
+
+    // --- 鋪設隱形碰撞層 ---
+    // 你必須根據圖片上「真正可以踩」的位置，來設定這些 Block 的座標
+    // 以下數值 (x, y, 寬, 高) 只是舉例，你需要自己去抓圖片的地板高度
+    Block* ground1 = new Block(0, 900, 1620, 180); // 第一張圖的地板
+    scene->addItem(ground1);
+
+    Block* ground2 = new Block(1620, 950, 1000, 130); // 第二張圖的地板可能有高低差
+    scene->addItem(ground2);
+
+    Block* wall1 = new Block(2620, 800, 100, 150); // 第二張圖中間突起的那塊牆壁
+    scene->addItem(wall1);
+
 }
+
 
 MainWindow::~MainWindow() {
     delete ui;
 }
+
 
 // ---------------------------------------------------------
 // [新增 Slot 函數實作]
