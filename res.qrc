@@ -31,5 +31,8 @@
         <file>Project2_Dataset/Image/Kirby_normal/kirby_run_6_R.png</file>
         <file>Project2_Dataset/Image/Kirby_normal/kirby_run_7_R.png</file>
         <file>Project2_Dataset/Image/Kirby_normal/kirby_run_7_L.png</file>
+        <file>Project2_Dataset/Image/background/Stage1(1).png</file>
+        <file>Project2_Dataset/Image/background/Stage1(2).png</file>
+        <file>Project2_Dataset/Image/background/Stage1(3).png</file>
     </qresource>
 </RCC>

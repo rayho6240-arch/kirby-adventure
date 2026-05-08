@@ -81,13 +81,14 @@ void Kirby::update() {
     isOnGround = false;
 
     // 定義一個固定的邏輯高度，避免因為換圖片(PNG透明邊緣不同)導致抖動
-    const qreal KIRBY_PHYSICAL_HEIGHT = 80;
+    //陷進去要調大，飄起來要調小
+    const qreal KIRBY_PHYSICAL_HEIGHT = 120;
 
     for (QGraphicsItem *item : collidingItems) {
         Block *block = qgraphicsitem_cast<Block *>(item);
         if (block) {
             // 使用固定的 KIRBY_PHYSICAL_HEIGHT 代替 boundingRect().height()
-            if (vy >= 0 && (oldY + KIRBY_PHYSICAL_HEIGHT <= block->y() + 20)) {
+            if (vy >= 0 && (oldY + KIRBY_PHYSICAL_HEIGHT <= block->y() + 30)) {
                 setY(block->y() - KIRBY_PHYSICAL_HEIGHT);
                 vy = 0;
                 isOnGround = true;

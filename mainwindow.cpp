@@ -48,24 +48,31 @@ MainWindow::MainWindow(QWidget *parent)
 
 
     // --- 1. 鋪設背景大圖 ---
+    // 修正路徑以符合新的資源資料夾結構：:/Project2_Dataset/Image/background/
     // 假設每張圖寬度是 1620，我們把三張圖橫向接在一起
-    QGraphicsPixmapItem* bg1 = new QGraphicsPixmapItem(QPixmap(":/Project2_Dataset/Image/Stage1/Stage1(1).png"));
-    bg1->setPos(0, 0); // 第一張圖在最左邊
+
+    QGraphicsPixmapItem* bg1 = new QGraphicsPixmapItem(QPixmap(":/Project2_Dataset/Image/background/Stage1(1).png"));
+    bg1->setPos(0, 890); // 第一張圖在最左邊
     scene->addItem(bg1);
 
-    QGraphicsPixmapItem* bg2 = new QGraphicsPixmapItem(QPixmap(":/Project2_Dataset/Image/Stage1/Stage1(2).png"));
-    bg2->setPos(1620, 0); // 第二張圖接在後面
+    QGraphicsPixmapItem* bg2 = new QGraphicsPixmapItem(QPixmap(":/Project2_Dataset/Image/background/Stage1(2).png"));
+    bg2->setPos(1620, 390); // 第二張圖接在後面
     scene->addItem(bg2);
 
-    QGraphicsPixmapItem* bg3 = new QGraphicsPixmapItem(QPixmap(":/Project2_Dataset/Image/Stage1/Stage1(3).png"));
-    bg3->setPos(3240, 0); // 第三張圖
+    QGraphicsPixmapItem* bg3 = new QGraphicsPixmapItem(QPixmap(":/Project2_Dataset/Image/background/Stage1(3).png"));
+    bg3->setPos(3240, 800); // 第三張圖
     scene->addItem(bg3);
 
+
+    // 設定背景圖在最後面
+    bg1->setZValue(-10);
+    bg2->setZValue(-10);
+    bg3->setZValue(-10);
 
     // --- 鋪設隱形碰撞層 ---
     // 你必須根據圖片上「真正可以踩」的位置，來設定這些 Block 的座標
     // 以下數值 (x, y, 寬, 高) 只是舉例，你需要自己去抓圖片的地板高度
-    Block* ground1 = new Block(0, 900, 1620, 180); // 第一張圖的地板
+    Block* ground1 = new Block(0, 900, 1620, 400); // 第一張圖的地板
     scene->addItem(ground1);
 
     Block* ground2 = new Block(1620, 950, 1000, 130); // 第二張圖的地板可能有高低差
