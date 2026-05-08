@@ -55,70 +55,77 @@ void Kirby::fly() {
 // ---------------------------------------------------------
 //vx 是「玩家的意圖」，而 currentVx 是「物理引擎的最終裁決」
 //vx 是private變數， currentVx 是區域變數，用來算nextX
+//bug: 朝右撞牆，若突然折返，會穿過牆壁掉入懸崖
+//bug: 朝左小跳，沒跳過牆，會震盪
 //==============================================================
 void Kirby::update() {
-    // 1. 記錄移動前的狀態
-    qreal oldY = y();
+    // --- 0. 定義固定物理大小 (這是解決震動的關鍵) ---
+    const qreal KIRBY_PHYSICAL_HEIGHT = 120;
+    const qreal KIRBY_PHYSICAL_WIDTH = 120;   // 根據你的卡比圖片寬度調整，建議設為固定值
+    const qreal SAFETY_MARGIN = 1.0;         // 安全間距，防止黏在牆上
 
-    // 2. 物理運算：計算這一幀應該要有的垂直速度 (vy)
+    qreal oldY = y();
     if (isFlying) vy += (gravity * 0.65);
     else vy += gravity;
-
-    // 蹲下或吸氣時不能左右移動
     qreal currentVx = (isDown || isInhaling) ? 0 : vx;
 
-    // 3. 計算預計位置 (計算完先不 setPos)
-    qreal nextX = x() + currentVx;
-    qreal nextY = y() + vy;
+    // --- 1. 水平移動與碰撞 (X 軸) ---
+    setX(x() + currentVx);
 
-    // 水平邊界檢查 (維持 4860)
-    nextX = qBound(0.0, nextX, 4860.0 - boundingRect().width());
+    // 世界邊界檢查
+    if (x() < 0) setX(0);
+    if (x() > 4860 - KIRBY_PHYSICAL_WIDTH) setX(4860 - KIRBY_PHYSICAL_WIDTH);
 
-    // 4. 正式套用位置 (只呼叫這一次 setPos)
-    setPos(nextX, nextY);
-
-    // 5. 碰撞偵測與修正
-    const QList<QGraphicsItem *> collidingItems = scene()->collidingItems(this);
-    isOnGround = false;
-
-    // 定義一個固定的邏輯高度，避免因為換圖片(PNG透明邊緣不同)導致抖動
-    //陷進去要調大，飄起來要調小
-    const qreal KIRBY_PHYSICAL_HEIGHT = 120;
-
-    for (QGraphicsItem *item : collidingItems) {
+    QList<QGraphicsItem *> collidingItemsX = scene()->collidingItems(this);
+    for (QGraphicsItem * const &item : collidingItemsX) {
         Block *block = qgraphicsitem_cast<Block *>(item);
         if (block) {
-            // 使用固定的 KIRBY_PHYSICAL_HEIGHT 代替 boundingRect().height()
+            // 判定是否為「牆壁」：只要卡比的垂直範圍跟方塊有重疊，就是牆壁
+            bool isWall = (y() + KIRBY_PHYSICAL_HEIGHT > block->y() + 5) &&
+                          (y() < block->y() + block->boundingRect().height() - 5);
+
+            if (isWall) {
+                if (currentVx > 0) {
+                    // 往右撞：推回到方塊左緣，再多退後 1 像素
+                    setX(block->x() - KIRBY_PHYSICAL_WIDTH - SAFETY_MARGIN);
+                } else if (currentVx < 0) {
+                    // 往左撞：推回到方塊右緣，再多前進 1 像素
+                    setX(block->x() + block->boundingRect().width() + SAFETY_MARGIN);
+                }
+            }
+        }
+    }
+
+    // --- 2. 垂直移動與碰撞 (Y 軸) ---
+    setY(y() + vy);
+    isOnGround = false;
+
+    QList<QGraphicsItem *> collidingItemsY = scene()->collidingItems(this);
+    for (QGraphicsItem * const &item : collidingItemsY) {
+        Block *block = qgraphicsitem_cast<Block *>(item);
+        if (block) {
+            // 下落碰撞 (踩地)
             if (vy >= 0 && (oldY + KIRBY_PHYSICAL_HEIGHT <= block->y() + 30)) {
                 setY(block->y() - KIRBY_PHYSICAL_HEIGHT);
                 vy = 0;
                 isOnGround = true;
                 break;
             }
+            // 上升碰撞 (撞天花板)
+            else if (vy < 0 && (oldY >= block->y() + block->boundingRect().height() - 10)) {
+                setY(block->y() + block->boundingRect().height());
+                vy = 0;
+            }
         }
     }
 
-    // 6. 狀態補強
-    if (isOnGround) {
-        isFlying = false;
-    }
+    // --- 3. 狀態補強 ---
+    if (isOnGround) isFlying = false;
+    if (currentVx > 0) isFacingRight = true;
+    else if (currentVx < 0) isFacingRight = false;
 
-
-
-
-    if (currentVx > 0) {
-        // 速度大於 0，代表向右移动，面向右邊
-        isFacingRight = true;
-    } else if (currentVx < 0) {
-        // 速度小於 0，代表向左移动，面向左邊
-        isFacingRight = false;
-    }
-
-    // 7. 最後才更新動畫
     updateSprite();
 }
-
-
 
 
 
