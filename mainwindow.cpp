@@ -126,6 +126,7 @@ void MainWindow::gameLoop() {
     // 1. 更新玩家狀態 (物理與動畫)
     if (player) {
         player->update();
+        player->processInhale(enemyList);// [新增]：讓卡比去「吸」這群敵人
     }
 
     // 2. 更新敵人狀態
