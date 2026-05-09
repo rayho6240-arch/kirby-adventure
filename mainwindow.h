@@ -12,6 +12,7 @@
 #include "WaddleDee.h"
 //[新增] 一個敵人變軍隊
 #include <QList>
+#include "StarBullet.h"
 
 
 
@@ -40,8 +41,16 @@ private:
     QTimer *timer;
 
 
+
+
     //WaddleDee *dee;
     QList<Enemy*> enemyList; //把一個敵人變成軍隊，用 list儲存
+
+    QList<StarBullet*> bulletList;
+
+
+
+
 
     // [修改] 原本的 QGraphicsPixmapItem *kirby; 變成了我們自定義的 Kirby 類別
     Kirby *player;
@@ -51,7 +60,6 @@ private:
     QTimer *doubleTapTimer;          // 雙擊判定計時器
     const int DOUBLE_TAP_WINDOW = 250; // 判定時間差（250毫秒內連按算衝刺）
 
-    // 原本的 vx, vy, isFlying, frameCounter 等等，已經全部搬去 kirby.h 裡面當卡比的私有財產了！
 
 protected:
     // 讓視窗能夠「聽」到鍵盤的動作

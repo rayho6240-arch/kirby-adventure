@@ -7,6 +7,15 @@
 #include <QImage>
 #include "Enemy.h"
 
+
+
+
+//這是 Qt 最優雅的解法，讓 Kirby 在噴射時「喊一聲」，讓 MainWindow 把子彈撿起來放進更新清單。
+
+
+
+
+
 // 讓 Kirby 繼承 QGraphicsPixmapItem，這樣他自己就是一個可以顯示在場景上的演員
 class Kirby : public QGraphicsPixmapItem {
 public:
@@ -33,6 +42,11 @@ public:
     // 取得卡比目前的 vx，供 MainWindow 判斷左右方向用
     qreal getVx() const { return vx; }
 
+
+
+    void handleAttack();  // 處理按下 X 的邏輯//取代單純傳入isInhaling 用更通用的函數//從private移到public
+    void spit(); //新增:吐出函數
+
 private:
     // 卡比自己的變數
     qreal vx = 0;
@@ -49,6 +63,8 @@ private:
     bool hasObjectInMouth = false; // 關鍵狀態：肚子裡是否有東西
 
     void setFullStatus(bool full);//新增:狀態切換函數
+
+
 
 
     int frameCounter = 0;

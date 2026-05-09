@@ -6,6 +6,7 @@
 //========================================================
 #include "Kirby.h"         // 引入卡比自己的標頭檔 (必須放在最前面)
 #include "Block.h"         // [關鍵新增] 因為我們要用 qgraphicsitem_cast 辨識 Block
+#include "StarBullet.h"
 
 #include <QGraphicsScene>  // 為了呼叫 scene()->collidingItems(this) 來獲取場景
 #include <QList>           // 為了裝 collidingItems 回傳的碰撞清單
@@ -240,6 +241,40 @@ void Kirby::setFullStatus(bool full) {
 }
 
 
+
+
+void Kirby::handleAttack() {
+    if (hasObjectInMouth) {
+        // [狀態 A]：嘴裡有東西 -> 噴射星星
+        spit();
+    } else {
+        // [狀態 B]：嘴裡沒東西 -> 開始吸氣
+        startInhaling();
+    }
+}
+
+
+
+void Kirby::spit() {
+    if (!hasObjectInMouth) return;
+
+    // 1. 生成星星子彈 (座標可以根據嘴巴位置調整)
+    qreal spawnX = isFacingRight ? (x() + 40) : (x() - 40);
+    StarBullet *star = new StarBullet(spawnX, y() + 10, isFacingRight);
+
+    // 2. 將星星加入場景
+    if (scene()) {
+        scene()->addItem(star);
+        // [重要提示]：如果你的 MainWindow 有 bulletList，
+        // 這裡可以透過 Signal 發送出去，或是讓 MainWindow 在下一幀自動偵測 scene 裡的星星
+    }
+
+    // 3. 恢復身材狀態
+    setFullStatus(false);
+
+    // 4. 噴射完後確保吸氣狀態是關閉的
+    isInhaling = false;
+}
 
 
 
