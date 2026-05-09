@@ -12,7 +12,7 @@
 #include <QList>           // 為了裝 collidingItems 回傳的碰撞清單
 #include <QGraphicsItem>   // 為了讀取 QGraphicsItem 的指標
 #include <QtGlobal>        // 為了使用 qBound() 函數 (通常 Qt 內建已包，但明確加上較好)
-
+#include <QDebug>
 
 
 Kirby::Kirby() {
@@ -255,27 +255,26 @@ void Kirby::handleAttack() {
 
 
 
+
+
 void Kirby::spit() {
-    if (!hasObjectInMouth) return;
+    qDebug() << "--- Spit Attempted ---"; // 1. 檢查有沒有按到按鍵
 
-    // 1. 生成星星子彈 (座標可以根據嘴巴位置調整)
-    qreal spawnX = isFacingRight ? (x() + 40) : (x() - 40);
-    StarBullet *star = new StarBullet(spawnX, y() + 10, isFacingRight);
-
-    // 2. 將星星加入場景
-    if (scene()) {
-        scene()->addItem(star);
-        // [重要提示]：如果你的 MainWindow 有 bulletList，
-        // 這裡可以透過 Signal 發送出去，或是讓 MainWindow 在下一幀自動偵測 scene 裡的星星
+    if (!hasObjectInMouth) {
+        qDebug() << "Failed: Mouth is empty";
+        return;
     }
 
-    // 3. 恢復身材狀態
-    setFullStatus(false);
+    StarBullet *star = new StarBullet(x(), y(), isFacingRight);
+    if (scene()) {
+        scene()->addItem(star);
+        emit starFired(star); // 2. 核心訊號
+        qDebug() << "Signal Emitted!"; // 3. 檢查有沒有喊出來
+    }
 
-    // 4. 噴射完後確保吸氣狀態是關閉的
+    setFullStatus(false);
     isInhaling = false;
 }
-
 
 
 

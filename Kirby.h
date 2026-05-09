@@ -6,18 +6,27 @@
 #include <QString>
 #include <QImage>
 #include "Enemy.h"
+#include "StarBullet.h"
 
 
-
-
-//這是 Qt 最優雅的解法，讓 Kirby 在噴射時「喊一聲」，讓 MainWindow 把子彈撿起來放進更新清單。
 
 
 
 
 
 // 讓 Kirby 繼承 QGraphicsPixmapItem，這樣他自己就是一個可以顯示在場景上的演員
-class Kirby : public QGraphicsPixmapItem {
+//要有signal功能一定要有QObject
+class Kirby : public QObject, public QGraphicsPixmapItem {
+    Q_OBJECT // <--- 絕對、必須、一定要加在類別定義的第一行！
+
+
+signals:
+    //這是 Qt 最優雅的解法，讓 Kirby 在噴射時「喊一聲」，讓 MainWindow 把子彈撿起來放進更新清單。
+    // 這裡不需要實作（不要在 .cpp 寫這個函式的內容）
+    // 當卡比噴射星星時，我們會「發射」這個訊號
+    void starFired(StarBullet* star);
+
+
 public:
     Kirby();
 

@@ -46,7 +46,7 @@ private:
     //WaddleDee *dee;
     QList<Enemy*> enemyList; //把一個敵人變成軍隊，用 list儲存
 
-    QList<StarBullet*> bulletList;
+    QList<StarBullet*> bulletList; // 管理所有飛行的星星
 
 
 
