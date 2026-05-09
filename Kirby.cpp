@@ -6,12 +6,13 @@
 //========================================================
 #include "Kirby.h"         // 引入卡比自己的標頭檔 (必須放在最前面)
 #include "Block.h"         // [關鍵新增] 因為我們要用 qgraphicsitem_cast 辨識 Block
+#include "StarBullet.h"
 
 #include <QGraphicsScene>  // 為了呼叫 scene()->collidingItems(this) 來獲取場景
 #include <QList>           // 為了裝 collidingItems 回傳的碰撞清單
 #include <QGraphicsItem>   // 為了讀取 QGraphicsItem 的指標
 #include <QtGlobal>        // 為了使用 qBound() 函數 (通常 Qt 內建已包，但明確加上較好)
-
+#include <QDebug>
 
 
 Kirby::Kirby() {
@@ -182,7 +183,8 @@ void Kirby::processInhale(QList<Enemy*> &enemies) {
                 if (dx > 5 && dx < 80) {
                     shouldSwallow = true;
                 }
-            } else {
+            }
+            else {
                 // 面朝左：Block 必須在 Kirby 的左邊 (dx < 0)
                 // Block.x 落在 Kirby.x - 30 到 0 之間
                 // 我們利用 dx 已經是負值，所以這裡判斷 -dx (即絕對值)
@@ -193,16 +195,86 @@ void Kirby::processInhale(QList<Enemy*> &enemies) {
 
             if (shouldSwallow) {
                 e->setVisible(false);
-                // 標記死亡，停止物理運算
+                // 標記死亡，這會讓 e->update() 裡的 return 觸發
+                e->setIsDead(true);
+
+                // 物理清零，確保它不會再移動
                 e->vx = 0;
                 e->vy = 0;
+
+                // [重點]：卡比狀態切換
+                setFullStatus(true);
+
+                // 自動停止吸氣動作，避免一次吸入多個
+                isInhaling = false;
+
+                // [進階建議]：既然吸到了，就直接跳出迴圈，不要再掃描其他敵人
+                break;
             }
-        }
+
+        } //endif
+    }//endfor
+}//endprocessInhale
+
+
+
+
+// ---------------------------------------------------------
+// 成功吞掉敵人的那一刻，狀態接換。
+// ---------------------------------------------------------
+//
+//
+//
+//============================================================
+void Kirby::setFullStatus(bool full) {
+    hasObjectInMouth = full;
+
+    if (full) {
+        // 切換成變胖的圖片 (現在可以先用 setScale 稍微放大來 debug)
+        // setPixmap(QPixmap(":/res/kirby_full.png"));
+        setScale(1.5); // 先變大 1.2 倍，一眼就看出吸到了
+    } else {
+        // 恢復原狀
+        // setPixmap(QPixmap(":/res/kirby_normal.png"));
+        setScale(1.0);
     }
 }
 
 
 
+
+void Kirby::handleAttack() {
+    if (hasObjectInMouth) {
+        // [狀態 A]：嘴裡有東西 -> 噴射星星
+        spit();
+    } else {
+        // [狀態 B]：嘴裡沒東西 -> 開始吸氣
+        startInhaling();
+    }
+}
+
+
+
+
+
+void Kirby::spit() {
+    qDebug() << "--- Spit Attempted ---"; // 1. 檢查有沒有按到按鍵
+
+    if (!hasObjectInMouth) {
+        qDebug() << "Failed: Mouth is empty";
+        return;
+    }
+
+    StarBullet *star = new StarBullet(x(), y(), isFacingRight);
+    if (scene()) {
+        scene()->addItem(star);
+        emit starFired(star); // 2. 核心訊號
+        qDebug() << "Signal Emitted!"; // 3. 檢查有沒有喊出來
+    }
+
+    setFullStatus(false);
+    isInhaling = false;
+}
 
 
 

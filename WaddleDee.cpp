@@ -10,9 +10,20 @@ WaddleDee::WaddleDee(QGraphicsItem *parent) : Enemy(parent) {
 }
 
 void WaddleDee::update() {
-    // 直接調用父類處理好的物理邏輯
+
+    // [重點]：先呼叫父類別的 update，檢查 isDead 並執行基礎物理
+    Enemy::update();
+
+    // 如果死了，上面的 Enemy::update 雖然 return 了，
+    // 但子類別這裡也應該檢查一下，避免執行後續獨有的行為
+    if (isDead) return;
+
+
+
+    // 直接調用父類處理好的物理邏輯函數
     // 傳入 60, 60 作為它的物理碰撞大小
     handlePhysics(60, 60);
+
 
     if (y() > 2000) { // 假設 y > 2000 代表掉下深淵
         // 做法 A: 刪除自己 (正式版做法)

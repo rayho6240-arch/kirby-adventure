@@ -8,6 +8,9 @@
 #include <QGraphicsPixmapItem>
 
 
+#include "Kirby.h"
+
+
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -97,11 +100,12 @@ MainWindow::MainWindow(QWidget *parent)
         enemyList.append(newDee); // 把他們通通塞進清單管理
     }
 
-
-
-
-
-
+    //spit星星
+    connect(player, &Kirby::starFired, this, [=](StarBullet* star){
+        bulletList.append(star); // 只要卡比一噴，就加進清單
+        // 加這行 Debug，看看噴射時有沒有這行字出現在下方輸出視窗
+        qDebug() << "Captured a star! Total stars in list:" << bulletList.size();
+    });
 
 
 }
@@ -135,6 +139,8 @@ void MainWindow::gameLoop() {
         e->update();
     }
 
+
+
     // 3. 處理角色間的互動 (互動層)
     // [架構師修正]：既然有多個敵人，我們也需要用迴圈來檢查碰撞
     if (player) {
@@ -145,6 +151,29 @@ void MainWindow::gameLoop() {
             }
         }
     }
+
+
+
+    //吐出星星
+    //for (StarBullet *b : bulletList) {
+      //  if (b->isVisible()) b->update();
+    //}
+    // 2. [更改] 更新星星子彈
+    for (int i = 0; i < bulletList.size(); ++i) {
+        StarBullet *b = bulletList[i];
+        b->update(); // 呼叫 StarBullet::update()，星星才會飛！
+
+        // [進階]：如果星星飛太遠或碰到東西，記得標記為不可見
+        if (b->x() < 0 || b->x() > 4860 || !b->isVisible()) {
+            scene->removeItem(b);
+            bulletList.removeAt(i);
+            delete b;
+            i--; // 索引修正
+        }
+    }
+
+
+
 
     // 4. 攝影機跟隨 (最後處理，因為要等所有物件座標都算好)
     if (player) {
@@ -199,9 +228,11 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
             if (!player->getVx()) player->setHorizontalVelocity(-7);
         }
     }
-    // 5. 處理x吸氣
+    // 5. 處理x吸氣//[add]spit star
     else if (key == Qt::Key_X) {
-        player->startInhaling();
+        //player->startInhaling();
+        // [修改]：讓卡比自己決定現在是要吸還是要吐
+        player->handleAttack();
     }
 }
 
@@ -223,6 +254,6 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event) {
         doubleTapTimer->start(DOUBLE_TAP_WINDOW);
     }
     else if (key == Qt::Key_X) {
-        player->stopInhaling(); // 放開按鍵停止吸氣
+        player->stopInhaling(); // 放開按鍵停止吸氣 //吸氣才需要release偵測
     }
 }

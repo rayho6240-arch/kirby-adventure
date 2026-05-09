@@ -7,6 +7,25 @@ Enemy::Enemy(QGraphicsItem *parent) : QGraphicsPixmapItem(parent) {
     vx = 0; vy = 0; gravity = 0.8; isOnGround = false;
 }
 
+
+
+
+
+void Enemy::update() {
+    // 所有的敵人在更新前都要檢查是否死了
+    if (isDead) return;
+
+    // 呼叫物理計算 (假設每個地面敵人都需要這個)
+    handlePhysics(60, 60);
+}
+
+
+
+
+
+
+
+
 void Enemy::handlePhysics(qreal width, qreal height) {
     qreal oldY = y();
     // 1. 先計算下一個位置
@@ -35,9 +54,6 @@ void Enemy::handlePhysics(qreal width, qreal height) {
             break;
         }
     }
-
-
-
 
     // 2. 垂直移動 (重力)
     vy += gravity;
