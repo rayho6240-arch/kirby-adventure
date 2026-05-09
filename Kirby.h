@@ -46,10 +46,14 @@ private:
     bool isDashing = false;
     bool isInhaling = false;
     bool isOnGround = false;  // 新增這行：記錄卡比是否確實踩在地上
+    bool hasObjectInMouth = false; // 關鍵狀態：肚子裡是否有東西
+
+    void setFullStatus(bool full);//新增:狀態切換函數
 
 
     int frameCounter = 0;
     int flapCounter = 0;
+
 
     // 換圖邏輯
     void updateSprite();

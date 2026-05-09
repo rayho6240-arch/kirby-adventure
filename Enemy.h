@@ -1,25 +1,33 @@
 #ifndef ENEMY_H
 #define ENEMY_H
-
 #include <QGraphicsPixmapItem>
 #include <QObject>
+
+
+
+//所有敵人的父親
+//各種敵人如waddledee 會先繼承，再多寫自己的邏輯。
 
 class Enemy : public QObject, public QGraphicsPixmapItem {
     Q_OBJECT
 public:
     Enemy(QGraphicsItem *parent = nullptr);
-    virtual void update() = 0; // 純虛擬函式，強迫子類實作行為
+    virtual void update() = 0; // 純虛擬函式，由子類實作"行為"
 
-    qreal vx, vy;//從private改到public 為了讓卡筆可以吸動他
+    qreal vx, vy;//從 private 改到 public 為了讓卡比可以 "吸動他 "
 
-protected:
-    // 讓子類也能存取的物理變數
+
+    void setIsDead(bool dead) { isDead = dead; } //定義好了
+    bool getIsDead() const { return isDead; }
+
+
+protected: // protect讓子類也能存取的物理變數
 
     qreal gravity;
     bool isOnGround;
+    bool isDead = false;
 
-    // 通用的物理位移與碰撞處理
-    void handlePhysics(qreal width, qreal height);
+    void handlePhysics(qreal width, qreal height);  // 通用的物理位移與碰撞處理
 };
 
 #endif
