@@ -1,4 +1,4 @@
-#include "block.h"
+#include "Block.h"
 #include <QBrush>
 #include <QPen>
 

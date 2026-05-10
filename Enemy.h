@@ -1,36 +1,80 @@
 #ifndef ENEMY_H
 #define ENEMY_H
+
+// ==========================================
+// 1. Qt 內建函式庫引入
+// ==========================================
 #include <QGraphicsPixmapItem>
 #include <QObject>
 
-
-
-//所有敵人的父親
-//各種敵人如waddledee 會先繼承，再多寫自己的邏輯。
-
+/**
+ * @brief Enemy 所有敵人的抽象基底類別 (Base Class)
+ * @details 統一定義敵人的物理運算、生命週期與基本屬性。
+ * 各種具體敵人（如 Waddle Dee）必須繼承此類別，並實作自己的 update() 邏輯。
+ */
 class Enemy : public QObject, public QGraphicsPixmapItem {
     Q_OBJECT
+
 public:
+    // ==========================================
+    // 2. 生命週期與核心介面 (Lifecycle & Interface)
+    // ==========================================
     Enemy(QGraphicsItem *parent = nullptr);
-    virtual void update() = 0; // 純虛擬函式，由子類實作"行為"
 
-    qreal vx, vy;//從 private 改到 public 為了讓卡比可以 "吸動他 "
+    /**
+     * @brief 每幀更新邏輯 (純虛擬函式 Pure Virtual Function)
+     * @note "= 0" 代表 Enemy 本身不實作這個函式，而是「強制規定」所有繼承它的子類別
+     * (如 WaddleDee) 都必須自己寫一個 update()。這讓 MainWindow 可以無腦呼叫 e->update()。
+     */
+    virtual void update() = 0;
 
+    // ==========================================
+    // 3. 物理與互動開放變數 (Public Physics)
+    // ==========================================
+    // @note 故意設為 public，是為了讓 Kirby::processInhale()
+    // 可以直接讀寫它們，從外部給予敵人一個被吸入的強大加速度。
+    qreal vx = 0;
+    qreal vy = 0;
 
-    void setIsDead(bool dead) { isDead = dead; } //定義好了
+    // ==========================================
+    // 4. 狀態管理 (State Flags)
+    // ==========================================
+    /**
+     * @brief 設定敵人死亡狀態
+     * @param dead 若為 true，代表敵人已被吃掉或擊敗，子類別的 update 應停止運作
+     */
+    void setIsDead(bool dead) { isDead = dead; }
+
+    /**
+     * @brief 取得敵人是否已死亡
+     */
     bool getIsDead() const { return isDead; }
 
+protected:
+    // ==========================================
+    // 5. 內部受保護的變數與函式 (Protected Members)
+    // ==========================================
+    // @note 使用 protected 讓繼承的子類別 (如 WaddleDee) 可以像使用自己的變數一樣直接讀取，
+    // 但外部的類別 (如 MainWindow) 無法隨意竄改這些核心物理數值。
 
-protected: // protect讓子類也能存取的物理變數
+    qreal gravity = 0.8;      ///< 共用重力參數
+    bool isOnGround = false;  ///< 是否踩在實體方塊上
+    bool isDead = false;      ///< 死亡判定旗標
 
-    qreal gravity;
-    bool isOnGround;
-    bool isDead = false;
-
-    void handlePhysics(qreal width, qreal height);  // 通用的物理位移與碰撞處理
+    /**
+     * @brief 通用的物理位移與碰撞處理 (AABB 碰撞)
+     * @param width 該敵人的物理碰撞箱寬度
+     * @param height 該敵人的物理碰撞箱高度
+     * @details 將複雜的地形判斷寫在這裡，子類別只需在自己的 update() 裡呼叫此函式，
+     * 就能自動擁有「掉落地面」與「撞牆停止」的能力。
+     */
+    void handlePhysics(qreal width, qreal height);
 };
 
-#endif
+
+#endif // ENEMY_H
+
+
 
 
 //後續為了提升效能

@@ -1,88 +1,128 @@
 #ifndef KIRBY_H
 #define KIRBY_H
 
+// ==========================================
+// 1. Qt 內建函式庫引入
+// ==========================================
 #include <QGraphicsPixmapItem>
 #include <QPainter>
 #include <QString>
 #include <QImage>
+#include <QObject>
+
+// ==========================================
+// 2. 自定義遊戲類別引入
+// ==========================================
 #include "Enemy.h"
 #include "StarBullet.h"
 
-
-
-
-
-
-
-// 讓 Kirby 繼承 QGraphicsPixmapItem，這樣他自己就是一個可以顯示在場景上的演員
-//要有signal功能一定要有QObject
+/**
+ * @brief Kirby 玩家主角類別
+ * @details 負責處理卡比的狀態機（走、跑、跳、飛）、物理運動、動畫切換以及專屬能力（吸入/吐出）。
+ * @note 為了使用 Signal/Slot 機制，必須同時繼承 QObject 與 QGraphicsPixmapItem，
+ * 並且 QObject 必須放在第一個繼承順位。
+ */
 class Kirby : public QObject, public QGraphicsPixmapItem {
-    Q_OBJECT // <--- 絕對、必須、一定要加在類別定義的第一行！
-
+    Q_OBJECT // <--- 必須加在類別定義的第一行，這樣 Qt 的 MOC 編譯器才會處理它的 Signal/Slot！
 
 signals:
-    //這是 Qt 最優雅的解法，讓 Kirby 在噴射時「喊一聲」，讓 MainWindow 把子彈撿起來放進更新清單。
-    // 這裡不需要實作（不要在 .cpp 寫這個函式的內容）
-    // 當卡比噴射星星時，我們會「發射」這個訊號
+    // ==========================================
+    // 訊號發送區 (Signals)
+    // ==========================================
+    /**
+     * @brief 卡比吐出星星時發送的訊號
+     * @param star 卡比動態產生的星星子彈物件指標
+     * @note 這是 Qt 最優雅的解法，讓 Kirby 負責產生物件，然後「喊一聲」，
+     * 讓 MainWindow 透過 Slot 把它撿起來放進更新與渲染清單，達成解耦。
+     */
     void starFired(StarBullet* star);
 
-
 public:
-    Kirby();
+    // ==========================================
+    // 生命週期與核心迴圈 (Lifecycle & Core)
+    // ==========================================
+    Kirby(); //ctor
 
-    // --- 動作指令 (提供給 MainWindow 呼叫) ---
-    void jump();
-    void fly();
-    void startInhaling();
-    void stopInhaling();
-    void setHorizontalVelocity(qreal v);
-    void setDashing(bool dashing);
-    void setDown(bool down);
-
-
-    // --- 核心更新邏輯 ---
+    /**
+     * @brief 卡比的核心物理與動畫更新邏輯
+     * @details 由 MainWindow 的 Game Loop 每一幀呼叫。負責套用重力、更新座標、切換 Sprite。
+     */
     void update();
 
+    // ==========================================
+    // 玩家動作指令區 (Movement Commands)
+    // 供 MainWindow 攔截鍵盤輸入後呼叫
+    // ==========================================
+    void jump();                            ///< 執行跳躍 (賦予一個向上的初速度)
+    void fly();                             ///< 執行飛行 (拍打翅膀，賦予向上的升力)
+    void setHorizontalVelocity(qreal v);    ///< 設定水平移動速度 (左右移動)
+    void setDashing(bool dashing);          ///< 切換是否處於衝刺狀態
+    void setDown(bool down);                ///< 切換是否處於蹲下狀態
+    qreal getVx() const { return vx; }      ///< 取得卡比目前的 X 軸速度，供外部判斷面向方向用
 
-    //卡比面前畫一個「看不見的長方形」，只要敵人在裡面，就會受到吸引力。
-    void processInhale(QList<Enemy*> &enemies); // 接收敵人清單進行處理
+    // ==========================================
+    // 戰鬥與互動邏輯 (Combat & Interaction)
+    // ==========================================
+    /**
+     * @brief 處理按下攻擊鍵(X)的總體邏輯
+     * @details 卡比會自行根據當前狀態判斷：如果嘴裡沒東西就開始吸，有東西就吐出來。
+     */
+    void handleAttack();
 
+    void startInhaling();                   ///< 開始吸氣動畫與狀態
+    void stopInhaling();                    ///< 停止吸氣動畫與狀態
+    void spit();                            ///< 吐出星星攻擊
 
-    // 取得卡比目前的 vx，供 MainWindow 判斷左右方向用
-    qreal getVx() const { return vx; }
-
-
-
-    void handleAttack();  // 處理按下 X 的邏輯//取代單純傳入isInhaling 用更通用的函數//從private移到public
-    void spit(); //新增:吐出函數
+    /**
+     * @brief 處理吸入敵人的範圍判定
+     * @param enemies 傳入畫面上所有敵人的清單 (傳參考)
+     * @details 會在卡比面前畫一個「看不見的長方形Hitbox」，只要敵人在裡面，就會受到吸引力並被吃掉。
+     */
+    void processInhale(QList<Enemy*> &enemies);
 
 private:
-    // 卡比自己的變數
-    qreal vx = 0;
-    qreal vy = 0;
-    const qreal gravity = 0.8;
-    const qreal DASH_SPEED = 12;
+    // ==========================================
+    // 內部狀態變更與渲染 (Private Helpers)
+    // ==========================================
+    /**
+     * @brief 處理卡比「滿嘴/空嘴」的狀態切換
+     * @param full true表示吞入敵人肚子變大，false表示吐出恢復原狀
+     */
+    void setFullStatus(bool full);
 
-    bool isFacingRight = true;
-    bool isDown = false;
-    bool isFlying = false;
-    bool isDashing = false;
-    bool isInhaling = false;
-    bool isOnGround = false;  // 新增這行：記錄卡比是否確實踩在地上
-    bool hasObjectInMouth = false; // 關鍵狀態：肚子裡是否有東西
-
-    void setFullStatus(bool full);//新增:狀態切換函數
-
-
-
-
-    int frameCounter = 0;
-    int flapCounter = 0;
-
-
-    // 換圖邏輯
+    /**
+     * @brief 更新卡比的圖片 (Sprite)
+     * @details 根據當前的各項 boolean 狀態，決定要播放哪一張動畫幀。
+     */
     void updateSprite();
 
+    // ==========================================
+    // 物理屬性參數 (Physics Parameters)
+    // ==========================================
+    qreal vx = 0;                           ///< 當前 X 軸速度 (像素/幀)
+    qreal vy = 0;                           ///< 當前 Y 軸速度 (像素/幀)
+    const qreal gravity = 0.8;              ///< 重力加速度
+    const qreal DASH_SPEED = 12;            ///< 衝刺時的固定速度
+
+    // ==========================================
+    // 狀態機變數 (State Flags)
+    // ==========================================
+    // 動作狀態
+    bool isFacingRight = true;              ///< 是否面向右邊
+    bool isDown = false;                    ///< 是否正在蹲下
+    bool isFlying = false;                  ///< 是否處於飛行/膨脹狀態
+    bool isDashing = false;                 ///< 是否正在衝刺
+    bool isOnGround = false;                ///< 是否確實踩在實體地板上
+
+    // 戰鬥狀態
+    bool isInhaling = false;                ///< 是否正在吸氣
+    bool hasObjectInMouth = false;          ///< 肚子裡/嘴裡是否有東西 (滿腹狀態)
+
+    // ==========================================
+    // 動畫計時器 (Animation Counters)
+    // ==========================================
+    int frameCounter = 0;                   ///< 記錄一般動畫經過的幀數
+    int flapCounter = 0;                    ///< 記錄飛行拍動翅膀的幀數
 
 };
 
