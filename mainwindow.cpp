@@ -9,6 +9,7 @@
 #include <QGraphicsPixmapItem>
 #include "Block.h"
 #include "Kirby.h"
+#include "HUD.h"
 
 // =========================================================
 // 1. 建構子與解構子 (初始化遊戲世界)
@@ -76,14 +77,21 @@ MainWindow::MainWindow(QWidget *parent)
         enemyList.append(newDee);
     }
 
-    // --- [6. 訊號與槽連線 (Signals & Slots)] ---
+
+
+    // --- [5. 誕生 HUD 並加入場景][新增] ---
+    gameHUD = new HUD();
+    scene->addItem(gameHUD);
+
+
+    // --- [7. 訊號與槽連線 (Signals & Slots)] ---
     // 監聽卡比吐星星的訊號
     connect(player, &Kirby::starFired, this, [=](StarBullet* star){
         bulletList.append(star); // 只要卡比一噴，就加進清單
         qDebug() << "Captured a star! Total stars in list:" << bulletList.size();
     });
 
-    // --- [7. 計時器與事件設定 (Timers & Events)] ---
+    // --- [8. 計時器與事件設定 (Timers & Events)] ---
     // 雙擊衝刺計時器 (只觸發一次)
     doubleTapTimer = new QTimer(this);
     doubleTapTimer->setSingleShot(true);
@@ -99,16 +107,25 @@ MainWindow::MainWindow(QWidget *parent)
     this->setFocus();
 }
 
+
 MainWindow::~MainWindow() {
     // ui 會自動刪除，scene 上面有 parent(this) 的物件也會被 Qt 回收
     delete ui;
 }
+
+
+
 
 // =========================================================
 // 2. 遊戲主迴圈 (Game Loop)
 // 每 16ms 執行一次，負責更新所有邏輯
 // =========================================================
 void MainWindow::gameLoop() {
+
+    //---[0. 輸贏]---有問題~~~
+    qDebug() << " 檢查卡比目前的血量：" << player->getCurrentHp();
+    if (isGameOver) return;
+
     // --- [1. 更新玩家狀態] ---
     if (player) {
         player->update();
@@ -121,13 +138,29 @@ void MainWindow::gameLoop() {
     }
 
 
+
     // --- [3. 物理碰撞偵測層] ---
     if (player) {
         for (Enemy *e : enemyList) {
             // @todo 這裡可以交給負責戰鬥機制的隊友擴充
+
+
+            //  【新增這行防護罩】
+            // 如果敵人已經判定死亡，或者「已經變成透明看不見了」，就直接跳過它，不檢查碰撞！
+            // 目前敵人死掉都僅是看不見而已(顏色變透明，未來:直接把敵人刪掉。)
+            if (e->getIsDead() || !e->isVisible()) {    //isVisible() 是 Qt 框架中 QGraphicsItem 類別內建的成員函數。
+                continue;
+            }
+
             if (player->collidesWithItem(e)) {
-                // 如果卡比撞到敵人 (且不在吸入或無敵狀態)
-                // player->takeDamage();
+                // 取得卡比當前的動作狀態
+                bool isInhaling = player->getInhaling(); // 是否正在吸氣
+                bool isSpitting = player->getSpitting(); // 是否正在吐星星
+
+                // 只有在卡比「沒有吸氣」且「沒有吐星星」的時候，才會受傷
+                if (!isInhaling && !isSpitting) {
+                    player->takeDamage(1);
+                }
             }
         }
     }
@@ -148,7 +181,22 @@ void MainWindow::gameLoop() {
 
 
 
-    // --- [5. 攝影機跟隨] ---
+    //  --- [5. 同步卡比的血量給 HUD] ---[新增]
+    gameHUD->updateHealth(player->getCurrentHp(), player->getMaxHp());
+
+        // 讓 HUD 永遠跟著卡比走 (保持在視窗左上角)
+    qreal uiX = player->x() - 350;
+    if (uiX < 10) uiX = 10;
+    gameHUD->setPos(uiX, 20);
+
+        // 檢查死亡
+    if (player->getCurrentHp() <= 0) {
+        isGameOver = true;
+        gameHUD->showGameOver();                 // 通知 HUD 顯示 Game Over
+        gameHUD->setPos(player->x() - 100, 300); // 把字移到畫面中間
+    }
+
+    // --- [6. 攝影機跟隨] ---
     // 等所有物件座標都算好後，最後移動視角
     if (player) {
         // qBound 限制攝影機不會拍到地圖外 (0 ~ 4860)
