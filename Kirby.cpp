@@ -257,7 +257,7 @@ void Kirby::spit() {
     }
 
     // 實體化星星子彈
-    StarBullet *star = new StarBullet(x(), y(), isFacingRight);
+    StarBullet *star = new StarBullet(x(), y()+30, isFacingRight);
     if (scene()) {
         scene()->addItem(star);
         emit starFired(star);          // 觸發訊號，通知 MainWindow 把星星加入更新清單
