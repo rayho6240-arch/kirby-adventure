@@ -202,6 +202,33 @@ void MainWindow::gameLoop() {
         }
     }
 
+    // --- [4.5 子彈與敵人的碰撞偵測] ---
+    for (int i = 0; i < bulletList.size(); ++i) {
+        StarBullet *b = bulletList[i];
+        if (!b->isVisible()) continue; // 如果子彈已經消失，跳過
+
+        for (int j = 0; j < enemyList.size(); ++j) {
+            Enemy *e = enemyList[j];
+
+            // 只有「活著且看得見」的敵人才能被打中
+            if (e->getIsDead() || !e->isVisible()) continue;
+
+            // 檢查星星是否撞到敵人
+            if (b->collidesWithItem(e)) {
+
+                // 1. 讓敵人受傷或死亡 (呼叫敵人的死亡處理)
+                e->setIsDead(true);
+                e->setVisible(false); // 讓敵人先消失
+
+                // 2. 讓星星子彈消失 (通常星星撞到東西會碎裂或消失)
+                b->setVisible(false);
+
+                // 3. 既然這顆星星已經撞到東西了，就不用再檢查其他敵人了
+                break;
+            }
+        }
+    }
+
 
 
     //  --- [5. 同步卡比的血量給 HUD] ---[新增]
