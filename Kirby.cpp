@@ -279,13 +279,14 @@ void Kirby::spit() {
 void Kirby::setFullStatus(bool full) {
     hasObjectInMouth = full;
 
-    if (full) {
+    // [更改] 將變胖動畫加到下面的動畫渲染系統
+    //if (full) {
         // TODO: 之後可以換成變胖的圖片 setPixmap(QPixmap(":/res/kirby_full.png"));
-        setScale(1.5); // 先暫時放大 1.5 倍來 debug，一眼就看出吸到了
-    } else {
+       // setScale(1.5);  // 先暫時放大 1.5 倍來 debug，一眼就看出吸到了
+    //} else {
         // 恢復原狀
-        setScale(1.0);
-    }
+       // setScale(1.0);
+    //}
 }
 
 
@@ -352,6 +353,26 @@ void Kirby::updateSprite() {
         frame = (flapCounter > 0) ? 2 : 1;
         if (flapCounter > 0) flapCounter--;
     }
+
+    // [問題] 現在卡比是以上面為基準，變胖卡比的大小較大，導致會有穿過地板的問題發生
+
+    // [新增] 吃東西狀態 + 靜止
+    else if (hasObjectInMouth && vx == 0) {
+        action = "inhale";
+        frame = 0;
+    }
+    // [新增] 吃東西狀態 + 跑步
+    else if (hasObjectInMouth && vx != 0) {
+        action = "inhale";
+        frameCounter++;
+        if (isDashing) {
+            frame = (frameCounter / 7) % 2 + 1;
+        }
+        else {
+            frame = (frameCounter / 10) % 2 + 1;
+        }
+    }
+
     // 3. 吸氣狀態
     else if (isInhaling) {
         action = "attack";

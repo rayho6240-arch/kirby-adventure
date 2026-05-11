@@ -16,6 +16,10 @@ WaddleDee::WaddleDee(QGraphicsItem *parent) : Enemy(parent) {
     // 先用紅色方塊代替，方便測試物理碰撞。留給同學換圖。
     QPixmap pix(60, 60);
     pix.fill(Qt::red);
+
+    // [待修改] 改成WaddleDee圖片後，人物不斷生成而接觸到地面又消失
+    //QPixmap pix(":/Project2_Dataset/Image/Waddle Dee/Waddle_Dee_6.png");
+    //QPixmap scaledPix = pix.scaled(80, 80);
     setPixmap(pix);
 }
 

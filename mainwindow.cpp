@@ -34,33 +34,56 @@ MainWindow::MainWindow(QWidget *parent)
 
     // --- [3. 鋪設背景大圖 (Level Design)] ---
     // @note 將三張 1620 寬度的圖橫向拼接
-    QGraphicsPixmapItem* bg1 = new QGraphicsPixmapItem(QPixmap(":/Project2_Dataset/Image/background/Stage1(1).png"));
-    bg1->setPos(0, 890);
+    // [修改] 將背景圖片改為一整張地圖，加上一個藍色天空背景，**但畫質有點差**
+    QPixmap bg(":/Project2_Dataset/Image/background/stage-1.jpg");
+    QGraphicsPixmapItem* bg1 = new QGraphicsPixmapItem(bg);
+    qreal scaleFactor = 4860.0 / bg.width();
+    bg1->setScale(scaleFactor);
+    bg1->setPos(0, 300);
     scene->addItem(bg1);
 
-    QGraphicsPixmapItem* bg2 = new QGraphicsPixmapItem(QPixmap(":/Project2_Dataset/Image/background/Stage1(2).png"));
-    bg2->setPos(1620, 390);
+    QPixmap Bg(":/Project2_Dataset/Image/background/stage-1-bg.jpg");
+    QGraphicsPixmapItem* bg2 = new QGraphicsPixmapItem(Bg);
+    qreal ScaleFactor = 4860.0 / Bg.width();
+    bg2->setScale(ScaleFactor);
+    bg2->setPos(0, 0);
     scene->addItem(bg2);
-
-    QGraphicsPixmapItem* bg3 = new QGraphicsPixmapItem(QPixmap(":/Project2_Dataset/Image/background/Stage1(3).png"));
-    bg3->setPos(3240, 800);
-    scene->addItem(bg3);
 
     // 將背景圖層放到最後方，避免遮擋玩家與敵人
     bg1->setZValue(-10);
-    bg2->setZValue(-10);
-    bg3->setZValue(-10);
+    bg2->setZValue(-20);
 
     // --- [4. 鋪設隱形地形碰撞 (Collisions)] ---
     // @note 這些是透明的 Block，用來阻擋卡比掉出地圖或穿牆
-    Block* ground1 = new Block(0, 900, 1620, 400);
+    // [修改] 將Block改為符合背景地圖的樣式
+    Block* ground1 = new Block(0, 890, 4860, 400);
     scene->addItem(ground1);
 
-    Block* ground2 = new Block(1620, 950, 1000, 130);
+    Block* ground2 = new Block(1360, 805, 130, 85);
     scene->addItem(ground2);
 
-    Block* wall1 = new Block(2620, 800, 100, 150);
+    Block* wall1 = new Block(2600, 805, 430, 85);
     scene->addItem(wall1);
+
+    Block* wall2 = new Block(3375, 805, 1485, 85);
+    scene->addItem(wall2);
+
+    Block* wall3 = new Block(3835, 510, 125, 295);
+    scene->addItem(wall3);
+
+    Block* wall4 = new Block(3960, 660, 80, 145);
+    scene->addItem(wall4);
+
+    Block* ceil = new Block(0, -100, 4860, 100);
+    scene->addItem(ceil);
+
+    // [新增] 將方塊改成完全透明的，只留背景圖片
+    ground1->setOpacity(0.0);
+    ground2->setOpacity(0.0);
+    wall1->setOpacity(0.0);
+    wall2->setOpacity(0.0);
+    wall3->setOpacity(0.0);
+    wall4->setOpacity(0.0);
 
     // --- [5. 實體物件生成：玩家與敵人 (Entities)] ---
     // 玩家 (卡比)
