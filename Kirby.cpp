@@ -16,12 +16,21 @@
  * @brief Kirby 建構子 (出廠預設值)
  */
 Kirby::Kirby() {
-    // 1. 載入預設待機圖片
+    // 1. ctor初始化卡比生命
+    maxHp = 6;          // 假設卡比有 6 格血
+    currentHp = maxHp;  // 出生時滿血
+    isInvincible = false;
+    invincibleTimer = 0;
+    isSpitting = false;
+    spitTimer = 0;
+
+    // 2. 載入預設待機圖片
     QPixmap kirbyImg(":/Project2_Dataset/Image/Kirby_normal/kirby_stop_R.png");
 
-    // 2. 賦予演員這張圖片 (此時尚未加入場景，由 MainWindow 負責加入)
+    // 3. 賦予演員這張圖片 (此時尚未加入場景，由 MainWindow 負責加入)
     setPixmap(kirbyImg);
 }
+
 
 // --- 接收外部指令 (從 MainWindow 傳入) ---
 void Kirby::setHorizontalVelocity(qreal v) { vx = v; }
@@ -76,9 +85,8 @@ void Kirby::update() {
     // 如果蹲下或正在吸氣，強制停止水平移動
     qreal currentVx = (isDown || isInhaling) ? 0 : vx;
 
-    // -------------------------------------------
+
     // --- 1. 水平移動與碰撞 (X 軸) ---
-    // -------------------------------------------
     setX(x() + currentVx);
 
     // 世界邊界檢查 (防止走出地圖外)
@@ -106,9 +114,8 @@ void Kirby::update() {
         }
     }
 
-    // -------------------------------------------
+
     // --- 2. 垂直移動與碰撞 (Y 軸) ---
-    // -------------------------------------------
     setY(y() + vy);
     isOnGround = false; // 預設不在地上，等下如果踩到地板再設回 true
 
@@ -131,7 +138,34 @@ void Kirby::update() {
         }
     }
 
-    // --- 3. 狀態補強與渲染 ---
+    // --- 3. 處理受傷後的無敵時間與閃爍特效[新增] ---
+    if (isInvincible) {
+        invincibleTimer--;
+
+        // 利用餘數製造閃爍效果 (每 8 幀切換一次透明度)
+        if (invincibleTimer % 8 < 4) {
+            setOpacity(0.3); // 變半透明
+        } else {
+            setOpacity(1.0); // 恢復正常
+        }
+
+        // 時間到，解除無敵狀態
+        if (invincibleTimer <= 0) {
+            isInvincible = false;
+            setOpacity(1.0); // 確保透明度恢復正常
+        }
+    }
+
+    // --- 4. 處理吐星狀態的倒數 ---
+    if (isSpitting) {
+        spitTimer--;
+        if (spitTimer <= 0) {
+            isSpitting = false; // 時間到，解除吐星狀態
+        }
+    }
+
+
+    // --- 5. 狀態補強與渲染 ---
     if (isOnGround) isFlying = false;         // 落地解除飛行狀態
     if (currentVx > 0) isFacingRight = true;  // 更新面朝方向
     else if (currentVx < 0) isFacingRight = false;
@@ -254,8 +288,47 @@ void Kirby::setFullStatus(bool full) {
     }
 }
 
+
+
+
+
 // =========================================================
-// 5. 動畫渲染系統 (Animation & Rendering)
+// 6. 生命&扣血系統[新增]
+// =========================================================
+
+void Kirby::takeDamage(int damage) {
+    // 1. 如果正在無敵狀態，直接免疫這次傷害
+    if (isInvincible) return;
+
+    // 2. 扣血
+    currentHp -= damage;
+    qDebug() << "kirby wound ,HP remain：" << currentHp << "/" << maxHp;
+
+    // 3. 死亡或觸發無敵
+    if (currentHp <= 0) {
+        currentHp = 0;
+        qDebug() << "kitby dead！";
+        // TODO: 未來這裡要觸發卡比死亡動畫與遊戲結束邏輯
+    } else {
+        // 觸發無敵狀態 (假設 60 FPS，設定 60 幀約為 1 秒的無敵時間)
+        isInvincible = true;
+        invincibleTimer = 120;
+    }
+}
+
+bool Kirby:: getInhaling(){
+    return isInhaling;
+}
+bool Kirby:: getSpitting(){
+    return isSpitting;
+}
+
+
+
+
+
+// =========================================================
+// 6. 動畫渲染系統 (Animation & Rendering)
 // =========================================================
 
 /**

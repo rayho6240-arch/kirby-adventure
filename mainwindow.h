@@ -17,6 +17,7 @@
 #include "Kirby.h"
 #include "WaddleDee.h"
 #include "StarBullet.h"
+#include "HUD.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; } //後面就不打 "mainwindow::"
@@ -54,19 +55,28 @@ private slots:
 
 private:
     // ==========================================
-    // UI 與場景管理 (Graphics & View)
+    // 1. UI 與場景管理 (Graphics & View)
     // ==========================================
     Ui::MainWindow *ui;
     QGraphicsScene *scene;  ///< 遊戲場景（所有物件都在這上面）
     QGraphicsView *view;    ///< 攝影機視角（玩家看到畫面的窗口）
 
+
     // ==========================================
-    // 遊戲核心計時器 (Timers)~~
+    // 2. 遊戲介面 (Heads-Up Display / HUD)[新增]
+    // ==========================================
+    HUD *gameHUD; //創立物件
+
+
+
+
+    // ==========================================
+    // 3. 遊戲核心計時器 (Timers)~~
     // ==========================================
     QTimer *timer;          ///< 控制 Game Loop 的主計時器（例如設定每 16ms 觸發一次，達成 60FPS）
 
     // ==========================================
-    // 遊戲實體物件 (Game Entities)
+    // 4. 遊戲實體物件 (Game Entities)
     // ==========================================
     Kirby *player;                  ///< 玩家操作的卡比
 
@@ -79,8 +89,15 @@ private:
 
     QList<StarBullet*> bulletList;  ///< 管理畫面上所有正在飛行的星星子彈
 
+
     // ==========================================
-    // 玩家輸入與狀態判定 (Input & States)
+    // 5. 遊戲狀態 (Game States)(卡比有沒有死)[新增]
+    // ==========================================
+    bool isGameOver=false;  ///< 記錄是否已經死亡或遊戲結束，避免在 GameLoop 中繼續執行邏輯
+
+
+    // ==========================================
+    // 6. 玩家輸入與狀態判定 (Input & States)
     // ==========================================
     // [註] 鍵盤雙擊判定保留在此，因為這是玩家「硬體輸入層級」的邏輯，判定完再將結果傳給 Kirby。
     int lastReleasedKey = -1;          ///< 記錄上一個放開的方向鍵鍵值（用來比對是否連按同一個鍵）
@@ -103,6 +120,7 @@ protected:
      * @param event 包含玩家放開了哪顆按鍵的資訊
      */
     void keyReleaseEvent(QKeyEvent *event) override;
+
 };
 
 #endif // MAINWINDOW_H

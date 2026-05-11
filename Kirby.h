@@ -80,6 +80,15 @@ public:
      */
     void processInhale(QList<Enemy*> &enemies);
 
+
+    //[新增]生命機制
+    int getCurrentHp() const { return currentHp; }
+    int getMaxHp() const { return maxHp; }
+    void takeDamage(int damage); // 承受傷害的函式
+    bool getInhaling();          //讓外面得到資訊(傷害判定)
+    bool getSpitting();
+
+
 private:
     // ==========================================
     // 內部狀態變更與渲染 (Private Helpers)
@@ -117,6 +126,14 @@ private:
     // 戰鬥狀態
     bool isInhaling = false;                ///< 是否正在吸氣
     bool hasObjectInMouth = false;          ///< 肚子裡/嘴裡是否有東西 (滿腹狀態)
+    bool isSpitting;  // 記錄是否正在吐星
+    int spitTimer;    // 吐星狀態的持續時間計時器
+
+    //生命狀態
+    int maxHp;              // 最大血量
+    int currentHp;          // 當前血量
+    bool isInvincible;      // 是否處於無敵狀態
+    int invincibleTimer;    // 無敵時間倒數計時器
 
     // ==========================================
     // 動畫計時器 (Animation Counters)
