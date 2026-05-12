@@ -74,7 +74,7 @@ void Kirby::update() {
     // --- 0. 定義固定物理碰撞箱大小 (Hitbox) ---
     const qreal KIRBY_PHYSICAL_HEIGHT = 120;
     const qreal KIRBY_PHYSICAL_WIDTH = 120;   // 建議設為固定值，避免因切換動畫圖片大小不同而卡牆
-    const qreal SAFETY_MARGIN = 1.0;          // 安全間距，防止退回時剛好黏在牆壁邊緣
+    const qreal SAFETY_MARGIN = 1.5;          // 安全間距，防止退回時剛好黏在牆壁邊緣 //目前只能通靈出這個數字，normal我碰撞振動問題成功修復，但是fat 會黏住
 
     qreal oldY = y();
 
@@ -86,7 +86,17 @@ void Kirby::update() {
     qreal currentVx = (isDown || isInhaling) ? 0 : vx;
 
 
+    //[關鍵修復] 計算圖片寬度與 Hitbox 的落差，確保 Hitbox 永遠在卡比的正中央
+    qreal currentSpriteWidth = this->boundingRect().width();
+    qreal offsetX = (currentSpriteWidth - KIRBY_PHYSICAL_HEIGHT) / 2.0;
+
+
+
+
+
+
     // --- 1. 水平移動與碰撞 (X 軸) ---
+    //------------------------------
     setX(x() + currentVx);
 
     // 世界邊界檢查 (防止走出地圖外)
@@ -103,16 +113,44 @@ void Kirby::update() {
                           (y() < block->y() + block->boundingRect().height() - 5);
 
             if (isWall) {
-                if (currentVx > 0) {
-                    // 往右撞牆：推回到方塊左緣，再多退後 SAFETY_MARGIN 像素
-                    setX(block->x() - KIRBY_PHYSICAL_WIDTH - SAFETY_MARGIN);
-                } else if (currentVx < 0) {
-                    // 往左撞牆：推回到方塊右緣，再多前進 SAFETY_MARGIN 像素
-                    setX(block->x() + block->boundingRect().width() + SAFETY_MARGIN);
+                // 1. 取得圖片真實寬度
+                qreal actualWidth = this->boundingRect().width();
+
+                // 2. 算出圖片與 120 物理箱之間的「置中偏差值」
+                // 例如圖片是 130，那左右各超出了 5 像素 (offsetX = 5)
+                qreal offsetX = (actualWidth - KIRBY_PHYSICAL_WIDTH) / 2.0;
+
+                // 3. 用真實寬度來抓中心點最準確
+                qreal kirbyCenterX = this->x() + actualWidth / 2.0;
+                qreal blockCenterX = block->x() + block->boundingRect().width() / 2.0;
+
+                if (kirbyCenterX < blockCenterX) {
+                    // --- 牆在右邊 ---
+                    // 【修正點】：多扣除右邊超出去的 offsetX，確保圖片完全被推出牆外
+                    setX(block->x() - KIRBY_PHYSICAL_WIDTH - offsetX - SAFETY_MARGIN);
+
+                    // 只有當你「正在往右走」時，才歸零速度
+                    if (currentVx > 0) {
+                        currentVx = 0;
+                    }
                 }
-            }
-        }
-    }
+                else {
+                    // --- 牆在左邊 ---
+                    // 【修正點】：把左邊超出去的 offsetX 減掉，讓真正的 120 物理框去貼牆
+                    setX(block->x() + block->boundingRect().width() - offsetX + SAFETY_MARGIN);
+
+                    // 只有當你「正在往左走」時，才歸零速度
+                    if (currentVx < 0)  currentVx = 0;
+                }
+
+            }//end if(isWall)
+        }//end if(block)
+    }//end for
+
+
+
+
+
 
 
     // --- 2. 垂直移動與碰撞 (Y 軸) ---
