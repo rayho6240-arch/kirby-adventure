@@ -73,8 +73,22 @@ void Kirby::fly() {
 void Kirby::update() {
     // --- 0. 定義固定物理碰撞箱大小 (Hitbox) ---
     const qreal KIRBY_PHYSICAL_HEIGHT = 120;
-    const qreal KIRBY_PHYSICAL_WIDTH = 120;   // 建議設為固定值，避免因切換動畫圖片大小不同而卡牆
-    const qreal SAFETY_MARGIN = 1.5;          // 安全間距，防止退回時剛好黏在牆壁邊緣 //目前只能通靈出這個數字，normal我碰撞振動問題成功修復，但是fat 會黏住
+    //const qreal KIRBY_PHYSICAL_WIDTH = 120;   // 建議設為固定值，避免因切換動畫圖片大小不同而卡牆
+    const qreal SAFETY_MARGIN  = 2;          // 安全間距，防止退回時剛好黏在牆壁邊緣 //目前只能通靈出這個數字，normal我碰撞振動問題成功修復，但是fat 會黏住
+
+    // 【修正點】：不要寫死 const，根據卡比目前的狀態決定他有多胖！
+    // 這裡的 isFlying 或是 isFat 請替換成你程式裡實際控制胖卡比的布林值
+    qreal currentPhysicalWidth;
+    qreal currentPhysicalHeight ;
+    if (isFlying || isSpitting) {
+        currentPhysicalWidth = 150; // 胖卡比的物理寬度 (你可以自己微調這個數字)
+        currentPhysicalHeight = 150; // 胖卡比的高度 (請依你的實際圖片微調此數值)
+    } else {
+        currentPhysicalWidth = 120; // 正常卡比的物理寬度
+        currentPhysicalHeight = 120;
+    }
+
+
 
     qreal oldY = y();
 
@@ -88,8 +102,11 @@ void Kirby::update() {
 
     //[關鍵修復] 計算圖片寬度與 Hitbox 的落差，確保 Hitbox 永遠在卡比的正中央
     qreal currentSpriteWidth = this->boundingRect().width();
-    qreal offsetX = (currentSpriteWidth - KIRBY_PHYSICAL_HEIGHT) / 2.0;
+    qreal offsetX = (currentSpriteWidth - currentPhysicalWidth) / 2.0;
 
+    qreal currentSpriteHeight = this->boundingRect().height();
+    // 【關鍵】：不用除以 2！因為所有的落差都在頭頂，腳底是切齊的。
+    qreal offsetY = currentSpriteHeight - currentPhysicalHeight;
 
 
 
@@ -101,7 +118,7 @@ void Kirby::update() {
 
     // 世界邊界檢查 (防止走出地圖外)
     if (x() < 0) setX(0);
-    if (x() > 4860 - KIRBY_PHYSICAL_WIDTH) setX(4860 - KIRBY_PHYSICAL_WIDTH);
+    if (x() > 4860 - currentPhysicalWidth) setX(4860 - currentPhysicalWidth);
 
     // X 軸碰撞判定
     QList<QGraphicsItem *> collidingItemsX = scene()->collidingItems(this);
@@ -118,7 +135,7 @@ void Kirby::update() {
 
                 // 2. 算出圖片與 120 物理箱之間的「置中偏差值」
                 // 例如圖片是 130，那左右各超出了 5 像素 (offsetX = 5)
-                qreal offsetX = (actualWidth - KIRBY_PHYSICAL_WIDTH) / 2.0;
+                qreal offsetX = (actualWidth - currentPhysicalWidth) / 2.0;
 
                 // 3. 用真實寬度來抓中心點最準確
                 qreal kirbyCenterX = this->x() + actualWidth / 2.0;
@@ -127,7 +144,7 @@ void Kirby::update() {
                 if (kirbyCenterX < blockCenterX) {
                     // --- 牆在右邊 ---
                     // 【修正點】：多扣除右邊超出去的 offsetX，確保圖片完全被推出牆外
-                    setX(block->x() - KIRBY_PHYSICAL_WIDTH - offsetX - SAFETY_MARGIN);
+                    setX(block->x() - currentPhysicalWidth - offsetX - SAFETY_MARGIN);
 
                     // 只有當你「正在往右走」時，才歸零速度
                     if (currentVx > 0) {
