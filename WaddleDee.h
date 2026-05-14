@@ -1,5 +1,7 @@
 #ifndef WADDLEDEE_H
 #define WADDLEDEE_H
+#include <QString>
+#include <QPixmap>
 
 // ==========================================
 // 1. 基底類別引入
@@ -32,6 +34,11 @@ public:
      * 並負責切換 WaddleDee 的左右走路動畫圖片。
      */
     void update() override;
+
+private:
+    // [新增]動畫渲染
+    void updateSprite();
+    int frameCounter = 0;
 };
 
 

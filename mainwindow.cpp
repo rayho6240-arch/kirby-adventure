@@ -35,7 +35,7 @@ MainWindow::MainWindow(QWidget *parent)
     // --- [3. 鋪設背景大圖 (Level Design)] ---
     // @note 將三張 1620 寬度的圖橫向拼接
     // [修改] 將背景圖片改為一整張地圖，加上一個藍色天空背景，**但畫質有點差**
-    QPixmap bg(":/Project2_Dataset/Image/background/stage-1.jpg");
+    QPixmap bg(":/Project2_Dataset/Image/background/stage-1_1.png");
     QGraphicsPixmapItem* bg1 = new QGraphicsPixmapItem(bg);
     qreal scaleFactor = 4860.0 / bg.width();
     bg1->setScale(scaleFactor);
@@ -56,35 +56,35 @@ MainWindow::MainWindow(QWidget *parent)
     // --- [4. 鋪設隱形地形碰撞 (Collisions)] ---
     // @note 這些是透明的 Block，用來阻擋卡比掉出地圖或穿牆
     // [修改] 將Block改為符合背景地圖的樣式
-    Block* ground1 = new Block(0, 890, 4860, 400);
+    Block* ground1 = new Block(0, 890, 2600, 400);
     scene->addItem(ground1);
 
-    Block* ground2 = new Block(1360, 805, 130, 85);
-    scene->addItem(ground2);
-
-    Block* wall1 = new Block(2600, 805, 430, 85);
+    Block* wall1 = new Block(1360, 805, 130, 85);
     scene->addItem(wall1);
 
-    Block* wall2 = new Block(3375, 805, 1485, 85);
+    Block* wall2 = new Block(2600, 805, 435, 485);
     scene->addItem(wall2);
 
-    Block* wall3 = new Block(3835, 510, 125, 295);
+    Block* wall3 = new Block(3375, 805, 1485, 485);
     scene->addItem(wall3);
 
-    Block* wall4 = new Block(3960, 660, 80, 145);
+    Block* wall4 = new Block(3835, 510, 125, 295);
     scene->addItem(wall4);
+
+    Block* wall5 = new Block(3960, 660, 80, 145);
+    scene->addItem(wall5);
 
     Block* ceil = new Block(0, -100, 4860, 100);
     scene->addItem(ceil);
 
     // [新增] 將方塊改成完全透明的，只留背景圖片
     ground1->setOpacity(0.0);
-    ground2->setOpacity(0.0);
     wall1->setOpacity(0.0);
     wall2->setOpacity(0.0);
     wall3->setOpacity(0.0);
     wall4->setOpacity(0.0);
-
+    wall5->setOpacity(0.0);
+    
     // --- [5. 實體物件生成：玩家與敵人 (Entities)] ---
     // 玩家 (卡比)
     player = new Kirby(); //呼叫 Kirby.h 中的 ctor

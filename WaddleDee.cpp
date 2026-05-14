@@ -14,12 +14,12 @@ WaddleDee::WaddleDee(QGraphicsItem *parent) : Enemy(parent) {
 
     // --- 簡易，預設外觀 ---
     // 先用紅色方塊代替，方便測試物理碰撞。留給同學換圖。
-    QPixmap pix(60, 60);
+    /*QPixmap pix(60, 60);
     pix.fill(Qt::red);
-
+    */
     // [待修改] 改成WaddleDee圖片後，人物不斷生成而接觸到地面又消失
-    //QPixmap pix(":/Project2_Dataset/Image/Waddle Dee/Waddle_Dee_6.png");
-    //QPixmap scaledPix = pix.scaled(80, 80);
+    QPixmap pix(":/Project2_Dataset/Image/Waddle Dee/Waddle_Dee_6.png");
+    pix = pix.scaled(60, 60, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
     setPixmap(pix);
 }
 
@@ -58,4 +58,23 @@ void WaddleDee::update() {
 
     // --- 4. 專屬動畫切換 (預留) ---
     // TODO: 未來這裡可以加上 updateSprite()，用來根據 vx 的正負值切換左右走路的圖片
+    updateSprite();
+}
+
+// [新增]更換Waddle Dee動畫圖片
+void WaddleDee::updateSprite(){
+    int frame = 0;
+    if(vx < 0){
+        frameCounter++;
+        frame = (frameCounter / 10) % 3;
+    }
+    else if(vx > 0){
+        frameCounter++;
+        frame = (frameCounter / 10) % 4 + 3;
+    }
+    QString path;
+    path = QString(":/Project2_Dataset/Image/Waddle Dee/Waddle_Dee_%1.png").arg(frame);
+    QPixmap pix(path);
+    pix = pix.scaled(60, 60, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    setPixmap(pix);
 }

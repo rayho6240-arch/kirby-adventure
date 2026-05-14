@@ -43,5 +43,12 @@
         <file>Project2_Dataset/Image/Kirby_normal/kirby_inhale_2_L.png</file>
         <file>Project2_Dataset/Image/Kirby_normal/kirby_inhale_2_R.png</file>
         <file>Project2_Dataset/Image/Waddle Dee/Waddle_Dee_6.png</file>
+        <file>Project2_Dataset/Image/background/stage-1_1.png</file>
+        <file>Project2_Dataset/Image/Waddle Dee/Waddle_Dee_0.png</file>
+        <file>Project2_Dataset/Image/Waddle Dee/Waddle_Dee_1.png</file>
+        <file>Project2_Dataset/Image/Waddle Dee/Waddle_Dee_2.png</file>
+        <file>Project2_Dataset/Image/Waddle Dee/Waddle_Dee_3.png</file>
+        <file>Project2_Dataset/Image/Waddle Dee/Waddle_Dee_4.png</file>
+        <file>Project2_Dataset/Image/Waddle Dee/Waddle_Dee_5.png</file>
     </qresource>
 </RCC>

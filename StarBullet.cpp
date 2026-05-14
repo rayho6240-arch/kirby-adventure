@@ -11,9 +11,9 @@
  * @param toRight 面朝方向 (決定子彈向左飛或向右飛)
  */
 StarBullet::StarBullet(qreal x, qreal y, bool toRight) {
-    // 1. 載入並設定星星圖片，同時將其強制縮放為 40x40 大小
+    /*// 1. 載入並設定星星圖片，同時將其強制縮放為 40x40 大小
     // @note 這裡目前先統一用向左的圖片。未來可增加素材L 或是利用 QImage::mirrored
-    setPixmap(QPixmap(":/Project2_Dataset/Image/Kirby_normal/kirby_attack_star_L(1).png").scaled(40, 40));
+    setPixmap(QPixmap(":/Project2_Dataset/Image/Kirby_normal/kirby_attack_star_L(1).png").scaled(141.53,100));
 
     // 2. 設定出生座標 (由 MainWindow 呼叫時，傳入卡比的當前座標)
     setPos(x, y);
@@ -21,6 +21,19 @@ StarBullet::StarBullet(qreal x, qreal y, bool toRight) {
     // 3. 決定飛行方向與速度
     // 如果 toRight 為 true，vx = 15.0；否則 vx = -15.0。星星射速度非常快！
     vx = toRight ? 15.0 : -15.0;
+    */
+
+    // [修改] 用toRight判斷星星圖片以及方向
+    if(toRight){
+        setPixmap(QPixmap(":/Project2_Dataset/Image/Kirby_normal/kirby_attack_star_R(1).png").scaled(141.53,100));
+        setPos(x, y);
+        vx = 15.0;
+    }
+    else{
+        setPixmap(QPixmap(":/Project2_Dataset/Image/Kirby_normal/kirby_attack_star_L(1).png").scaled(141.53,100));
+        setPos(x, y);
+        vx = -15.0; 
+    }
 }
 
 // =========================================================

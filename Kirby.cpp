@@ -44,9 +44,11 @@ void Kirby::startInhaling() {
     isDashing = false;
 }
 
+
+// [修改] 將Mouthful狀態判斷加到jump、fly的動作判斷
 void Kirby::jump() {
     // @note 以前是判斷 y() >= 800，現在完全交給 isOnGround 判斷，地形適應力更強！
-    if (isOnGround && !isInhaling) {
+    if (isOnGround && !isInhaling && !hasObjectInMouth) {
         vy = -15;           // 給予向上的初速度
         isOnGround = false; // 跳起的一瞬間，立刻解除踩地狀態
         isFlying = false;
@@ -54,7 +56,7 @@ void Kirby::jump() {
 }
 
 void Kirby::fly() {
-    if (!isInhaling) {
+    if (!isInhaling && !hasObjectInMouth) {
         isFlying = true;
         vy = -8;            // 拍打翅膀給予向上升力
         flapCounter = 8;    // 設定拍動動畫持續幀數
