@@ -50,5 +50,7 @@
         <file>Project2_Dataset/Image/Waddle Dee/Waddle_Dee_3.png</file>
         <file>Project2_Dataset/Image/Waddle Dee/Waddle_Dee_4.png</file>
         <file>Project2_Dataset/Image/Waddle Dee/Waddle_Dee_5.png</file>
+        <file>Project2_Dataset/Image/background/start.png</file>
+        <file>Project2_Dataset/Image/background/stage2_merged_nowater.jpg</file>
     </qresource>
 </RCC>

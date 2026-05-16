@@ -23,6 +23,13 @@ QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; } //後面就不打 "mainwindow::"
 QT_END_NAMESPACE
 
+// [新增] 定義遊戲目前的狀態
+enum GameState {
+    STATE_MENU,
+    STATE_STAGE1,
+    STATE_STAGE2
+};
+
 /**
  * @brief MainWindow 遊戲主視窗類別
  * @details 負責初始化遊戲場景、管理 Game Loop、調度所有遊戲實體（卡比、敵人、星星），
@@ -103,6 +110,15 @@ private:
     int lastReleasedKey = -1;          ///< 記錄上一個放開的方向鍵鍵值（用來比對是否連按同一個鍵）
     QTimer *doubleTapTimer;            ///< 雙擊判定專用的計時器
     const int DOUBLE_TAP_WINDOW = 250; ///< 雙擊判定的有效時間差（250毫秒內連按兩下才算衝刺）
+
+
+    // =========================================================
+    // [新增] 場景設定
+    // =========================================================
+    GameState currentState; // 記錄現在是在選單還是關卡中
+    void loadStartMenu();
+    void loadStage1();
+    void loadStage2();
 
 protected:
     // ==========================================

@@ -87,6 +87,11 @@ public:
     void takeDamage(int damage); // 承受傷害的函式
     bool getInhaling();          //讓外面得到資訊(傷害判定)
     bool getSpitting();
+    
+    // [新增] 得到是否在地上的資訊
+    bool getOnGround();
+    // [新增] 改變卡比邊界檢查的範圍
+    void changeWidth(int width);
 
 
 private:
@@ -140,6 +145,10 @@ private:
     // ==========================================
     int frameCounter = 0;                   ///< 記錄一般動畫經過的幀數
     int flapCounter = 0;                    ///< 記錄飛行拍動翅膀的幀數
+    
+    
+    // [新增] 控制地圖寬度的變數，到了stage2可用changeWidth(int width)改變
+    int mapwidth = 4860;
 
 };
 

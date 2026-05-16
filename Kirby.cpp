@@ -83,11 +83,11 @@ void Kirby::update() {
     qreal currentPhysicalWidth;
     qreal currentPhysicalHeight ;
     if (isFlying || isSpitting) {
-        currentPhysicalWidth = 150; // 胖卡比的物理寬度 (你可以自己微調這個數字)
-        currentPhysicalHeight = 150; // 胖卡比的高度 (請依你的實際圖片微調此數值)
+        currentPhysicalWidth = 180; // 胖卡比的物理寬度 (你可以自己微調這個數字)
+        currentPhysicalHeight = 180; // 胖卡比的高度 (請依你的實際圖片微調此數值)
     } else {
-        currentPhysicalWidth = 120; // 正常卡比的物理寬度
-        currentPhysicalHeight = 120;
+        currentPhysicalWidth = 130; // 正常卡比的物理寬度
+        currentPhysicalHeight = 130;
     }
 
 
@@ -120,7 +120,8 @@ void Kirby::update() {
 
     // 世界邊界檢查 (防止走出地圖外)
     if (x() < 0) setX(0);
-    if (x() > 4860 - currentPhysicalWidth) setX(4860 - currentPhysicalWidth);
+    // [修改] 將原本的邊界4860改為mapwidth，這樣到了stage2可透過 changeWidth(int width) 修改邊界
+    if (x() > mapwidth - currentPhysicalWidth) setX(mapwidth - currentPhysicalWidth);
 
     // X 軸碰撞判定
     QList<QGraphicsItem *> collidingItemsX = scene()->collidingItems(this);
@@ -380,8 +381,14 @@ bool Kirby:: getInhaling(){
 bool Kirby:: getSpitting(){
     return isSpitting;
 }
-
-
+    // [新增] 得到是否在地上的資訊
+bool Kirby::getOnGround(){
+    return isOnGround;
+}
+    // [新增] 改變卡比邊界檢查的範圍
+void Kirby::changeWidth(int width){
+    mapwidth = width;
+}
 
 
 

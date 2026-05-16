@@ -20,11 +20,12 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
+    // =========================================================
+    // [修改] 將原本場景設定移至 loadStage1 ，這裡只留視窗大小與視角及計時器 
+    // =========================================================
+
     // --- [1. 初始化場景 (Scene)] ---
     scene = new QGraphicsScene(this);
-    // @note 舞台寬度設定：Stage 1 為 4860，Stage 2 為 8100
-    scene->setSceneRect(0, 0, 4860, 1080);
-    scene->setBackgroundBrush(Qt::white);
 
     // --- [2. 初始化視角 (View/Camera)] ---
     view = new QGraphicsView(scene, this);
@@ -32,87 +33,7 @@ MainWindow::MainWindow(QWidget *parent)
     // 固定畫框大小，玩家看到的永遠是 1620x1080 的範圍
     view->setFixedSize(1620, 1080);
 
-    // --- [3. 鋪設背景大圖 (Level Design)] ---
-    // @note 將三張 1620 寬度的圖橫向拼接
-    // [修改] 將背景圖片改為一整張地圖，加上一個藍色天空背景，**但畫質有點差**
-    QPixmap bg(":/Project2_Dataset/Image/background/stage-1_1.png");
-    QGraphicsPixmapItem* bg1 = new QGraphicsPixmapItem(bg);
-    qreal scaleFactor = 4860.0 / bg.width();
-    bg1->setScale(scaleFactor);
-    bg1->setPos(0, 300);
-    scene->addItem(bg1);
 
-    QPixmap Bg(":/Project2_Dataset/Image/background/stage-1-bg.jpg");
-    QGraphicsPixmapItem* bg2 = new QGraphicsPixmapItem(Bg);
-    qreal ScaleFactor = 4860.0 / Bg.width();
-    bg2->setScale(ScaleFactor);
-    bg2->setPos(0, 0);
-    scene->addItem(bg2);
-
-    // 將背景圖層放到最後方，避免遮擋玩家與敵人
-    bg1->setZValue(-10);
-    bg2->setZValue(-20);
-
-    // --- [4. 鋪設隱形地形碰撞 (Collisions)] ---
-    // @note 這些是透明的 Block，用來阻擋卡比掉出地圖或穿牆
-    // [修改] 將Block改為符合背景地圖的樣式
-    Block* ground1 = new Block(0, 890, 2600, 400);
-    scene->addItem(ground1);
-
-    Block* wall1 = new Block(1360, 805, 130, 85);
-    scene->addItem(wall1);
-
-    Block* wall2 = new Block(2600, 805, 435, 485);
-    scene->addItem(wall2);
-
-    Block* wall3 = new Block(3375, 805, 1485, 485);
-    scene->addItem(wall3);
-
-    Block* wall4 = new Block(3835, 510, 125, 295);
-    scene->addItem(wall4);
-
-    Block* wall5 = new Block(3960, 660, 80, 145);
-    scene->addItem(wall5);
-
-    Block* ceil = new Block(0, -100, 4860, 100);
-    scene->addItem(ceil);
-
-    // [新增] 將方塊改成完全透明的，只留背景圖片
-    ground1->setOpacity(0.0);
-    wall1->setOpacity(0.0);
-    wall2->setOpacity(0.0);
-    wall3->setOpacity(0.0);
-    wall4->setOpacity(0.0);
-    wall5->setOpacity(0.0);
-    
-    // --- [5. 實體物件生成：玩家與敵人 (Entities)] ---
-    // 玩家 (卡比)
-    player = new Kirby(); //呼叫 Kirby.h 中的 ctor
-    player->setPos(400, 100);
-    scene->addItem(player);
-
-    // 敵人 (Waddle Dee 軍隊)
-    // @note 用迴圈批次生成敵人，並加入 enemyList 統一管理
-    for (int i = 0; i < 3; ++i) {
-        WaddleDee *newDee = new WaddleDee();
-        newDee->setPos(800 + (i * 500), 500);
-        scene->addItem(newDee);
-        enemyList.append(newDee);
-    }
-
-
-
-    // --- [5. 誕生 HUD 並加入場景][新增] ---
-    gameHUD = new HUD();
-    scene->addItem(gameHUD);
-
-
-    // --- [7. 訊號與槽連線 (Signals & Slots)] ---
-    // 監聽卡比吐星星的訊號
-    connect(player, &Kirby::starFired, this, [=](StarBullet* star){
-        bulletList.append(star); // 只要卡比一噴，就加進清單
-        qDebug() << "Captured a star! Total stars in list:" << bulletList.size();
-    });
 
     // --- [8. 計時器與事件設定 (Timers & Events)] ---
     // 雙擊衝刺計時器 (只觸發一次)
@@ -123,11 +44,13 @@ MainWindow::MainWindow(QWidget *parent)
     // 遊戲主迴圈計時器 (約 60 FPS)
     timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, &MainWindow::gameLoop);
-    timer->start(16);
 
     // 設定視窗可以接收鍵盤事件
     this->setFocusPolicy(Qt::StrongFocus);
     this->setFocus();
+
+    // 開始載入初始畫面
+    loadStartMenu();
 }
 
 
@@ -147,6 +70,7 @@ void MainWindow::gameLoop() {
 
     //---[0. 輸贏]---有問題~~~
     qDebug() << " 檢查卡比目前的血量：" << player->getCurrentHp();
+    qDebug() << "卡比目前位置:" << "X:" << player->x() << "Y:" << player->y();
     if (isGameOver) return;
 
     // --- [1. 更新玩家狀態] ---
@@ -250,7 +174,8 @@ void MainWindow::gameLoop() {
     // 等所有物件座標都算好後，最後移動視角
     if (player) {
         // qBound 限制攝影機不會拍到地圖外 (0 ~ 4860)
-        qreal camX = qBound(512.0, player->x(), 4860.0 - 512.0);
+        // [修改] 將4860改為地圖實際寬度 width()，這樣切換到 stage2 時可直接套用
+        qreal camX = qBound(512.0, player->x(), scene->width() - 512.0);
         view->centerOn(camX, 540);
     }
 }
@@ -276,44 +201,77 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
 
     int key = event->key();
 
-    // 1. 蹲下
-    if (key == Qt::Key_Down) {
-        player->setDown(true);
-        player->setDashing(false);
-    }
-    // 2. 跳躍
-    else if (key == Qt::Key_Z) {
-        player->jump();
-    }
-    // 3. 飛行
-    else if (key == Qt::Key_Up) {
-        player->fly();
-    }
-    // 4. 往右移動與衝刺
-    else if (key == Qt::Key_Right) {
-        if (doubleTapTimer->isActive() && lastReleasedKey == Qt::Key_Right) {
-            player->setDashing(true);
-            player->setHorizontalVelocity(12); // 衝刺速度
-            doubleTapTimer->stop();
-            lastReleasedKey = -1;
-        } else {
-            if (!player->getVx()) player->setHorizontalVelocity(7); // 一般走路速度
+    // ==========================================
+    // [新增] 狀態 1：如果目前在主選單 (Start Menu)，則等待按下enter建
+    // ==========================================
+    if (currentState == STATE_MENU) {
+        if (key == Qt::Key_Return || key == Qt::Key_Enter) {
+            currentState = STATE_STAGE1; // 更新狀態
+            loadStage1();                // 載入第一關
         }
     }
-    // 5. 往左移動與衝刺
-    else if (key == Qt::Key_Left) {
-        if (doubleTapTimer->isActive() && lastReleasedKey == Qt::Key_Left) {
-            player->setDashing(true);
-            player->setHorizontalVelocity(-12);
-            doubleTapTimer->stop();
-            lastReleasedKey = -1;
-        } else {
-            if (!player->getVx()) player->setHorizontalVelocity(-7);
+
+    // ==========================================
+    // [新增] 狀態 2：如果目前在 Stage1 並且在門的地方按下 Up ，則切換場景為 Stage2
+    // ==========================================
+    if (currentState == STATE_STAGE1) {
+        if(player->x() < 4650 && player->x() > 4630 && player->getOnGround()){
+            if(key == Qt::Key_Up){
+                currentState = STATE_STAGE2;
+                loadStage2();
+                return;
+            }
         }
     }
-    // 6. 攻擊 (吸入/吐出)
-    else if (key == Qt::Key_X) {
-        player->handleAttack(); // 讓 Kirby 內部自行判斷目前狀態該執行哪個動作
+
+
+    // ==========================================
+    // [新增包裝] 狀態 3：只有在遊戲關卡中，才執行卡比的動作按鍵
+    // ==========================================
+    if (currentState == STATE_STAGE1 || currentState == STATE_STAGE2) {
+        if (!player) return; // 安全檢查：確保卡比存在才執行動作
+
+        // 1. 蹲下
+        if (key == Qt::Key_Down) {
+            player->setDown(true);
+            player->setDashing(false);
+        }
+        // 2. 跳躍
+        else if (key == Qt::Key_Z) {
+            player->jump();
+        }
+        // 3. 飛行
+        else if (key == Qt::Key_Up) {
+            // 注意：這裡如果你要實作碰到傳送門按上鍵進入 Stage 2，
+            // 可以在這裡呼叫一個 player->checkPortal() 或是將邏輯寫在 player->fly() 裡判斷
+            player->fly();
+        }
+        // 4. 往右移動與衝刺
+        else if (key == Qt::Key_Right) {
+            if (doubleTapTimer->isActive() && lastReleasedKey == Qt::Key_Right) {
+                player->setDashing(true);
+                player->setHorizontalVelocity(12); // 衝刺速度
+                doubleTapTimer->stop();
+                lastReleasedKey = -1;
+            } else {
+                if (!player->getVx()) player->setHorizontalVelocity(7); // 一般走路速度
+            }
+        }
+        // 5. 往左移動與衝刺
+        else if (key == Qt::Key_Left) {
+            if (doubleTapTimer->isActive() && lastReleasedKey == Qt::Key_Left) {
+                player->setDashing(true);
+                player->setHorizontalVelocity(-12);
+                doubleTapTimer->stop();
+                lastReleasedKey = -1;
+            } else {
+                if (!player->getVx()) player->setHorizontalVelocity(-7);
+            }
+        }
+        // 6. 攻擊 (吸入/吐出)
+        else if (key == Qt::Key_X) {
+            player->handleAttack(); // 讓 Kirby 內部自行判斷目前狀態該執行哪個動作
+        }
     }
 }
 
@@ -326,20 +284,181 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event) {
 
     int key = event->key();
 
-    // 解除蹲下
-    if (key == Qt::Key_Down) {
-        player->setDown(false);
-    }
-    // 解除左右移動，並啟動雙擊計時器準備判定衝刺
-    else if (key == Qt::Key_Left || key == Qt::Key_Right) {
-        player->setDashing(false);
-        player->setHorizontalVelocity(0);
+    // ==========================================
+    // [新增包裝] 只有在遊戲關卡中，才處理放開按鍵的邏輯
+    // ==========================================
+    if (currentState == STATE_STAGE1 || currentState == STATE_STAGE2) {
+        if (!player) return; // 安全檢查
 
-        lastReleasedKey = key;
-        doubleTapTimer->start(DOUBLE_TAP_WINDOW);
+        // 解除蹲下
+        if (key == Qt::Key_Down) {
+            player->setDown(false);
+        }
+        // 解除左右移動，並啟動雙擊計時器準備判定衝刺
+        else if (key == Qt::Key_Left || key == Qt::Key_Right) {
+            player->setDashing(false);
+            player->setHorizontalVelocity(0);
+
+            lastReleasedKey = key;
+            doubleTapTimer->start(DOUBLE_TAP_WINDOW);
+        }
+        // 停止吸氣
+        else if (key == Qt::Key_X) {
+            player->stopInhaling();
+        }
     }
-    // 停止吸氣
-    else if (key == Qt::Key_X) {
-        player->stopInhaling();
+}
+
+// =========================================================
+// [新增] 場景設定
+// =========================================================
+void MainWindow::loadStartMenu(){
+    currentState = STATE_MENU; // 設定現在為初始場景
+    scene->clear();
+    scene->setSceneRect(0, 0, 1620, 1080);
+    
+    QGraphicsPixmapItem* title = new QGraphicsPixmapItem(QPixmap(":/Project2_Dataset/Image/background/start.png"));
+    scene->addItem(title);
+    
+    // 停止遊戲迴圈，因為選單不需要更新物理運算
+    timer->stop();
+}
+
+
+// 將原本mainwindow裡的程式碼移到loadStage1函式
+void MainWindow::loadStage1(){
+    // 1. 清空前一個場景 (Start Menu 或之前的關卡) 的所有物件
+    // 注意：scene->clear() 會自動 delete 裡面的指標，避免記憶體外洩
+    scene->clear(); 
+    bulletList.clear(); 
+    enemyList.clear();
+    scene->setSceneRect(0, 0, 4860, 1080);
+
+    // --- [3. 鋪設背景大圖 (Level Design)] ---
+    // @note 將三張 1620 寬度的圖橫向拼接
+    // [修改] 將背景圖片改為一整張地圖，加上一個藍色天空背景，**但畫質有點差**
+    QPixmap bg(":/Project2_Dataset/Image/background/stage-1_1.png");
+    QGraphicsPixmapItem* bg1 = new QGraphicsPixmapItem(bg);
+    qreal scaleFactor = 4860.0 / bg.width();
+    bg1->setScale(scaleFactor);
+    bg1->setPos(0, 300);
+    scene->addItem(bg1);
+
+    QPixmap Bg(":/Project2_Dataset/Image/background/stage-1-bg.jpg");
+    QGraphicsPixmapItem* bg2 = new QGraphicsPixmapItem(Bg);
+    qreal ScaleFactor = 4860.0 / Bg.width();
+    bg2->setScale(ScaleFactor);
+    bg2->setPos(0, 0);
+    scene->addItem(bg2);
+
+    // 將背景圖層放到最後方，避免遮擋玩家與敵人
+    bg1->setZValue(-10);
+    bg2->setZValue(-20);
+
+    // --- [4. 鋪設隱形地形碰撞 (Collisions)] ---
+    // @note 這些是透明的 Block，用來阻擋卡比掉出地圖或穿牆
+    // [修改] 將Block改為符合背景地圖的樣式
+    Block* ground1 = new Block(0, 890, 2600, 400);
+    scene->addItem(ground1);
+
+    Block* wall1 = new Block(1360, 805, 130, 85);
+    scene->addItem(wall1);
+
+    Block* wall2 = new Block(2600, 805, 435, 485);
+    scene->addItem(wall2);
+
+    Block* wall3 = new Block(3375, 805, 1485, 485);
+    scene->addItem(wall3);
+
+    Block* wall4 = new Block(3835, 510, 125, 295);
+    scene->addItem(wall4);
+
+    Block* wall5 = new Block(3960, 660, 80, 145);
+    scene->addItem(wall5);
+
+    Block* ceil = new Block(0, -100, 4860, 100);
+    scene->addItem(ceil);
+
+    // [新增] 將方塊改成完全透明的，只留背景圖片
+    ground1->setOpacity(0.0);
+    wall1->setOpacity(0.0);
+    wall2->setOpacity(0.0);
+    wall3->setOpacity(0.0);
+    wall4->setOpacity(0.0);
+    wall5->setOpacity(0.0);
+    
+    // --- [5. 實體物件生成：玩家與敵人 (Entities)] ---
+    // 玩家 (卡比)
+    player = new Kirby(); //呼叫 Kirby.h 中的 ctor
+    player->setPos(400, 100);
+    scene->addItem(player);
+
+    // 敵人 (Waddle Dee 軍隊)
+    // @note 用迴圈批次生成敵人，並加入 enemyList 統一管理
+    for (int i = 0; i < 3; ++i) {
+        WaddleDee *newDee = new WaddleDee();
+        newDee->setPos(800 + (i * 500), 500);
+        scene->addItem(newDee);
+        enemyList.append(newDee);
     }
+
+
+
+    // --- [5. 誕生 HUD 並加入場景][新增] ---
+    gameHUD = new HUD();
+    scene->addItem(gameHUD);
+
+
+    // --- [7. 訊號與槽連線 (Signals & Slots)] ---
+    // 監聽卡比吐星星的訊號
+    connect(player, &Kirby::starFired, this, [=](StarBullet* star){
+        bulletList.append(star); // 只要卡比一噴，就加進清單
+        qDebug() << "Captured a star! Total stars in list:" << bulletList.size();
+    });
+    timer->start(16);
+}
+
+// 未來將stage2的背景、人物程式直接寫在這裡
+// 現在差地圖方塊設置以及背景優化
+void MainWindow::loadStage2(){
+    timer->stop();
+    
+    scene->clear(); 
+    bulletList.clear(); 
+    enemyList.clear();
+    
+    scene->setSceneRect(0, 0, 8100, 1080);
+    QPixmap backg(":/Project2_Dataset/Image/background/stage2_merged_nowater.jpg");
+    QGraphicsPixmapItem* bg2 = new QGraphicsPixmapItem(backg);
+    qreal scaleFactor = 8100.0 / backg.width();
+    bg2->setScale(scaleFactor);
+    bg2->setPos(0, 400);
+    scene->addItem(bg2);
+    QPixmap Bg(":/Project2_Dataset/Image/background/stage-1-bg.jpg");
+    QGraphicsPixmapItem* Bg2 = new QGraphicsPixmapItem(Bg);
+    qreal ScaleFactor = 8100.0 / Bg.width();
+    Bg2->setScale(ScaleFactor);
+    Bg2->setPos(0, 0);
+    scene->addItem(Bg2);
+
+    bg2->setZValue(-10);
+    Bg2->setZValue(-20);
+
+    Block* ground1 = new Block(0, 890, 8100, 400);
+    scene->addItem(ground1);
+
+    player = new Kirby(); //呼叫 Kirby.h 中的 ctor
+    player->setPos(400, 100);
+    player->changeWidth(8100);
+    scene->addItem(player);
+
+    gameHUD = new HUD();
+    scene->addItem(gameHUD);
+
+    connect(player, &Kirby::starFired, this, [=](StarBullet* star){
+        bulletList.append(star); // 只要卡比一噴，就加進清單
+        qDebug() << "Captured a star! Total stars in list:" << bulletList.size();
+    });
+    
+    timer->start(16);
 }
