@@ -249,8 +249,12 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
         // 4. 往右移動與衝刺
         else if (key == Qt::Key_Right) {
             if (doubleTapTimer->isActive() && lastReleasedKey == Qt::Key_Right) {
-                player->setDashing(true);
-                player->setHorizontalVelocity(12); // 衝刺速度
+                if (player-> getHasObjectInMouth() ) {
+                    player->setHorizontalVelocity(7); // 吃東西時不能衝刺
+                } else {
+                    player->setDashing(true);
+                    player->setHorizontalVelocity(12); // 衝刺速度
+                }
                 doubleTapTimer->stop();
                 lastReleasedKey = -1;
             } else {
@@ -260,8 +264,12 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
         // 5. 往左移動與衝刺
         else if (key == Qt::Key_Left) {
             if (doubleTapTimer->isActive() && lastReleasedKey == Qt::Key_Left) {
-                player->setDashing(true);
-                player->setHorizontalVelocity(-12);
+                if (player-> getHasObjectInMouth() ) {
+                    player->setHorizontalVelocity(-7); // 吃東西時不能衝刺
+                } else {
+                    player->setDashing(true);
+                    player->setHorizontalVelocity(-12); // 衝刺速度
+                }
                 doubleTapTimer->stop();
                 lastReleasedKey = -1;
             } else {

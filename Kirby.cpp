@@ -227,6 +227,7 @@ void Kirby::update() {
     if (isOnGround) isFlying = false;         // 落地解除飛行狀態
     if (currentVx > 0) isFacingRight = true;  // 更新面朝方向
     else if (currentVx < 0) isFacingRight = false;
+    if (hasObjectInMouth || isFlying)  isDashing = false; //變胖不可以衝刺
 
     updateSprite(); // 最後更新動畫幀
 }
@@ -425,16 +426,16 @@ void Kirby::updateSprite() {
         action = "inhale";
         frame = 0;
     }
-    // [新增] 吃東西狀態 + 跑步
+    // [新增] 吃東西狀態 + 跑步(選圖)
     else if (hasObjectInMouth && vx != 0) {
         action = "inhale";
         frameCounter++;
-        if (isDashing) {
-            frame = (frameCounter / 7) % 2 + 1;
-        }
-        else {
+        //if (isDashing) {
+         //   frame = (frameCounter / 7) % 2 + 1;   //[改]嘴裡有東西不能衝刺
+       // }
+        //else {
             frame = (frameCounter / 10) % 2 + 1;
-        }
+       // }
     }
 
     // 3. 吸氣狀態
@@ -448,8 +449,8 @@ void Kirby::updateSprite() {
         frame = 0;
     }
     // 5. 地面衝刺 (每 7 次 update 換一張圖)
-    else if (isDashing && vx != 0 && isOnGround) {
-        action = "run";
+    else if (isDashing && vx != 0 && isOnGround && !hasObjectInMouth ) { //[嘴裡有東西不能衝刺]
+        action = "run"; //圖片格式
         frameCounter++;
         frame = (frameCounter / 7) % 3 + 5; // 循環播放 5, 6, 7 幀
     }

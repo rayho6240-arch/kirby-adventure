@@ -87,6 +87,7 @@ public:
     void takeDamage(int damage); // 承受傷害的函式
     bool getInhaling();          //讓外面得到資訊(傷害判定)
     bool getSpitting();
+    bool getHasObjectInMouth() const { return hasObjectInMouth; } // 讓外部知道卡比嘴裡有沒有東西
     
     // [新增] 得到是否在地上的資訊
     bool getOnGround();
