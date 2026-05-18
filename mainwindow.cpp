@@ -10,7 +10,7 @@
 #include "Block.h"
 #include "Kirby.h"
 #include "HUD.h"
-
+#include "Sparky.h"
 // =========================================================
 // 1. 建構子與解構子 (初始化遊戲世界)
 // =========================================================
@@ -436,6 +436,7 @@ void MainWindow::loadStage2(){
     enemyList.clear();
     
     scene->setSceneRect(0, 0, 8100, 1080);
+
     QPixmap backg(":/Project2_Dataset/Image/background/stage2_merged_nowater.jpg");
     QGraphicsPixmapItem* bg2 = new QGraphicsPixmapItem(backg);
     qreal scaleFactor = 8100.0 / backg.width();
@@ -455,10 +456,28 @@ void MainWindow::loadStage2(){
     Block* ground1 = new Block(0, 890, 8100, 400);
     scene->addItem(ground1);
 
+    // {新增}範例 B：建立一個三角形（斜坡）
+    QPolygonF slope1;
+    slope1 << QPointF(0, 100) << QPointF(130, 100) << QPointF(130, 0); // 三個頂點
+    QGraphicsPolygonItem *ramp = new QGraphicsPolygonItem(slope1);
+    ramp->setPos(1080, 800);  //平移
+    ramp->setBrush(QBrush(Qt::gray)); // 塗成灰色
+    scene->addItem(ramp);
+
+
+
     player = new Kirby(); //呼叫 Kirby.h 中的 ctor
     player->setPos(400, 100);
     player->changeWidth(8100);
     scene->addItem(player);
+
+    //新增敵人
+    Sparky *spark = new Sparky(player);
+    spark->setPos(500, 300); // 設定初始位置
+    scene->addItem(spark);
+    enemyList.append(spark); // 加進你的敵人陣列裡一起 update
+
+
 
     gameHUD = new HUD();
     scene->addItem(gameHUD);

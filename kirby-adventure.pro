@@ -14,6 +14,7 @@ SOURCES += \
     Enemy.cpp \
     HUD.cpp \
     Kirby.cpp \
+    Sparky.cpp \
     StarBlock.cpp \
     StarBullet.cpp \
     WaddleDee.cpp \
@@ -26,6 +27,7 @@ HEADERS += \
     Enemy.h \
     HUD.h \
     Kirby.h \
+    Sparky.h \
     StarBullet.h \
     Starblock.h \
     WaddleDee.h \
