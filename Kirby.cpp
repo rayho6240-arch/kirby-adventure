@@ -273,8 +273,15 @@ void Kirby::processInhale(QList<Enemy*> &enemies) {
             qreal dx = e->x() - x();
 
             // --- 吸引力物理 ---
-            if (dx > 0) e->vx = -6.0; // 敵人在右側，往左吸
-            else e->vx = 6.0;         // 敵人在左側，往右吸
+            if (dx > 0) {
+                e->vx = -6.0; // 敵人在右側，往左吸
+                e->setIsBeingInhaled(true);
+            }
+            else{
+                e->vx = 6.0;         // 敵人在左側，往右吸
+                e->setIsBeingInhaled(true);
+            } 
+            
 
             // --- 吞食判定 (考慮面朝方向補償) ---
             bool shouldSwallow = false;

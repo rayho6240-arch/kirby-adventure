@@ -50,17 +50,17 @@ Sparky::Sparky(QGraphicsItem *player, QGraphicsItem *parent)
 void Sparky::update(){
     if (isDead) return;
 
-    // 1. 偵測是否正在被吸入並切換狀態
-    if (this->isBeingInhaled) { 
-        currentState = BEING_INHALED;
-    } else if (currentState == BEING_INHALED) {
-        currentState = IDLE;
-        stateTimer = 0;
-    }
+// 1. 強制狀態切換：只要被吸，就必須是 BEING_INHALED
+    if (isInhaled) {
+        if (currentState != BEING_INHALED) {
+            currentState = BEING_INHALED;
+        }
+    } 
 
-    // 2. 分支處理：被吸入時 vs. 正常行動時
+    // 2. 分支處理
     if (currentState == BEING_INHALED) {
-        // --- 【被吸入模式】 ---
+        // 在被吸入狀態下，【絕對不要】去動到 vx 和 vy
+        // 讓 Kirby.cpp 完全主導物理量
         if (targetPlayer != nullptr) {
             qreal dist = qAbs(targetPlayer->x() - this->x());
             if (dist < 20) { 
@@ -69,8 +69,9 @@ void Sparky::update(){
                 return;
             }
         }
-        // 這裡不要寫 vx = 0，也不要 stateTimer++，直接跳到最後跑物理
-    } 
+    }
+
+
     else {
         // --- 【正常 AI 模式】 --- (原本所有的 AI 邏輯都縮進到這個 else 裡)
         stateTimer++;

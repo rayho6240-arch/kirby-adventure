@@ -9,7 +9,6 @@ class Sparky: public Enemy{
 public:
     Sparky(QGraphicsItem *player = nullptr, QGraphicsItem *parent = nullptr);
     void update() override;
-     bool isBeingInhaled;
 
 private:
     enum SparkState{

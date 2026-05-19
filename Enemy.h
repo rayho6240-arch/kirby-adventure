@@ -35,7 +35,7 @@ public:
     // 可以直接讀寫它們，從外部給予敵人一個被吸入的強大加速度。
     qreal vx = 0;
     qreal vy = 0;
-
+    void setIsBeingInhaled(bool a){isInhaled = a;}
     // ==========================================
     // 4. 狀態管理 (State Flags)
     // ==========================================
@@ -60,6 +60,7 @@ protected:
     qreal gravity = 0.8;      ///< 共用重力參數
     bool isOnGround = false;  ///< 是否踩在實體方塊上
     bool isDead = false;      ///< 死亡判定旗標
+    bool isInhaled=false;
 
     /**
      * @brief 通用的物理位移與碰撞處理 (AABB 碰撞)
