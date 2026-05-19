@@ -9,10 +9,14 @@ class Sparky: public Enemy{
 public:
     Sparky(QGraphicsItem *player = nullptr, QGraphicsItem *parent = nullptr);
     void update() override;
+     bool isBeingInhaled;
+
 private:
     enum SparkState{
         IDLE,
-        JUMPING
+        JUMPING,
+        ATTACKING,
+        BEING_INHALED  // 🌟 新增：被吸入狀態
     };
     SparkState currentState;
     int stateTimer;
@@ -29,7 +33,7 @@ private:
     QPixmap leftImage1, leftImage2;
     QPixmap rightImage1, rightImage2;
 
-    QPixmap attack1, attack2;
+    QPixmap attackImage1, attackImage2;
 
 
 };

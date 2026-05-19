@@ -473,7 +473,7 @@ void MainWindow::loadStage2(){
 
     //新增敵人
     Sparky *spark = new Sparky(player);
-    spark->setPos(500, 300); // 設定初始位置
+    spark->setPos(1000, 300); // 設定初始位置
     scene->addItem(spark);
     enemyList.append(spark); // 加進你的敵人陣列裡一起 update
 
