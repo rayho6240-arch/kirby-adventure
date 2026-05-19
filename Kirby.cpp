@@ -506,7 +506,6 @@ void Kirby::updateSprite() {
 
 
     // --- [核心重構 2] 組合圖片路徑 (改用 folderPath) ---
-    // --- [針對 Spark 素材的專屬路徑組合] ---
     QString path;
 
     if (currentForm == Form::Sparky) {
