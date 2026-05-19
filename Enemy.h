@@ -50,6 +50,11 @@ public:
      */
     bool getIsDead() const { return isDead; }
 
+
+
+
+    QString getEnemyType() const { return enemyType; }
+
 protected:
     // ==========================================
     // 5. 內部受保護的變數與函式 (Protected Members)
@@ -70,6 +75,10 @@ protected:
      * 就能自動擁有「掉落地面」與「撞牆停止」的能力。
      */
     void handlePhysics(qreal width, qreal height);
+
+
+
+    QString enemyType = "Normal"; // 預設值
 };
 
 

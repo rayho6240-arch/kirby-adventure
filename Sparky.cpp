@@ -6,7 +6,7 @@
 Sparky::Sparky(QGraphicsItem *player, QGraphicsItem *parent)
     : Enemy(parent), targetPlayer(player) {
 
-
+    enemyType = "Sparky";
 
     // 定義一個公用的縮放大小，確保跟物理 handlePhysics 對齊
         QSize spawnSize(60, 60);
