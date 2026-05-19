@@ -53,7 +53,7 @@ public:
 
 
 
-    QString getEnemyType() const { return enemyType; }
+    virtual QString getEnemyType() const { return "Normal"; }
 
 protected:
     // ==========================================

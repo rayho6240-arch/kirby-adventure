@@ -32,12 +32,14 @@ Kirby::Kirby() {
 }
 
 
+
+
 // --- 接收外部指令 (從 MainWindow 傳入) ---
 void Kirby::setHorizontalVelocity(qreal v) { vx = v; }
 void Kirby::setDashing(bool dashing){ isDashing = dashing; }
 void Kirby::setDown(bool down) {
     this->isDown = down;
-
+    qDebug() << "setDown called. isDown:" << isDown << " currentForm:" << (int)currentForm;
     // 小範圍重構：按下「下」時檢查變身
     if (isDown && currentForm == Form::SparkyFat) {
         currentForm = Form::Sparky;      // 正式變身
@@ -47,6 +49,12 @@ void Kirby::setDown(bool down) {
         // 這裡可以播放一個「變身成功」的小特效
     }
 }
+
+
+
+
+
+
 void Kirby::stopInhaling(){ isInhaling = false; }
 
 void Kirby::startInhaling() {
@@ -428,7 +436,7 @@ void Kirby::updateSprite() {
     // 根據目前的型態決定要去哪個資料夾抓圖
     QString folderPath = ":/Project2_Dataset/Image/Kirby_normal/";
     if (currentForm == Form::Sparky) {
-        folderPath = ":/Project2_Dataset/Image/Kirby_Sparky/"; // 假設你的 Sparky 素材放在這
+        folderPath = ":/Project2_Dataset/Image/Kirby_spark/"; // 假設你的 Sparky 素材放在這
     }
 
     // --- [原有邏輯] 決定動作與幀數 (保持不變) ---
@@ -483,19 +491,50 @@ void Kirby::updateSprite() {
         frame = 0;
     }
 
-    // --- [核心重構 2] 組合圖片路徑 (改用 folderPath) ---
-    QString path;
-    if (action == "jump") {
-        // 使用 arg(frame) 但路徑前綴動態化
-        path = QString("%1kirby_jump(%2).png").arg(folderPath).arg(frame);
-    }
-    else if (frame == 0) {
-        path = QString("%1kirby_%2_%3.png").arg(folderPath).arg(action).arg(dir);
-    }
-    else {
-        path = QString("%1kirby_%2_%3_%4.png").arg(folderPath).arg(action).arg(frame).arg(dir);
-    }
 
+
+
+
+
+    // --- [核心重構 2] 組合圖片路徑 (改用 folderPath) ---
+// --- [針對 Spark 素材的專屬路徑組合] ---
+    QString path;
+
+    if (currentForm == Form::Sparky) {
+        // Sparky 形態：符合 "Kirby_spark_action(frame)_dir.png"
+        QString folder = ":/Project2_Dataset/Image/Kirby_spark/"; // 請確認資源檔路徑
+        
+        if (action == "jump") {
+            // 素材中似乎沒有 jump，暫時用 stop 代替，或你有補圖的話改回 "jump"
+            path = QString("%1Kirby_spark_stop_%2.png").arg(folder).arg(dir);
+        }
+        else if (action == "attack") {
+            // 攻擊幀：Kirby_spark_attack(1).png (不分左右)
+            int sparkAttackFrame = (frameCounter / 5) % 3 + 1; // 假設攻擊有3幀
+            path = QString("%1Kirby_spark_attack(%2).png").arg(folder).arg(sparkAttackFrame);
+        }
+        else if (frame == 0) {
+            // 單幀動作：Kirby_spark_stop_R.png / Kirby_spark_down_R.png
+            path = QString("%1Kirby_spark_%2_%3.png").arg(folder).arg(action).arg(dir);
+        }
+        else {
+            // 多幀動作：Kirby_spark_run(1)_R.png / Kirby_spark_fly(1)_R.png
+            // 修正幀數：Sparky 的跑跟飛只有 2 幀，要做循環限制防止讀不到圖
+            int sparkFrame = (frameCounter / 10) % 2 + 1; 
+            path = QString("%1Kirby_spark_%2(%3)_%4.png").arg(folder).arg(action).arg(sparkFrame).arg(dir);
+        }
+    } 
+    else {
+        // Normal 形態：保持你原本的路徑規則 (kirby_run_1_R.png)
+        QString folder = ":/Project2_Dataset/Image/Kirby_normal/";
+        if (action == "jump") {
+            path = QString("%1kirby_jump(%2).png").arg(folder).arg(frame);
+        } else if (frame == 0) {
+            path = QString("%1kirby_%2_%3.png").arg(folder).arg(action).arg(dir);
+        } else {
+            path = QString("%1kirby_%2_%3_%4.png").arg(folder).arg(action).arg(frame).arg(dir);
+        }
+    }
     // --- 載入圖片與特殊處理 (保持不變) ---
     QPixmap pix(path);
     if (!pix.isNull()) {

@@ -10,6 +10,9 @@ public:
     Sparky(QGraphicsItem *player = nullptr, QGraphicsItem *parent = nullptr);
     void update() override;
 
+    // 使用 override 確保你有正確覆寫到基底類別的函數
+    QString getEnemyType() const override { return "Sparky"; }
+
 private:
     enum SparkState{
         IDLE,
