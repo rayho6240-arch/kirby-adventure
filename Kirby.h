@@ -40,11 +40,21 @@ signals:
 public:
 
 
+    enum class CurrentAbility {
+        None,
+        Spark,
+        Fire
+    };
+
     enum class Form {
         Normal,     // 普通狀態
         SparkyFat,  // 吃掉 Sparky 變胖了 (準備變身)
-        Sparky      // 已經獲得 Spark 技能 (變身完成)
+        Sparky,     // 已經獲得 Spark 技能 (變身完成)
+        FireFat,    // 吃掉 HotHead 變胖了 (準備變身)
+        FireForm    // 已經獲得 Fire 技能 (變身完成)
     };
+
+    CurrentAbility currentAbility = CurrentAbility::None;
 
 
 
@@ -91,15 +101,28 @@ public:
      * @details 會在卡比面前畫一個「看不見的長方形Hitbox」，只要敵人在裡面，就會受到吸引力並被吃掉。
      */
     void processInhale(QList<Enemy*> &enemies);
-
+    void discardAbility();                  ///< 棄置目前能力，恢復 Normal 形態
 
     //[新增]生命機制
     int getCurrentHp() const { return currentHp; }
     int getMaxHp() const { return maxHp; }
+
+    //[新增]lives機制
+    int getCurrentlives() const { return currentlives; }
+    int getMaxlives() const { return maxlives; }
+
+
+    //控制血量與生命
+    void minusCurrentlives(int live = 1) { currentlives -= live; }
+    void setCurrentHp(int hp = 3) { currentHp = hp; }
+    void setCurrentlives(int live) { currentlives = live; }
+
+
     void takeDamage(int damage); // 承受傷害的函式
     bool getInhaling();          //讓外面得到資訊(傷害判定)
     bool getSpitting();
     bool getHasObjectInMouth() const { return hasObjectInMouth; } // 讓外部知道卡比嘴裡有沒有東西
+    bool isSparkyElectricAttack() const { return currentForm == Form::Sparky && isInhaling; }
     
     // [新增] 得到是否在地上的資訊
     bool getOnGround();
@@ -156,6 +179,10 @@ private:
     //生命狀態
     int maxHp;              // 最大血量
     int currentHp;          // 當前血量
+    
+    int maxlives;
+    int currentlives;
+
     bool isInvincible;      // 是否處於無敵狀態
     int invincibleTimer;    // 無敵時間倒數計時器
 
@@ -168,6 +195,9 @@ private:
     
     // [新增] 控制地圖寬度的變數，到了stage2可用changeWidth(int width)改變
     int mapwidth = 4860;
+
+    // [新增] 火焰特效物件
+    QGraphicsPixmapItem *fireEffect = nullptr;
 
 };
 

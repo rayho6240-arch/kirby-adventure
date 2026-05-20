@@ -27,6 +27,7 @@ public:
      * (如 WaddleDee) 都必須自己寫一個 update()。這讓 MainWindow 可以無腦呼叫 e->update()。
      */
     virtual void update() = 0;
+    virtual void draw() {}
 
     // ==========================================
     // 3. 物理與互動開放變數 (Public Physics)

@@ -5,12 +5,16 @@
 #include <QKeyEvent>
 #include <QDebug>
 
+#include <QMediaContent>
+
 // 遊戲物件與畫面
 #include <QGraphicsPixmapItem>
+#include <QApplication>
 #include "Block.h"
 #include "Kirby.h"
 #include "HUD.h"
 #include "Sparky.h"
+
 // =========================================================
 // 1. 建構子與解構子 (初始化遊戲世界)
 // =========================================================
@@ -49,6 +53,9 @@ MainWindow::MainWindow(QWidget *parent)
     this->setFocusPolicy(Qt::StrongFocus);
     this->setFocus();
 
+
+
+
     // 開始載入初始畫面
     loadStartMenu();
 }
@@ -71,7 +78,7 @@ void MainWindow::gameLoop() {
     //---[0. 輸贏]---有問題~~~
     qDebug() << " 檢查卡比目前的血量：" << player->getCurrentHp();
     qDebug() << "卡比目前位置:" << "X:" << player->x() << "Y:" << player->y();
-    if (isGameOver) return;
+    if (currentState == GAMEOVER) return;
 
     // --- [1. 更新玩家狀態] ---
     if (player) {
@@ -94,7 +101,6 @@ void MainWindow::gameLoop() {
 
             //  【新增這行防護罩】
             // 如果敵人已經判定死亡，或者「已經變成透明看不見了」，就直接跳過它，不檢查碰撞！
-            // 目前敵人死掉都僅是看不見而已(顏色變透明，未來:直接把敵人刪掉。)
             if (e->getIsDead() || !e->isVisible()) {    //isVisible() 是 Qt 框架中 QGraphicsItem 類別內建的成員函數。
                 continue;
             }
@@ -103,6 +109,14 @@ void MainWindow::gameLoop() {
                 // 取得卡比當前的動作狀態
                 bool isInhaling = player->getInhaling(); // 是否正在吸氣
                 bool isSpitting = player->getSpitting(); // 是否正在吐星星
+                bool isSparkyElectric = player->isSparkyElectricAttack();
+
+                // Sparky 電擊狀態下，碰到敵人瞬間死亡
+                if (isSparkyElectric) {
+                    e->setIsDead(true);
+                    e->setVisible(false);
+                    continue;
+                }
 
                 // 只有在卡比「沒有吸氣」且「沒有吐星星」的時候，才會受傷
                 if (!isInhaling && !isSpitting) {
@@ -140,9 +154,9 @@ void MainWindow::gameLoop() {
             // 檢查星星是否撞到敵人
             if (b->collidesWithItem(e)) {
 
-                // 1. 讓敵人受傷或死亡 (呼叫敵人的死亡處理)
+                // 1. 讓敵人瞬間死亡
                 e->setIsDead(true);
-                e->setVisible(false); // 讓敵人先消失
+                e->setVisible(false);
 
                 // 2. 讓星星子彈消失 (通常星星撞到東西會碎裂或消失)
                 b->setVisible(false);
@@ -156,7 +170,7 @@ void MainWindow::gameLoop() {
 
 
     //  --- [5. 同步卡比的血量給 HUD] ---[新增]
-    gameHUD->updateHealth(player->getCurrentHp(), player->getMaxHp());
+    gameHUD->updateHealth(player->getCurrentHp(), player->getMaxHp(), player->getCurrentlives(), player->getMaxlives());
 
         // 讓 HUD 永遠跟著卡比走 (保持在視窗左上角)
     qreal uiX = player->x() - 350;
@@ -164,10 +178,21 @@ void MainWindow::gameLoop() {
     gameHUD->setPos(uiX, 20);
 
         // 檢查死亡
-    if (player->getCurrentHp() <= 0) {
+    if (player->getCurrentHp() <= 0 && player->getCurrentlives() <= 1) {
         isGameOver = true;
         gameHUD->showGameOver();                 // 通知 HUD 顯示 Game Over
         gameHUD->setPos(player->x() - 100, 300); // 把字移到畫面中間
+        loadGameOver();
+    }
+    else if(player->getCurrentHp() <= 0){
+        if( currentState == STATE_STAGE1 ){
+            player->setPos(400,100);
+        }
+        else if( currentState == STATE_STAGE2 ){
+            player->setPos(400,100);
+        }
+        player->minusCurrentlives();
+        player->setCurrentHp();
     }
 
     // --- [6. 攝影機跟隨] ---
@@ -212,6 +237,29 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
     }
 
     // ==========================================
+    // [新增] 狀態 ：如果目前已經Game Over了，依據按上、下還有enter來決定之後的行動
+    // ==========================================
+    if (currentState == GAMEOVER) {
+        if(key == Qt::Key_Return || key == Qt::Key_Enter){
+            if(cont){
+                loadStartMenu();
+            }
+            else{
+                // [待解決]需要一個能夠關閉整個遊戲視窗的東西，下面這個也同樣會跳回start menu
+                qApp->quit();
+            }
+        }
+        else if(key == Qt::Key_Up){
+            gameover->setPixmap(QPixmap(":/Project2_Dataset/Image/background/game_over_continue.png"));
+            cont = true;
+        }
+        else if(key == Qt::Key_Down){
+            gameover->setPixmap(QPixmap(":/Project2_Dataset/Image/background/game_over_quit.png"));
+            cont = false;
+        }
+    }
+
+    // ==========================================
     // [新增] 狀態 2：如果目前在 Stage1 並且在門的地方按下 Up ，則切換場景為 Stage2
     // ==========================================
     if (currentState == STATE_STAGE1) {
@@ -219,6 +267,19 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
             if(key == Qt::Key_Up){
                 currentState = STATE_STAGE2;
                 loadStage2();
+                return;
+            }
+        }
+    }
+
+    // ==========================================
+    // [新增] 狀態 ：如果目前在 Stage2 並且在門的x位置的地方按下 Up ，則切換場景為 Finish
+    // ==========================================
+    if (currentState == STATE_STAGE2) {
+        if(player->x() < 7900 && player->x() > 7800 && player->getOnGround()){
+            if(key == Qt::Key_Up){
+                currentState = STATE_FINISH;
+                loadFinish();
                 return;
             }
         }
@@ -280,6 +341,10 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
         else if (key == Qt::Key_X) {
             player->handleAttack(); // 讓 Kirby 內部自行判斷目前狀態該執行哪個動作
         }
+        // 7. 棄置能力
+        else if (key == Qt::Key_V) {
+            player->discardAbility();
+        }
     }
 }
 
@@ -323,6 +388,8 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event) {
 void MainWindow::loadStartMenu(){
     currentState = STATE_MENU; // 設定現在為初始場景
     scene->clear();
+    bulletList.clear(); 
+    enemyList.clear();
     scene->setSceneRect(0, 0, 1620, 1080);
     
     QGraphicsPixmapItem* title = new QGraphicsPixmapItem(QPixmap(":/Project2_Dataset/Image/background/start.png"));
@@ -335,6 +402,8 @@ void MainWindow::loadStartMenu(){
 
 // 將原本mainwindow裡的程式碼移到loadStage1函式
 void MainWindow::loadStage1(){
+    timer->stop();
+
     // 1. 清空前一個場景 (Start Menu 或之前的關卡) 的所有物件
     // 注意：scene->clear() 會自動 delete 裡面的指標，避免記憶體外洩
     scene->clear(); 
@@ -410,11 +479,22 @@ void MainWindow::loadStage1(){
         enemyList.append(newDee);
     }
 
+    // 敵人 (Gordo - 原地待機敵人)
+    Gordo *gordo = new Gordo();
+    gordo->setPos(1200, 600);
+    scene->addItem(gordo);
+    enemyList.append(gordo);
 
+    // 敵人 (HotHead - 巡邏與噴火敵人)
+    HotHead *hothead = new HotHead(player);
+    hothead->setPos(2000, 500);
+    scene->addItem(hothead);
+    enemyList.append(hothead);
 
     // --- [5. 誕生 HUD 並加入場景][新增] ---
     gameHUD = new HUD();
     scene->addItem(gameHUD);
+
 
 
     // --- [7. 訊號與槽連線 (Signals & Slots)] ---
@@ -431,6 +511,11 @@ void MainWindow::loadStage1(){
 void MainWindow::loadStage2(){
     timer->stop();
     
+    //繼承stage1的血量
+    c_Hp = player->getCurrentHp();
+    c_lives = player->getCurrentlives();
+
+
     scene->clear(); 
     bulletList.clear(); 
     enemyList.clear();
@@ -459,9 +544,7 @@ void MainWindow::loadStage2(){
     // {新增}範例 B：建立一個三角形（斜坡）
     QPolygonF slope1;
     slope1 << QPointF(0, 100) << QPointF(130, 100) << QPointF(130, 0); // 三個頂點
-    QGraphicsPolygonItem *ramp = new QGraphicsPolygonItem(slope1);
-    ramp->setPos(1080, 800);  //平移
-    ramp->setBrush(QBrush(Qt::gray)); // 塗成灰色
+    Block* ramp = new Block(1080,800,slope1);
     scene->addItem(ramp);
 
 
@@ -469,17 +552,22 @@ void MainWindow::loadStage2(){
     player = new Kirby(); //呼叫 Kirby.h 中的 ctor
     player->setPos(400, 100);
     player->changeWidth(8100);
+
+    // 繼承stage1的血量
+    player->setCurrentHp(c_Hp);
+    player->setCurrentlives(c_lives);
+
     scene->addItem(player);
 
-
+    //新增敵人sparky
     for (int i = 0; i < 3; ++i) {
-        Sparky *sparky = new Sparky(player);
-        sparky->setPos(800 + (i * 500), 500);
-        scene->addItem(sparky);
-        enemyList.append(sparky);
+        Sparky *spark = new Sparky(player);
+        spark->setPos(800 + (i * 500), 500);
+        scene->addItem(spark);
+        enemyList.append(spark);
     }
-
-
+    
+    // --- [5. 誕生 HUD 並加入場景][新增] ---
     gameHUD = new HUD();
     scene->addItem(gameHUD);
 
@@ -489,4 +577,75 @@ void MainWindow::loadStage2(){
     });
     
     timer->start(16);
+}
+
+
+void MainWindow::loadGameOver(){
+
+    // 停止遊戲迴圈，因為選單不需要更新物理運算
+    timer->stop();
+    
+    currentState = GAMEOVER;
+    scene->clear(); 
+    bulletList.clear(); 
+    enemyList.clear();
+    scene->setSceneRect(0,0,1620,1080);
+    gameover = new QGraphicsPixmapItem(QPixmap(":/Project2_Dataset/Image/background/game_over_continue.png"));
+    scene->addItem(gameover);
+
+}
+
+
+
+// [待解決] 原本結算畫面我想直接截遊戲的影片，但好像qt不支援我的影片編碼，需要再想其他辦法
+void MainWindow::loadFinish(){
+    // 1. 停止所有遊戲計時器 (避免在背景繼續運算)
+    timer->stop();
+
+    // 2. 徹底清空場景（這會殺死所有怪物、方塊、HUD）
+    scene->clear(); 
+    bulletList.clear(); 
+    enemyList.clear();
+
+    scene->setSceneRect(0,0,1620,1080);
+    
+
+    // 3. 初始化播放器與音訊輸出
+    m_finishPlayer = new QMediaPlayer(this);
+
+
+    connect(m_finishPlayer, static_cast<void(QMediaPlayer::*)(QMediaPlayer::Error)>(&QMediaPlayer::error),
+            this, [=](QMediaPlayer::Error error) {
+        qDebug() << "❌ 影片播放失敗！錯誤代碼:" << error;
+        qDebug() << "❌ 錯誤訊息:" << m_finishPlayer->errorString();
+    });
+
+
+    // 4. 建立場景影片元件並加入場景
+    m_videoItem = new QGraphicsVideoItem();
+    scene->addItem(m_videoItem);
+
+    // 5. 設定影片大小（填滿你的遊戲視窗）
+    m_videoItem->setSize(QSizeF(1620, 1080));
+    m_videoItem->setPos(0, 0);
+    view->centerOn(m_videoItem->boundingRect().center());
+
+    // 6. 連結播放器到影片元件
+    m_finishPlayer->setVideoOutput(m_videoItem);
+
+    // 7. 【關鍵】監聽影片播放狀態：播完後自動跳轉
+    connect(m_finishPlayer, &QMediaPlayer::mediaStatusChanged, this, [=](QMediaPlayer::MediaStatus status) {
+        qDebug() << "🎬 目前影片狀態改變:" << status; // 除錯用
+        if (status == QMediaPlayer::EndOfMedia) {
+            // 影片播完了！
+            m_finishPlayer->stop();
+            
+            // 這裡呼叫你原本回到主選單的函數
+            loadStartMenu(); 
+        }
+    });
+
+    // 8. 載入檔案並播放 (注意路徑格式)
+    m_finishPlayer->setMedia(QMediaContent(QUrl("qrc:/Project2_Dataset/Image/Video/ranked_3.mp4")));
+    m_finishPlayer->play();
 }

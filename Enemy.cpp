@@ -17,6 +17,7 @@ Enemy::Enemy(QGraphicsItem *parent) : QGraphicsPixmapItem(parent) {
     vy = 0;
     gravity = 0.8;
     isOnGround = false;
+    // this->enemyAbility = Ability::SPARK; // <-- 標記這隻是電光怪
 }
 
 // =========================================================
@@ -31,7 +32,6 @@ Enemy::Enemy(QGraphicsItem *parent) : QGraphicsPixmapItem(parent) {
  */
 void Enemy::update() {
     // --- 1. 死亡攔截 ---
-    // 所有的敵人在更新前都要檢查是否死了，死了就不運作，節省效能
     if (isDead) return;
 
     // --- 2. 呼叫物理計算 ---

@@ -8,14 +8,20 @@
 #include <QGraphicsScene>
 #include <QGraphicsView>
 #include <QGraphicsRectItem>
+#include <QGraphicsPixmapItem>
 #include <QTimer>
 #include <QList>
+
+#include <QMediaPlayer>
+#include <QGraphicsVideoItem>
 
 // ==========================================
 // 2. 自定義遊戲類別引入
 // ==========================================
 #include "Kirby.h"
 #include "WaddleDee.h"
+#include "Gordo.h"
+#include "HotHead.h"
 #include "StarBullet.h"
 #include "HUD.h"
 
@@ -27,7 +33,9 @@ QT_END_NAMESPACE
 enum GameState {
     STATE_MENU,
     STATE_STAGE1,
-    STATE_STAGE2
+    STATE_STAGE2,
+    GAMEOVER,
+    STATE_FINISH
 };
 
 /**
@@ -86,6 +94,7 @@ private:
     // 4. 遊戲實體物件 (Game Entities)
     // ==========================================
     Kirby *player;                  ///< 玩家操作的卡比
+    
 
     /**
      * @brief 敵軍陣列
@@ -101,6 +110,8 @@ private:
     // 5. 遊戲狀態 (Game States)(卡比有沒有死)[新增]
     // ==========================================
     bool isGameOver=false;  ///< 記錄是否已經死亡或遊戲結束，避免在 GameLoop 中繼續執行邏輯
+    
+    bool cont = true;
 
 
     // ==========================================
@@ -119,6 +130,18 @@ private:
     void loadStartMenu();
     void loadStage1();
     void loadStage2();
+    void loadGameOver();
+    void loadFinish();
+
+    // [待修改] 結算畫面的影片播放參數，但目前無法播放
+    QMediaPlayer* m_finishPlayer;
+    QGraphicsVideoItem* m_videoItem;
+
+    QGraphicsPixmapItem* gameover;
+
+    // 將血量寫在header file避免重複寫
+    int c_Hp = 3;
+    int c_lives = 3;
 
 protected:
     // ==========================================
