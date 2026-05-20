@@ -38,6 +38,18 @@ signals:
     void starFired(StarBullet* star);
 
 public:
+
+
+    enum class Form {
+        Normal,     // 普通狀態
+        SparkyFat,  // 吃掉 Sparky 變胖了 (準備變身)
+        Sparky      // 已經獲得 Spark 技能 (變身完成)
+    };
+
+
+
+
+
     // ==========================================
     // 生命週期與核心迴圈 (Lifecycle & Core)
     // ==========================================
@@ -104,6 +116,12 @@ public:
 
 
 private:
+
+    Form currentForm = Form::Normal; // 預設是普通型態
+
+
+
+
     // ==========================================
     // 內部狀態變更與渲染 (Private Helpers)
     // ==========================================
