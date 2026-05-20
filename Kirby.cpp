@@ -32,11 +32,31 @@ Kirby::Kirby() {
 }
 
 
+
+
 // --- 接收外部指令 (從 MainWindow 傳入) ---
 void Kirby::setHorizontalVelocity(qreal v) { vx = v; }
-void Kirby::setDashing(bool dashing)       { isDashing = dashing; }
-void Kirby::setDown(bool down)             { isDown = down; }
-void Kirby::stopInhaling()                 { isInhaling = false; }
+void Kirby::setDashing(bool dashing){ isDashing = dashing; }
+void Kirby::setDown(bool down) {
+    this->isDown = down;
+    qDebug() << "setDown called. isDown:" << isDown << " currentForm:" << (int)currentForm;
+    // 小範圍重構：按下「下」時檢查變身
+    if (isDown && currentForm == Form::SparkyFat) {
+        currentForm = Form::Sparky;      // 正式變身
+        hasObjectInMouth = false;        // 東西吞下去了，嘴巴空了
+        this->setScale(1.0);
+        qDebug() << "Kirby evolved to Sparky Form!";
+        
+        // 這裡可以播放一個「變身成功」的小特效
+    }
+}
+
+
+
+
+
+
+void Kirby::stopInhaling(){ isInhaling = false; }
 
 void Kirby::startInhaling() {
     // 蹲下或飛行時不能吸氣
@@ -82,11 +102,12 @@ void Kirby::update() {
     // 這裡的 isFlying 或是 isFat 請替換成你程式裡實際控制胖卡比的布林值
     qreal currentPhysicalWidth;
     qreal currentPhysicalHeight ;
-    if (isFlying || isSpitting) {
-        currentPhysicalWidth = 180; // 胖卡比的物理寬度 (你可以自己微調這個數字)
-        currentPhysicalHeight = 180; // 胖卡比的高度 (請依你的實際圖片微調此數值)
-    } else {
-        currentPhysicalWidth = 130; // 正常卡比的物理寬度
+
+    if (isFlying || isSpitting || currentForm == Form::SparkyFat) { // 將 SparkyFat 加入判斷：變胖時使用大尺寸 Hitbox
+        currentPhysicalWidth = 180; 
+        currentPhysicalHeight = 180; 
+    }else {
+        currentPhysicalWidth = 130; 
         currentPhysicalHeight = 130;
     }
 
@@ -273,8 +294,15 @@ void Kirby::processInhale(QList<Enemy*> &enemies) {
             qreal dx = e->x() - x();
 
             // --- 吸引力物理 ---
-            if (dx > 0) e->vx = -6.0; // 敵人在右側，往左吸
-            else e->vx = 6.0;         // 敵人在左側，往右吸
+            if (dx > 0) {
+                e->vx = -6.0; // 敵人在右側，往左吸
+                e->setIsBeingInhaled(true);
+            }
+            else{
+                e->vx = 6.0;         // 敵人在左側，往右吸
+                e->setIsBeingInhaled(true);
+            } 
+            
 
             // --- 吞食判定 (考慮面朝方向補償) ---
             bool shouldSwallow = false;
@@ -290,15 +318,19 @@ void Kirby::processInhale(QList<Enemy*> &enemies) {
             if (shouldSwallow) {
                 // 1. 處理敵人死亡
                 e->setVisible(false);
-                e->setIsDead(true); // 標記死亡，讓 Enemy 內部的 update() 停止運作
-                e->vx = 0;
-                e->vy = 0;
+                e->setIsDead(true);
 
                 // 2. 更新卡比狀態
-                setFullStatus(true);
-                isInhaling = false; // 自動停止吸氣動作，避免一次吸入多個
+                // 假設你的 Enemy 類別有一個 getType() 函數
+                if (e->getEnemyType() == "Sparky") {
+                    currentForm = Form::SparkyFat; // 進入準備變身狀態
+                } else {
+                    currentForm = Form::Normal;
+                }
 
-                break; // 吸到一個就跳出迴圈
+                setFullStatus(true); // 這會設定 hasObjectInMouth = true
+                isInhaling = false;
+                break; 
             }
         }
     }
@@ -396,18 +428,20 @@ void Kirby::changeWidth(int width){
 // =========================================================
 // 6. 動畫渲染系統 (Animation & Rendering)
 // =========================================================
-
-/**
- * @brief 萬用換圖函數：根據當前狀態組合出對應的圖片檔名
- * @note 利用 QString::arg() 動態替換檔名。
- * %1 替換動作(action), %2 替換幀數(frame), %3 替換方向(dir)。
- */
 void Kirby::updateSprite() {
     QString dir = isFacingRight ? "R" : "L";
     QString action;
     int frame = 0;
 
-    // 1. 跳躍狀態 (根據上升或下降改變幀數)
+    // --- [核心重構 1] 決定基礎路徑 ---
+    // 根據目前的型態決定要去哪個資料夾抓圖
+    QString folderPath = ":/Project2_Dataset/Image/Kirby_normal/";
+    if (currentForm == Form::Sparky) {
+        folderPath = ":/Project2_Dataset/Image/Kirby_spark/"; // 假設你的 Sparky 素材放在這
+    }
+
+    // --- [原有邏輯] 決定動作與幀數 (保持不變) ---
+    // 1. 跳躍狀態
     if (!isOnGround && !isFlying && qAbs(vy) > 2.0) {
         action = "jump";
         frame = (vy > 0) ? 3 : 1;
@@ -418,47 +452,43 @@ void Kirby::updateSprite() {
         frame = (flapCounter > 0) ? 2 : 1;
         if (flapCounter > 0) flapCounter--;
     }
-
-    // [問題] 現在卡比是以上面為基準，變胖卡比的大小較大，導致會有穿過地板的問題發生
-
-    // [新增] 吃東西狀態 + 靜止
+    // [變胖] 吃東西狀態 + 靜止
     else if (hasObjectInMouth && vx == 0) {
         action = "inhale";
         frame = 0;
     }
-    // [新增] 吃東西狀態 + 跑步(選圖)
+    // [變胖] 吃東西狀態 + 跑步
     else if (hasObjectInMouth && vx != 0) {
         action = "inhale";
         frameCounter++;
-        //if (isDashing) {
-         //   frame = (frameCounter / 7) % 2 + 1;   //[改]嘴裡有東西不能衝刺
-       // }
-        //else {
-            frame = (frameCounter / 10) % 2 + 1;
-       // }
+        frame = (frameCounter / 10) % 2 + 1;
     }
-
     // 3. 吸氣狀態
-    else if (isInhaling) {
+    else if (isInhaling && currentForm != Form::Sparky ) {
         action = "attack";
         frame = 0;
+    }
+    else if (isInhaling && currentForm == Form::Sparky ) {
+        action = "attack";
+        frameCounter++;
+        frame = (frameCounter / 10) % 2 + 1;
     }
     // 4. 地面蹲下
     else if (isDown && isOnGround) {
         action = "down";
         frame = 0;
     }
-    // 5. 地面衝刺 (每 7 次 update 換一張圖)
-    else if (isDashing && vx != 0 && isOnGround && !hasObjectInMouth ) { //[嘴裡有東西不能衝刺]
-        action = "run"; //圖片格式
+    // 5. 地面衝刺
+    else if (isDashing && vx != 0 && isOnGround && !hasObjectInMouth ) {
+        action = "run";
         frameCounter++;
-        frame = (frameCounter / 7) % 3 + 5; // 循環播放 5, 6, 7 幀
+        frame = (frameCounter / 7) % 3 + 5;
     }
-    // 6. 地面一般走路 (每 10 次 update 換一張圖)
+    // 6. 地面一般走路
     else if (vx != 0 && isOnGround) {
         action = "run";
         frameCounter++;
-        frame = (frameCounter / 10) % 3 + 1; // 循環播放 1, 2, 3 幀
+        frame = (frameCounter / 10) % 3 + 1;
     }
     // 7. 靜止待機
     else {
@@ -467,29 +497,89 @@ void Kirby::updateSprite() {
         frame = 0;
     }
 
-    // --- 組合圖片路徑 ---
-    QString path;
-    if (action == "jump") {
-        // 跳躍專用路徑格式：kirby_jump(1).png
-        path = QString(":/Project2_Dataset/Image/Kirby_normal/kirby_jump(%1).png").arg(frame);
-    }
-    else if (frame == 0) {
-        // 單幀動作路徑格式：kirby_stop_R.png
-        path = QString(":/Project2_Dataset/Image/Kirby_normal/kirby_%1_%2.png").arg(action).arg(dir);
-    }
-    else {
-        // 多幀動作路徑格式：kirby_run_1_R.png
-        path = QString(":/Project2_Dataset/Image/Kirby_normal/kirby_%1_%2_%3.png").arg(action).arg(frame).arg(dir);
-    }
 
-    // --- 載入圖片與特殊處理 ---素材不夠可用的工具---
+
+
+
+
+    // --- [核心重構 2] 組合圖片路徑 (改用 folderPath) ---
+    // --- [針對 Spark 素材的專屬路徑組合] ---
+    QString path;
+
+    if (currentForm == Form::Sparky) {
+        // Sparky 形態：符合 "Kirby_spark_action(frame)_dir.png"
+        QString folder = ":/Project2_Dataset/Image/Kirby_spark/"; // 請確認資源檔路徑
+        
+        if (action == "jump") {
+            // 素材中似乎沒有 jump，暫時用 stop 代替，或你有補圖的話改回 "jump"
+            path = QString("%1Kirby_spark_stop_%2.png").arg(folder).arg(dir);
+        }
+        else if (action == "attack") {
+            // 攻擊幀：Kirby_spark_attack(1).png (不分左右)
+            int sparkAttackFrame = (frameCounter / 5) % 3 + 1; // 假設攻擊有3幀
+            path = QString("%1Kirby_spark_attack(%2).png").arg(folder).arg(sparkAttackFrame);
+        }
+        else if (frame == 0) {
+            // 單幀動作：Kirby_spark_stop_R.png / Kirby_spark_down_R.png
+            path = QString("%1Kirby_spark_%2_%3.png").arg(folder).arg(action).arg(dir);
+        }
+        else {
+            // 多幀動作：Kirby_spark_run(1)_R.png / Kirby_spark_fly(1)_R.png
+            // 修正幀數：Sparky 的跑跟飛只有 2 幀，要做循環限制防止讀不到圖
+            int sparkFrame = (frameCounter / 10) % 2 + 1; 
+            path = QString("%1Kirby_spark_%2(%3)_%4.png").arg(folder).arg(action).arg(sparkFrame).arg(dir);
+        }
+    } 
+    else {
+        // Normal 形態：保持你原本的路徑規則 (kirby_run_1_R.png)
+        QString folder = ":/Project2_Dataset/Image/Kirby_normal/";
+        if (action == "jump") {
+            path = QString("%1kirby_jump(%2).png").arg(folder).arg(frame);
+        } else if (frame == 0) {
+            path = QString("%1kirby_%2_%3.png").arg(folder).arg(action).arg(dir);
+        } else {
+            path = QString("%1kirby_%2_%3_%4.png").arg(folder).arg(action).arg(frame).arg(dir);
+        }
+    }
+    // --- 載入圖片與特殊處理 (保持不變) ---
     QPixmap pix(path);
     if (!pix.isNull()) {
-        // @note 由於跳躍沒有專屬的左向素材，這裡使用 Qt 內建的 QImage::mirrored 做水平翻轉
         if (action == "jump" && dir == "L") {
-            QImage flippedImage = pix.toImage().mirrored(true, false); // true = 水平翻轉
+            QImage flippedImage = pix.toImage().mirrored(true, false);
             pix = QPixmap::fromImage(flippedImage);
+            
         }
+
+
+
+        // --- 關鍵修正：讓圖片縮放到適合物理框的高度 ---
+        // 假設我們希望卡比的身體（不含帽子）大約是 130 像素高
+        // 我們可以強制將圖檔等比例縮放到高度 = 140 (或你覺得合適的數值)
+        pix = pix.scaledToHeight(140, Qt::SmoothTransformation);
+
+
+
         setPixmap(pix);
+
+        // --- 【核心修正：腳底對齊】 ---
+        // 假設你設定卡比的物理碰撞盒高度是 130
+        qreal baseHeight = 130.0; 
+        
+        // 計算 Y 軸偏移：(碰撞盒高度 - 圖片實際像素高度)
+        // 如果圖片高 180 (有帽子)，yOffset = 130 - 180 = -50 (圖片會往上提 50 像素)
+        // 如果圖片高 120 (跑步)，yOffset = 130 - 120 = 10 (圖片會往下壓 10 像素)
+        qreal yOffset = baseHeight - pix.height();
+
+        // --- 【水平修正：左右置中】 ---
+        // 假設碰撞盒寬度是 130
+        qreal xOffset = (130.0 - pix.width()) / 2.0;
+
+        // 套用偏移，這不會移動碰撞盒，只會移動視覺上的圖片
+        setOffset(xOffset, yOffset);
+
+
+    } else {
+        // Debug 用：如果路徑出錯，至少知道是哪張圖沒讀到
+        // qDebug() << "Failed to load image:" << path;
     }
 }

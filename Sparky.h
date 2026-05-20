@@ -9,10 +9,16 @@ class Sparky: public Enemy{
 public:
     Sparky(QGraphicsItem *player = nullptr, QGraphicsItem *parent = nullptr);
     void update() override;
+
+    // 使用 override 確保你有正確覆寫到基底類別的函數
+    QString getEnemyType() const override { return "Sparky"; }
+
 private:
     enum SparkState{
         IDLE,
-        JUMPING
+        JUMPING,
+        ATTACKING,
+        BEING_INHALED  // 🌟 新增：被吸入狀態
     };
     SparkState currentState;
     int stateTimer;
@@ -29,7 +35,7 @@ private:
     QPixmap leftImage1, leftImage2;
     QPixmap rightImage1, rightImage2;
 
-    QPixmap attack1, attack2;
+    QPixmap attackImage1, attackImage2;
 
 
 };

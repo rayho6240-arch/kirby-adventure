@@ -471,12 +471,13 @@ void MainWindow::loadStage2(){
     player->changeWidth(8100);
     scene->addItem(player);
 
-    //新增敵人
-    Sparky *spark = new Sparky(player);
-    spark->setPos(500, 300); // 設定初始位置
-    scene->addItem(spark);
-    enemyList.append(spark); // 加進你的敵人陣列裡一起 update
 
+    for (int i = 0; i < 3; ++i) {
+        Sparky *sparky = new Sparky(player);
+        sparky->setPos(800 + (i * 500), 500);
+        scene->addItem(sparky);
+        enemyList.append(sparky);
+    }
 
 
     gameHUD = new HUD();
