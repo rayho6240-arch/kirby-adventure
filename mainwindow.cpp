@@ -99,7 +99,6 @@ void MainWindow::gameLoop() {
 
             //  【新增這行防護罩】
             // 如果敵人已經判定死亡，或者「已經變成透明看不見了」，就直接跳過它，不檢查碰撞！
-            // 目前敵人死掉都僅是看不見而已(顏色變透明，未來:直接把敵人刪掉。)
             if (e->getIsDead() || !e->isVisible()) {    //isVisible() 是 Qt 框架中 QGraphicsItem 類別內建的成員函數。
                 continue;
             }
@@ -108,6 +107,14 @@ void MainWindow::gameLoop() {
                 // 取得卡比當前的動作狀態
                 bool isInhaling = player->getInhaling(); // 是否正在吸氣
                 bool isSpitting = player->getSpitting(); // 是否正在吐星星
+                bool isSparkyElectric = player->isSparkyElectricAttack();
+
+                // Sparky 電擊狀態下，碰到敵人瞬間死亡
+                if (isSparkyElectric) {
+                    e->setIsDead(true);
+                    e->setVisible(false);
+                    continue;
+                }
 
                 // 只有在卡比「沒有吸氣」且「沒有吐星星」的時候，才會受傷
                 if (!isInhaling && !isSpitting) {
@@ -145,9 +152,9 @@ void MainWindow::gameLoop() {
             // 檢查星星是否撞到敵人
             if (b->collidesWithItem(e)) {
 
-                // 1. 讓敵人受傷或死亡 (呼叫敵人的死亡處理)
+                // 1. 讓敵人瞬間死亡
                 e->setIsDead(true);
-                e->setVisible(false); // 讓敵人先消失
+                e->setVisible(false);
 
                 // 2. 讓星星子彈消失 (通常星星撞到東西會碎裂或消失)
                 b->setVisible(false);
@@ -318,6 +325,10 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
         // 6. 攻擊 (吸入/吐出)
         else if (key == Qt::Key_X) {
             player->handleAttack(); // 讓 Kirby 內部自行判斷目前狀態該執行哪個動作
+        }
+        // 7. 棄置能力
+        else if (key == Qt::Key_V) {
+            player->discardAbility();
         }
     }
 }
@@ -511,11 +522,13 @@ void MainWindow::loadStage2(){
     player->changeWidth(8100);
     scene->addItem(player);
 
-    //新增敵人
-    Sparky *spark = new Sparky(player);
-    spark->setPos(500, 300); // 設定初始位置
-    scene->addItem(spark);
-    enemyList.append(spark); // 加進你的敵人陣列裡一起 update
+    //新增敵人sparky
+    for (int i = 0; i < 3; ++i) {
+        Sparky *spark = new Sparky(player);
+        spark->setPos(800 + (i * 500), 500);
+        scene->addItem(spark);
+        enemyList.append(spark);
+    }
     
     // --- [5. 誕生 HUD 並加入場景][新增] ---
     gameHUD = new HUD();

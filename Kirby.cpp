@@ -264,8 +264,11 @@ void Kirby::update() {
  * @brief 處理按下攻擊鍵(X)的總體邏輯
  */
 void Kirby::handleAttack() {
-    if (hasObjectInMouth) spit();          // [狀態 A]：嘴裡有東西 -> 噴射星星
-    else startInhaling();                  // [狀態 B]：嘴裡沒東西 -> 開始吸氣
+    if (hasObjectInMouth) {
+        spit();                             // [狀態 A]：嘴裡有東西 -> 噴射星星
+    } else {
+        startInhaling();                    // [狀態 B]：嘴裡沒東西 -> 開始吸氣
+    }
 }
 
 /**
@@ -273,6 +276,8 @@ void Kirby::handleAttack() {
  * @note 不使用單純的內建碰撞，而是手動計算距離 (dx)，給予敵人一個指向卡比的加速度 (vx)。
  */
 void Kirby::processInhale(QList<Enemy*> &enemies) {
+    // Sparky 形態時按 X 只是釋放閃電，不進行敵人吸引
+    if (currentForm == Form::Sparky) return;
     if (!isInhaling) return;
 
     qreal inhaleRange = 300;  // 吸氣有效長度
@@ -383,6 +388,17 @@ void Kirby::setFullStatus(bool full) {
     //}
 }
 
+void Kirby::discardAbility() {
+    currentForm = Form::Normal;
+    hasObjectInMouth = false;
+    isInhaling = false;
+    isSpitting = false;
+    isFlying = false;
+    isDashing = false;
+    isDown = false;
+    setScale(1.0);
+}
+
 
 
 
@@ -417,6 +433,7 @@ bool Kirby:: getInhaling(){
 bool Kirby:: getSpitting(){
     return isSpitting;
 }
+
     // [新增] 得到是否在地上的資訊
 bool Kirby::getOnGround(){
     return isOnGround;
