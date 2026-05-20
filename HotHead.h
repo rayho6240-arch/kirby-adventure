@@ -52,7 +52,8 @@ private:
         CHASE,
         CHARGE,
         FIRE,
-        COOLDOWN
+        COOLDOWN,
+        BEING_INHALED
     };
 
     void updateSprite();

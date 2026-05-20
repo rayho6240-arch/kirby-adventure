@@ -90,6 +90,28 @@
         <file>Project2_Dataset/Image/Hot Head/Hot_head_stop_L(1).png</file>
         <file>Project2_Dataset/Image/Hot Head/Hot_head_stop_R(1).png</file>
         <file>Project2_Dataset/Image/Video/ranked_3.mp4</file>
-
+        <file>Project2_Dataset/Image/Kirby_fire/kirbyfire_attack_L.png</file>
+        <file>Project2_Dataset/Image/Kirby_fire/kirbyfire_attack_R.png</file>
+        <file>Project2_Dataset/Image/Kirby_fire/kirbyfire_board.png</file>
+        <file>Project2_Dataset/Image/Kirby_fire/kirbyfire_down_L.png</file>
+        <file>Project2_Dataset/Image/Kirby_fire/kirbyfire_down_R.png</file>
+        <file>Project2_Dataset/Image/Kirby_fire/kirbyfire_fire(1)_L.png</file>
+        <file>Project2_Dataset/Image/Kirby_fire/kirbyfire_fire(1)_R.png</file>
+        <file>Project2_Dataset/Image/Kirby_fire/kirbyfire_fire(2)_L.png</file>
+        <file>Project2_Dataset/Image/Kirby_fire/kirbyfire_fire(2)_R.png</file>
+        <file>Project2_Dataset/Image/Kirby_fire/kirbyfire_fire(3)_L.png</file>
+        <file>Project2_Dataset/Image/Kirby_fire/kirbyfire_fire(3)_R.png</file>
+        <file>Project2_Dataset/Image/Kirby_fire/kirbyfire_fly(1)_L.png</file>
+        <file>Project2_Dataset/Image/Kirby_fire/kirbyfire_fly(1)_R.png</file>
+        <file>Project2_Dataset/Image/Kirby_fire/kirbyfire_fly(2)_L.png</file>
+        <file>Project2_Dataset/Image/Kirby_fire/kirbyfire_fly(2)_R.png</file>
+        <file>Project2_Dataset/Image/Kirby_fire/kirbyfire_run(1)_L.png</file>
+        <file>Project2_Dataset/Image/Kirby_fire/kirbyfire_run(1)_R.png</file>
+        <file>Project2_Dataset/Image/Kirby_fire/kirbyfire_run(2)_L.png</file>
+        <file>Project2_Dataset/Image/Kirby_fire/kirbyfire_run(2)_R.png</file>
+        <file>Project2_Dataset/Image/Kirby_fire/kirbyfire_run(3)_L.png</file>
+        <file>Project2_Dataset/Image/Kirby_fire/kirbyfire_run(3)_R.png</file>
+        <file>Project2_Dataset/Image/Kirby_fire/kirbyfire_stop_L.png</file>
+        <file>Project2_Dataset/Image/Kirby_fire/kirbyfire_stop_R.png</file>
     </qresource>
 </RCC>

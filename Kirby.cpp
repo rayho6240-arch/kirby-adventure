@@ -33,6 +33,10 @@ Kirby::Kirby() {
 
     // 3. 賦予演員這張圖片 (此時尚未加入場景，由 MainWindow 負責加入)
     setPixmap(kirbyImg);
+
+    fireEffect = new QGraphicsPixmapItem(this);
+    fireEffect->setVisible(false);
+    fireEffect->setZValue(1);
 }
 
 
@@ -53,6 +57,12 @@ void Kirby::setDown(bool down) {
         
         // 這裡可以播放一個「變身成功」的小特效
     }
+    else if (isDown && currentForm == Form::FireFat) {
+        currentForm = Form::FireForm;    // 正式變身為 FireForm
+        hasObjectInMouth = false;        // 東西吞下去了，嘴巴空了
+        this->setScale(1.0);
+        qDebug() << "Kirby evolved to Fire Form!";
+    }
 }
 
 
@@ -64,7 +74,10 @@ void Kirby::stopInhaling(){ isInhaling = false; }
 
 void Kirby::startInhaling() {
     // 蹲下或飛行時不能吸氣
-    if (!isDown && !isFlying) isInhaling = true;
+    if (!isDown && !isFlying) {
+        if (!isInhaling) frameCounter = 0;
+        isInhaling = true;
+    }
     isDashing = false;
 }
 
@@ -107,7 +120,7 @@ void Kirby::update() {
     qreal currentPhysicalWidth;
     qreal currentPhysicalHeight ;
 
-    if (isFlying || isSpitting || currentForm == Form::SparkyFat) { // 將 SparkyFat 加入判斷：變胖時使用大尺寸 Hitbox
+    if (isFlying || isSpitting || currentForm == Form::SparkyFat || currentForm == Form::FireFat) { // 將胖卡比狀態加入判斷：變胖時使用大尺寸 Hitbox
         currentPhysicalWidth = 180; 
         currentPhysicalHeight = 180; 
     }else {
@@ -276,8 +289,8 @@ void Kirby::handleAttack() {
  * @note 不使用單純的內建碰撞，而是手動計算距離 (dx)，給予敵人一個指向卡比的加速度 (vx)。
  */
 void Kirby::processInhale(QList<Enemy*> &enemies) {
-    // Sparky 形態時按 X 只是釋放閃電，不進行敵人吸引
-    if (currentForm == Form::Sparky) return;
+    // Sparky 或 FireForm 形態時按 X 只是發動技能，不進行敵人吸引
+    if (currentForm == Form::Sparky || currentForm == Form::FireForm) return;
     if (!isInhaling) return;
 
     qreal inhaleRange = 300;  // 吸氣有效長度
@@ -329,11 +342,15 @@ void Kirby::processInhale(QList<Enemy*> &enemies) {
                 e->setIsDead(true);
 
                 // 2. 更新卡比狀態
-                // 假設你的 Enemy 類別有一個 getType() 函數
                 if (e->getEnemyType() == "Sparky") {
                     currentForm = Form::SparkyFat; // 進入準備變身狀態
+                    currentAbility = CurrentAbility::Spark;
+                } else if (e->getEnemyType() == "HotHead") {
+                    currentForm = Form::FireFat;
+                    currentAbility = CurrentAbility::Fire;
                 } else {
                     currentForm = Form::Normal;
+                    currentAbility = CurrentAbility::None;
                 }
 
                 setFullStatus(true); // 這會設定 hasObjectInMouth = true
@@ -389,7 +406,17 @@ void Kirby::setFullStatus(bool full) {
 }
 
 void Kirby::discardAbility() {
+    if (currentForm == Form::FireForm) {
+        // (進階) 在卡比前方生成一個代表火能力的「星星彈」向前方飛出。
+        StarBullet *star = new StarBullet(x(), y()+30, isFacingRight);
+        if (scene()) {
+            scene()->addItem(star);
+            emit starFired(star);
+        }
+    }
+
     currentForm = Form::Normal;
+    currentAbility = CurrentAbility::None;
     hasObjectInMouth = false;
     isInhaling = false;
     isSpitting = false;
@@ -484,14 +511,19 @@ void Kirby::updateSprite() {
         frame = (frameCounter / 10) % 2 + 1;
     }
     // 3. 吸氣狀態
-    else if (isInhaling && currentForm != Form::Sparky ) {
-        action = "attack";
-        frame = 0;
-    }
     else if (isInhaling && currentForm == Form::Sparky ) {
         action = "attack";
         frameCounter++;
         frame = (frameCounter / 10) % 2 + 1;
+    }
+    else if (isInhaling && currentForm == Form::FireForm) {
+        frameCounter++;
+        action = "attack";
+        frame = 0;
+    }
+    else if (isInhaling) {
+        action = "attack";
+        frame = 0;
     }
     // 4. 地面蹲下
     else if (isDown && isOnGround) {
@@ -549,6 +581,25 @@ void Kirby::updateSprite() {
             path = QString("%1Kirby_spark_%2(%3)_%4.png").arg(folder).arg(action).arg(sparkFrame).arg(dir);
         }
     } 
+    else if (currentForm == Form::FireForm) {
+        QString folder = ":/Project2_Dataset/Image/Kirby_fire/"; 
+        if (action == "jump") {
+            path = QString("%1kirbyfire_stop_%2.png").arg(folder).arg(dir);
+        }
+        else if (action == "attack") {
+            path = QString("%1kirbyfire_attack_%2.png").arg(folder).arg(dir);
+        }
+        else if (frame == 0) {
+            path = QString("%1kirbyfire_%2_%3.png").arg(folder).arg(action).arg(dir);
+        }
+        else {
+            int fireFrame = (frameCounter / 10) % 2 + 1;
+            if (action == "run") {
+                fireFrame = (frameCounter / 7) % 3 + 1; // run(1) to run(3)
+            }
+            path = QString("%1kirbyfire_%2(%3)_%4.png").arg(folder).arg(action).arg(fireFrame).arg(dir);
+        }
+    }
     else {
         // Normal 形態：保持你原本的路徑規則 (kirby_run_1_R.png)
         QString folder = ":/Project2_Dataset/Image/Kirby_normal/";
@@ -596,6 +647,26 @@ void Kirby::updateSprite() {
         // 套用偏移，這不會移動碰撞盒，只會移動視覺上的圖片
         setOffset(xOffset, yOffset);
 
+        // --- 火焰特效處理 (進階呈現) ---
+        if (fireEffect) {
+            if (isInhaling && currentForm == Form::FireForm && frameCounter >= 15) {
+                fireEffect->setVisible(true);
+                int fireFrame = ((frameCounter - 15) / 4) % 3 + 1;
+                QString firePath = QString(":/Project2_Dataset/Image/Kirby_fire/kirbyfire_fire(%1)_%2.png")
+                                    .arg(fireFrame).arg(dir);
+                QPixmap firePix(firePath);
+                
+                firePix = firePix.scaledToHeight(140, Qt::SmoothTransformation);
+                fireEffect->setPixmap(firePix);
+                
+                // 定位在卡比前方
+                qreal effectXOffset = (dir == "R") ? 100 : (30 - firePix.width()); 
+                qreal effectYOffset = baseHeight - firePix.height();
+                fireEffect->setPos(effectXOffset, effectYOffset);
+            } else {
+                fireEffect->setVisible(false);
+            }
+        }
 
     } else {
         // Debug 用：如果路徑出錯，至少知道是哪張圖沒讀到

@@ -40,11 +40,21 @@ signals:
 public:
 
 
+    enum class CurrentAbility {
+        None,
+        Spark,
+        Fire
+    };
+
     enum class Form {
         Normal,     // 普通狀態
         SparkyFat,  // 吃掉 Sparky 變胖了 (準備變身)
-        Sparky      // 已經獲得 Spark 技能 (變身完成)
+        Sparky,     // 已經獲得 Spark 技能 (變身完成)
+        FireFat,    // 吃掉 HotHead 變胖了 (準備變身)
+        FireForm    // 已經獲得 Fire 技能 (變身完成)
     };
+
+    CurrentAbility currentAbility = CurrentAbility::None;
 
 
 
@@ -185,6 +195,9 @@ private:
     
     // [新增] 控制地圖寬度的變數，到了stage2可用changeWidth(int width)改變
     int mapwidth = 4860;
+
+    // [新增] 火焰特效物件
+    QGraphicsPixmapItem *fireEffect = nullptr;
 
 };
 

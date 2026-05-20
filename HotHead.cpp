@@ -62,6 +62,26 @@ HotHead::HotHead(QGraphicsItem *player, QGraphicsItem *parent)
 void HotHead::update() {
     if (isDead) return;
 
+    if (isInhaled) {
+        if (currentState != BEING_INHALED) {
+            currentState = BEING_INHALED;
+        }
+    }
+
+    if (currentState == BEING_INHALED) {
+        if (targetPlayer != nullptr) {
+            qreal dist = qAbs(targetPlayer->x() - this->x());
+            if (dist < 20) { 
+                setIsDead(true);
+                setVisible(false);
+                return;
+            }
+        }
+        handlePhysics(60, 60);
+        updateSprite();
+        return;
+    }
+
     switch (currentState) {
     case PATROL:
         checkPlayerDistance();
@@ -153,6 +173,11 @@ void HotHead::updateSprite() {
     frameCounter += 1;
 
     switch (currentState) {
+    case BEING_INHALED:
+        setPixmap(facingDirection == 1 ? runRight : runLeft);
+        if (fireEffect) fireEffect->setVisible(false);
+        break;
+
     case PATROL:
         setPixmap(facingDirection == 1 ? runRight : runLeft);
         break;
