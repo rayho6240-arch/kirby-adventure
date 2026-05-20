@@ -12,6 +12,9 @@
 #include <QTimer>
 #include <QList>
 
+#include <QMediaPlayer>
+#include <QGraphicsVideoItem>
+
 // ==========================================
 // 2. 自定義遊戲類別引入
 // ==========================================
@@ -29,7 +32,8 @@ enum GameState {
     STATE_MENU,
     STATE_STAGE1,
     STATE_STAGE2,
-    GAMEOVER
+    GAMEOVER,
+    STATE_FINISH
 };
 
 /**
@@ -125,8 +129,17 @@ private:
     void loadStage1();
     void loadStage2();
     void loadGameOver();
+    void loadFinish();
+
+    // [待修改] 結算畫面的影片播放參數，但目前無法播放
+    QMediaPlayer* m_finishPlayer;
+    QGraphicsVideoItem* m_videoItem;
 
     QGraphicsPixmapItem* gameover;
+
+    // 將血量寫在header file避免重複寫
+    int c_Hp = 3;
+    int c_lives = 3;
 
 protected:
     // ==========================================
