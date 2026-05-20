@@ -44,6 +44,7 @@ void Kirby::setDown(bool down) {
     if (isDown && currentForm == Form::SparkyFat) {
         currentForm = Form::Sparky;      // 正式變身
         hasObjectInMouth = false;        // 東西吞下去了，嘴巴空了
+        this->setScale(1.0);
         qDebug() << "Kirby evolved to Sparky Form!";
         
         // 這裡可以播放一個「變身成功」的小特效
@@ -105,7 +106,7 @@ void Kirby::update() {
     if (isFlying || isSpitting || currentForm == Form::SparkyFat) { // 將 SparkyFat 加入判斷：變胖時使用大尺寸 Hitbox
         currentPhysicalWidth = 180; 
         currentPhysicalHeight = 180; 
-    } else {
+    }else {
         currentPhysicalWidth = 130; 
         currentPhysicalHeight = 130;
     }
@@ -497,7 +498,7 @@ void Kirby::updateSprite() {
 
 
     // --- [核心重構 2] 組合圖片路徑 (改用 folderPath) ---
-// --- [針對 Spark 素材的專屬路徑組合] ---
+    // --- [針對 Spark 素材的專屬路徑組合] ---
     QString path;
 
     if (currentForm == Form::Sparky) {
@@ -541,8 +542,37 @@ void Kirby::updateSprite() {
         if (action == "jump" && dir == "L") {
             QImage flippedImage = pix.toImage().mirrored(true, false);
             pix = QPixmap::fromImage(flippedImage);
+            
         }
+
+
+
+        // --- 關鍵修正：讓圖片縮放到適合物理框的高度 ---
+        // 假設我們希望卡比的身體（不含帽子）大約是 130 像素高
+        // 我們可以強制將圖檔等比例縮放到高度 = 140 (或你覺得合適的數值)
+        pix = pix.scaledToHeight(140, Qt::SmoothTransformation);
+
+
+
         setPixmap(pix);
+
+        // --- 【核心修正：腳底對齊】 ---
+        // 假設你設定卡比的物理碰撞盒高度是 130
+        qreal baseHeight = 130.0; 
+        
+        // 計算 Y 軸偏移：(碰撞盒高度 - 圖片實際像素高度)
+        // 如果圖片高 180 (有帽子)，yOffset = 130 - 180 = -50 (圖片會往上提 50 像素)
+        // 如果圖片高 120 (跑步)，yOffset = 130 - 120 = 10 (圖片會往下壓 10 像素)
+        qreal yOffset = baseHeight - pix.height();
+
+        // --- 【水平修正：左右置中】 ---
+        // 假設碰撞盒寬度是 130
+        qreal xOffset = (130.0 - pix.width()) / 2.0;
+
+        // 套用偏移，這不會移動碰撞盒，只會移動視覺上的圖片
+        setOffset(xOffset, yOffset);
+
+
     } else {
         // Debug 用：如果路徑出錯，至少知道是哪張圖沒讀到
         // qDebug() << "Failed to load image:" << path;
