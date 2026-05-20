@@ -124,7 +124,7 @@ void Kirby::update() {
     if (x() > mapwidth - currentPhysicalWidth) setX(mapwidth - currentPhysicalWidth);
 
     // X 軸碰撞判定
-    QList<QGraphicsItem *> collidingItemsX = scene()->collidingItems(this);
+    QList<QGraphicsItem *> collidingItemsX = scene()->collidingItems(this,Qt::IntersectsItemShape);
     for (QGraphicsItem * const &item : collidingItemsX) { //去看Block.h的註解
         Block *block = qgraphicsitem_cast<Block *>(item); //如果卡比碰到了「星星」或「特效」，因為它們不是 <Block>，cast 會回傳 nullptr，這樣卡比就不會把它們當作牆壁卡住了。
         if (block) {
@@ -162,7 +162,6 @@ void Kirby::update() {
                     // 只有當你「正在往左走」時，才歸零速度
                     if (currentVx < 0)  currentVx = 0;
                 }
-
             }//end if(isWall)
         }//end if(block)
     }//end for
@@ -177,7 +176,7 @@ void Kirby::update() {
     setY(y() + vy);
     isOnGround = false; // 預設不在地上，等下如果踩到地板再設回 true
 
-    QList<QGraphicsItem *> collidingItemsY = scene()->collidingItems(this);
+    QList<QGraphicsItem *> collidingItemsY = scene()->collidingItems(this,Qt::IntersectsItemShape);
     for (QGraphicsItem * const &item : collidingItemsY) {
         Block *block = qgraphicsitem_cast<Block *>(item);
         if (block) {
