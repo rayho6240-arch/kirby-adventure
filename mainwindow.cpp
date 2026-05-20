@@ -5,6 +5,8 @@
 #include <QKeyEvent>
 #include <QDebug>
 
+#include <QMediaContent>
+
 // 遊戲物件與畫面
 #include <QGraphicsPixmapItem>
 #include <QApplication>
@@ -189,7 +191,7 @@ void MainWindow::gameLoop() {
         else if( currentState == STATE_STAGE2 ){
             player->setPos(400,100);
         }
-        player->setCurrentlives();
+        player->minusCurrentlives();
         player->setCurrentHp();
     }
 
@@ -265,6 +267,19 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
             if(key == Qt::Key_Up){
                 currentState = STATE_STAGE2;
                 loadStage2();
+                return;
+            }
+        }
+    }
+
+    // ==========================================
+    // [新增] 狀態 ：如果目前在 Stage2 並且在門的x位置的地方按下 Up ，則切換場景為 Finish
+    // ==========================================
+    if (currentState == STATE_STAGE2) {
+        if(player->x() < 7900 && player->x() > 7800 && player->getOnGround()){
+            if(key == Qt::Key_Up){
+                currentState = STATE_FINISH;
+                loadFinish();
                 return;
             }
         }
@@ -484,6 +499,11 @@ void MainWindow::loadStage1(){
 void MainWindow::loadStage2(){
     timer->stop();
     
+    //繼承stage1的血量
+    c_Hp = player->getCurrentHp();
+    c_lives = player->getCurrentlives();
+
+
     scene->clear(); 
     bulletList.clear(); 
     enemyList.clear();
@@ -520,6 +540,11 @@ void MainWindow::loadStage2(){
     player = new Kirby(); //呼叫 Kirby.h 中的 ctor
     player->setPos(400, 100);
     player->changeWidth(8100);
+
+    // 繼承stage1的血量
+    player->setCurrentHp(c_Hp);
+    player->setCurrentlives(c_lives);
+
     scene->addItem(player);
 
     //新增敵人sparky
@@ -556,4 +581,59 @@ void MainWindow::loadGameOver(){
     gameover = new QGraphicsPixmapItem(QPixmap(":/Project2_Dataset/Image/background/game_over_continue.png"));
     scene->addItem(gameover);
 
+}
+
+
+
+// [待解決] 原本結算畫面我想直接截遊戲的影片，但好像qt不支援我的影片編碼，需要再想其他辦法
+void MainWindow::loadFinish(){
+    // 1. 停止所有遊戲計時器 (避免在背景繼續運算)
+    timer->stop();
+
+    // 2. 徹底清空場景（這會殺死所有怪物、方塊、HUD）
+    scene->clear(); 
+    bulletList.clear(); 
+    enemyList.clear();
+
+    scene->setSceneRect(0,0,1620,1080);
+    
+
+    // 3. 初始化播放器與音訊輸出
+    m_finishPlayer = new QMediaPlayer(this);
+
+
+    connect(m_finishPlayer, static_cast<void(QMediaPlayer::*)(QMediaPlayer::Error)>(&QMediaPlayer::error),
+            this, [=](QMediaPlayer::Error error) {
+        qDebug() << "❌ 影片播放失敗！錯誤代碼:" << error;
+        qDebug() << "❌ 錯誤訊息:" << m_finishPlayer->errorString();
+    });
+
+
+    // 4. 建立場景影片元件並加入場景
+    m_videoItem = new QGraphicsVideoItem();
+    scene->addItem(m_videoItem);
+
+    // 5. 設定影片大小（填滿你的遊戲視窗）
+    m_videoItem->setSize(QSizeF(1620, 1080));
+    m_videoItem->setPos(0, 0);
+    view->centerOn(m_videoItem->boundingRect().center());
+
+    // 6. 連結播放器到影片元件
+    m_finishPlayer->setVideoOutput(m_videoItem);
+
+    // 7. 【關鍵】監聽影片播放狀態：播完後自動跳轉
+    connect(m_finishPlayer, &QMediaPlayer::mediaStatusChanged, this, [=](QMediaPlayer::MediaStatus status) {
+        qDebug() << "🎬 目前影片狀態改變:" << status; // 除錯用
+        if (status == QMediaPlayer::EndOfMedia) {
+            // 影片播完了！
+            m_finishPlayer->stop();
+            
+            // 這裡呼叫你原本回到主選單的函數
+            loadStartMenu(); 
+        }
+    });
+
+    // 8. 載入檔案並播放 (注意路徑格式)
+    m_finishPlayer->setMedia(QMediaContent(QUrl("qrc:/Project2_Dataset/Image/Video/ranked_3.mp4")));
+    m_finishPlayer->play();
 }
