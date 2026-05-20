@@ -11,6 +11,7 @@
 #include "Kirby.h"
 #include "HUD.h"
 #include "Sparky.h"
+
 // =========================================================
 // 1. 建構子與解構子 (初始化遊戲世界)
 // =========================================================
@@ -48,6 +49,7 @@ MainWindow::MainWindow(QWidget *parent)
     // 設定視窗可以接收鍵盤事件
     this->setFocusPolicy(Qt::StrongFocus);
     this->setFocus();
+
 
     // 開始載入初始畫面
     loadStartMenu();
@@ -459,9 +461,7 @@ void MainWindow::loadStage2(){
     // {新增}範例 B：建立一個三角形（斜坡）
     QPolygonF slope1;
     slope1 << QPointF(0, 100) << QPointF(130, 100) << QPointF(130, 0); // 三個頂點
-    QGraphicsPolygonItem *ramp = new QGraphicsPolygonItem(slope1);
-    ramp->setPos(1080, 800);  //平移
-    ramp->setBrush(QBrush(Qt::gray)); // 塗成灰色
+    Block* ramp = new Block(1080,800,slope1);
     scene->addItem(ramp);
 
 

@@ -4,14 +4,15 @@
 // ==========================================
 // 1. Qt 內建函式庫引入
 // ==========================================
-#include <QGraphicsRectItem>
+#include <QGraphicsPolygonItem> // 改引入 PolygonItem
+#include <QPolygonF>
 
 /**
  * @brief Block 地形與障礙物的基底類別
  * @details 繼承自 QGraphicsRectItem。通常作為遊戲中「隱形碰撞箱」使用，
  * 例如隱形地板、空氣牆等。未來也可以延伸出可破壞的星之方塊 (StarBlock)。
  */
-class Block : public QGraphicsRectItem {
+class Block : public QGraphicsPolygonItem {
 public:
     // ==========================================
     // Qt 轉型辨識系統 (RTTI / Type System)
@@ -41,7 +42,7 @@ public:
      * @param h 矩形的高度
      */
     Block(qreal x, qreal y, qreal w, qreal h);
-
+    Block(qreal x, qreal y, const QPolygonF& polygon);
 };
 
 #endif // BLOCK_H
