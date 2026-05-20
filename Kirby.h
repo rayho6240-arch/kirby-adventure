@@ -101,8 +101,12 @@ public:
     int getCurrentlives() const { return currentlives; }
     int getMaxlives() const { return maxlives; }
 
-    void setCurrentlives() { currentlives -= 1; }
-    void setCurrentHp() { currentHp = maxHp; }
+
+    //控制血量與生命
+    void minusCurrentlives(int live = 1) { currentlives -= live; }
+    void setCurrentHp(int hp = 3) { currentHp = hp; }
+    void setCurrentlives(int live) { currentlives = live; }
+
 
     void takeDamage(int damage); // 承受傷害的函式
     bool getInhaling();          //讓外面得到資訊(傷害判定)
