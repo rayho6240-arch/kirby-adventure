@@ -7,7 +7,7 @@ HUD::HUD() {
     hpText->setFont(QFont("Arial", 24, QFont::Bold));
 
     // 2. 預設顯示
-    updateHealth(6, 6, 3, 3);
+    updateHealth(3, 3, 3, 3);
 
     // 3. 設定 Z 軸高度，確保 UI 永遠顯示在最上層，不會被方塊或卡比擋住
     setZValue(100);

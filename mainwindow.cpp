@@ -7,6 +7,7 @@
 
 // 遊戲物件與畫面
 #include <QGraphicsPixmapItem>
+#include <QApplication>
 #include "Block.h"
 #include "Kirby.h"
 #include "HUD.h"
@@ -75,7 +76,7 @@ void MainWindow::gameLoop() {
     //---[0. 輸贏]---有問題~~~
     qDebug() << " 檢查卡比目前的血量：" << player->getCurrentHp();
     qDebug() << "卡比目前位置:" << "X:" << player->x() << "Y:" << player->y();
-    if (isGameOver) return;
+    if (currentState == GAMEOVER) return;
 
     // --- [1. 更新玩家狀態] ---
     if (player) {
@@ -168,8 +169,7 @@ void MainWindow::gameLoop() {
     gameHUD->setPos(uiX, 20);
 
         // 檢查死亡
-        // [待修改] 現在kirby Lives會一直停留在2
-    if (player->getCurrentHp() <= 0 && player->getCurrentlives() <= 0) {
+    if (player->getCurrentHp() <= 0 && player->getCurrentlives() <= 1) {
         isGameOver = true;
         gameHUD->showGameOver();                 // 通知 HUD 顯示 Game Over
         gameHUD->setPos(player->x() - 100, 300); // 把字移到畫面中間
@@ -177,10 +177,10 @@ void MainWindow::gameLoop() {
     }
     else if(player->getCurrentHp() <= 0){
         if( currentState == STATE_STAGE1 ){
-            loadStage1();
+            player->setPos(400,100);
         }
         else if( currentState == STATE_STAGE2 ){
-            loadStage2();
+            player->setPos(400,100);
         }
         player->setCurrentlives();
         player->setCurrentHp();
@@ -227,14 +227,16 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
         }
     }
 
+    // ==========================================
+    // [新增] 狀態 ：如果目前已經Game Over了，依據按上、下還有enter來決定之後的行動
+    // ==========================================
     if (currentState == GAMEOVER) {
-        bool cont = true;
         if(key == Qt::Key_Return || key == Qt::Key_Enter){
             if(cont){
                 loadStartMenu();
             }
             else{
-                // [待解決]需要一個能夠關閉整個遊戲視窗的東西
+                // [待解決]需要一個能夠關閉整個遊戲視窗的東西，下面這個也同樣會跳回start menu
                 qApp->quit();
             }
         }
@@ -360,6 +362,8 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event) {
 void MainWindow::loadStartMenu(){
     currentState = STATE_MENU; // 設定現在為初始場景
     scene->clear();
+    bulletList.clear(); 
+    enemyList.clear();
     scene->setSceneRect(0, 0, 1620, 1080);
     
     QGraphicsPixmapItem* title = new QGraphicsPixmapItem(QPixmap(":/Project2_Dataset/Image/background/start.png"));
