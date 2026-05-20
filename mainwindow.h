@@ -17,6 +17,8 @@
 // ==========================================
 #include "Kirby.h"
 #include "WaddleDee.h"
+#include "Gordo.h"
+#include "HotHead.h"
 #include "StarBullet.h"
 #include "HUD.h"
 

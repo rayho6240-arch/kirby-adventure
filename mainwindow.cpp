@@ -464,6 +464,18 @@ void MainWindow::loadStage1(){
         enemyList.append(newDee);
     }
 
+    // 敵人 (Gordo - 原地待機敵人)
+    Gordo *gordo = new Gordo();
+    gordo->setPos(1200, 600);
+    scene->addItem(gordo);
+    enemyList.append(gordo);
+
+    // 敵人 (HotHead - 巡邏與噴火敵人)
+    HotHead *hothead = new HotHead(player);
+    hothead->setPos(2000, 500);
+    scene->addItem(hothead);
+    enemyList.append(hothead);
+
     // --- [5. 誕生 HUD 並加入場景][新增] ---
     gameHUD = new HUD();
     scene->addItem(gameHUD);

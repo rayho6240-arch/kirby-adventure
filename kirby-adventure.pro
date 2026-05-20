@@ -12,6 +12,8 @@ SOURCES += \
     Block.cpp \
     Effect.cpp \
     Enemy.cpp \
+    Gordo.cpp \
+    HotHead.cpp \
     HUD.cpp \
     Kirby.cpp \
     Sparky.cpp \
@@ -25,6 +27,8 @@ HEADERS += \
     Block.h \
     Effect.h \
     Enemy.h \
+    Gordo.h \
+    HotHead.h \
     HUD.h \
     Kirby.h \
     Sparky.h \
