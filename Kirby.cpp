@@ -464,9 +464,14 @@ void Kirby::updateSprite() {
         frame = (frameCounter / 10) % 2 + 1;
     }
     // 3. 吸氣狀態
-    else if (isInhaling) {
+    else if (isInhaling && currentForm != Form::Sparky ) {
         action = "attack";
         frame = 0;
+    }
+    else if (isInhaling && currentForm == Form::Sparky ) {
+        action = "attack";
+        frameCounter++;
+        frame = (frameCounter / 10) % 2 + 1;
     }
     // 4. 地面蹲下
     else if (isDown && isOnGround) {
