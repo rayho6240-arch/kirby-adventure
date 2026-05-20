@@ -8,6 +8,7 @@
 #include <QGraphicsScene>
 #include <QGraphicsView>
 #include <QGraphicsRectItem>
+#include <QGraphicsPixmapItem>
 #include <QTimer>
 #include <QList>
 
@@ -27,7 +28,8 @@ QT_END_NAMESPACE
 enum GameState {
     STATE_MENU,
     STATE_STAGE1,
-    STATE_STAGE2
+    STATE_STAGE2,
+    GAMEOVER
 };
 
 /**
@@ -102,6 +104,8 @@ private:
     // 5. 遊戲狀態 (Game States)(卡比有沒有死)[新增]
     // ==========================================
     bool isGameOver=false;  ///< 記錄是否已經死亡或遊戲結束，避免在 GameLoop 中繼續執行邏輯
+    
+    bool cont = true;
 
 
     // ==========================================
@@ -120,6 +124,9 @@ private:
     void loadStartMenu();
     void loadStage1();
     void loadStage2();
+    void loadGameOver();
+
+    QGraphicsPixmapItem* gameover;
 
 protected:
     // ==========================================

@@ -96,6 +96,14 @@ public:
     //[新增]生命機制
     int getCurrentHp() const { return currentHp; }
     int getMaxHp() const { return maxHp; }
+
+    //[新增]lives機制
+    int getCurrentlives() const { return currentlives; }
+    int getMaxlives() const { return maxlives; }
+
+    void setCurrentlives() { currentlives -= 1; }
+    void setCurrentHp() { currentHp = maxHp; }
+
     void takeDamage(int damage); // 承受傷害的函式
     bool getInhaling();          //讓外面得到資訊(傷害判定)
     bool getSpitting();
@@ -156,6 +164,10 @@ private:
     //生命狀態
     int maxHp;              // 最大血量
     int currentHp;          // 當前血量
+    
+    int maxlives;
+    int currentlives;
+
     bool isInvincible;      // 是否處於無敵狀態
     int invincibleTimer;    // 無敵時間倒數計時器
 

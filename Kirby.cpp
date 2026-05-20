@@ -17,8 +17,12 @@
  */
 Kirby::Kirby() {
     // 1. ctor初始化卡比生命
-    maxHp = 6;          // 假設卡比有 6 格血
+    maxHp = 3;          // 假設卡比有 6 格血
     currentHp = maxHp;  // 出生時滿血
+
+    maxlives = 3;
+    currentlives = maxlives;
+
     isInvincible = false;
     invincibleTimer = 0;
     isSpitting = false;
@@ -396,7 +400,7 @@ void Kirby::takeDamage(int damage) {
     qDebug() << "kirby wound ,HP remain：" << currentHp << "/" << maxHp;
 
     // 3. 死亡或觸發無敵
-    if (currentHp <= 0) {
+    if (currentHp <= 0 && currentlives > 0) {
         currentHp = 0;
         qDebug() << "kitby dead！";
         // TODO: 未來這裡要觸發卡比死亡動畫與遊戲結束邏輯

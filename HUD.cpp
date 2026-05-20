@@ -7,15 +7,15 @@ HUD::HUD() {
     hpText->setFont(QFont("Arial", 24, QFont::Bold));
 
     // 2. 預設顯示
-    updateHealth(6, 6);
+    updateHealth(3, 3, 3, 3);
 
     // 3. 設定 Z 軸高度，確保 UI 永遠顯示在最上層，不會被方塊或卡比擋住
     setZValue(100);
 }
 
-void HUD::updateHealth(int currentHp, int maxHp) {
+void HUD::updateHealth(int currentHp, int maxHp, int currentlives, int maxlives) {
     // 只要呼叫這個函式，就會自動更新文字內容
-    hpText->setPlainText(QString("HP: %1 / %2").arg(currentHp).arg(maxHp));
+    hpText->setPlainText(QString("HP: %1 / %2 , Lives: %3 / %4").arg(currentHp).arg(maxHp).arg(currentlives).arg(maxlives));
     //TODO: 圖片弄好
 }
 
