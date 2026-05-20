@@ -58,5 +58,7 @@
         <file>Project2_Dataset/Image/Sparky/Sparky_left_2.png</file>
         <file>Project2_Dataset/Image/Sparky/Sparky_ritht_1.png</file>
         <file>Project2_Dataset/Image/Sparky/Sparky_ritht_2.png</file>
+        <file>Project2_Dataset/Image/background/game_over_continue.png</file>
+        <file>Project2_Dataset/Image/background/game_over_quit.png</file>
     </qresource>
 </RCC>

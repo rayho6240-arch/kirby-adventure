@@ -15,7 +15,7 @@ public:
     HUD();
 
     // 給外界 (MainWindow) 呼叫的介面
-    void updateHealth(int currentHp, int maxHp);
+    void updateHealth(int currentHp, int maxHp, int currentlives, int maxlives);
     void showGameOver();
 
 private:

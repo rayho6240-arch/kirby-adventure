@@ -8,6 +8,7 @@
 #include <QGraphicsScene>
 #include <QGraphicsView>
 #include <QGraphicsRectItem>
+#include <QGraphicsPixmapItem>
 #include <QTimer>
 #include <QList>
 
@@ -27,7 +28,8 @@ QT_END_NAMESPACE
 enum GameState {
     STATE_MENU,
     STATE_STAGE1,
-    STATE_STAGE2
+    STATE_STAGE2,
+    GAMEOVER
 };
 
 /**
@@ -120,6 +122,9 @@ private:
     void loadStartMenu();
     void loadStage1();
     void loadStage2();
+    void loadGameOver();
+
+    QGraphicsPixmapItem* gameover;
 
 protected:
     // ==========================================

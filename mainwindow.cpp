@@ -51,6 +51,8 @@ MainWindow::MainWindow(QWidget *parent)
     this->setFocus();
 
 
+
+
     // 開始載入初始畫面
     loadStartMenu();
 }
@@ -158,7 +160,7 @@ void MainWindow::gameLoop() {
 
 
     //  --- [5. 同步卡比的血量給 HUD] ---[新增]
-    gameHUD->updateHealth(player->getCurrentHp(), player->getMaxHp());
+    gameHUD->updateHealth(player->getCurrentHp(), player->getMaxHp(), player->getCurrentlives(), player->getMaxlives());
 
         // 讓 HUD 永遠跟著卡比走 (保持在視窗左上角)
     qreal uiX = player->x() - 350;
@@ -166,10 +168,22 @@ void MainWindow::gameLoop() {
     gameHUD->setPos(uiX, 20);
 
         // 檢查死亡
-    if (player->getCurrentHp() <= 0) {
+        // [待修改] 現在kirby Lives會一直停留在2
+    if (player->getCurrentHp() <= 0 && player->getCurrentlives() <= 0) {
         isGameOver = true;
         gameHUD->showGameOver();                 // 通知 HUD 顯示 Game Over
         gameHUD->setPos(player->x() - 100, 300); // 把字移到畫面中間
+        loadGameOver();
+    }
+    else if(player->getCurrentHp() <= 0){
+        if( currentState == STATE_STAGE1 ){
+            loadStage1();
+        }
+        else if( currentState == STATE_STAGE2 ){
+            loadStage2();
+        }
+        player->setCurrentlives();
+        player->setCurrentHp();
     }
 
     // --- [6. 攝影機跟隨] ---
@@ -210,6 +224,27 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
         if (key == Qt::Key_Return || key == Qt::Key_Enter) {
             currentState = STATE_STAGE1; // 更新狀態
             loadStage1();                // 載入第一關
+        }
+    }
+
+    if (currentState == GAMEOVER) {
+        bool cont = true;
+        if(key == Qt::Key_Return || key == Qt::Key_Enter){
+            if(cont){
+                loadStartMenu();
+            }
+            else{
+                // [待解決]需要一個能夠關閉整個遊戲視窗的東西
+                qApp->quit();
+            }
+        }
+        else if(key == Qt::Key_Up){
+            gameover->setPixmap(QPixmap(":/Project2_Dataset/Image/background/game_over_continue.png"));
+            cont = true;
+        }
+        else if(key == Qt::Key_Down){
+            gameover->setPixmap(QPixmap(":/Project2_Dataset/Image/background/game_over_quit.png"));
+            cont = false;
         }
     }
 
@@ -337,6 +372,8 @@ void MainWindow::loadStartMenu(){
 
 // 將原本mainwindow裡的程式碼移到loadStage1函式
 void MainWindow::loadStage1(){
+    timer->stop();
+
     // 1. 清空前一個場景 (Start Menu 或之前的關卡) 的所有物件
     // 注意：scene->clear() 會自動 delete 裡面的指標，避免記憶體外洩
     scene->clear(); 
@@ -412,11 +449,10 @@ void MainWindow::loadStage1(){
         enemyList.append(newDee);
     }
 
-
-
     // --- [5. 誕生 HUD 並加入場景][新增] ---
     gameHUD = new HUD();
     scene->addItem(gameHUD);
+
 
 
     // --- [7. 訊號與槽連線 (Signals & Slots)] ---
@@ -476,9 +512,8 @@ void MainWindow::loadStage2(){
     spark->setPos(500, 300); // 設定初始位置
     scene->addItem(spark);
     enemyList.append(spark); // 加進你的敵人陣列裡一起 update
-
-
-
+    
+    // --- [5. 誕生 HUD 並加入場景][新增] ---
     gameHUD = new HUD();
     scene->addItem(gameHUD);
 
@@ -488,4 +523,20 @@ void MainWindow::loadStage2(){
     });
     
     timer->start(16);
+}
+
+
+void MainWindow::loadGameOver(){
+
+    // 停止遊戲迴圈，因為選單不需要更新物理運算
+    timer->stop();
+    
+    currentState = GAMEOVER;
+    scene->clear(); 
+    bulletList.clear(); 
+    enemyList.clear();
+    scene->setSceneRect(0,0,1620,1080);
+    gameover = new QGraphicsPixmapItem(QPixmap(":/Project2_Dataset/Image/background/game_over_continue.png"));
+    scene->addItem(gameover);
+
 }
