@@ -131,18 +131,22 @@ private:
     void loadStage1();
     void loadStage2();
     void loadGameOver();
-    void loadFinish();
+    void loadFinish(); // 負責管理整個結束畫面
+    void finish_animation(); // 負責播放結束動畫
 
-    // [待修改] 結算畫面的影片播放參數，但目前無法播放
-    QMediaPlayer* m_finishPlayer;
-    QGraphicsVideoItem* m_videoItem;
 
     QGraphicsPixmapItem* gameover;
+
+    QGraphicsPixmapItem* finish_Item;
+    QTimer* finish_timer;
+    int finish_frame;
 
     // 將血量寫在header file避免重複寫
     int c_Hp = 3;
     int c_lives = 3;
 
+    int remain_Hp; // 計算從stage2到finish時剩餘總血量
+    int finish_total[7] = {393 , 273 , 261 , 221 , 200 , 204 , 235}; // 每個結算動畫的總圖片數
 protected:
     // ==========================================
     // 系統事件覆寫 (Event Overrides)
