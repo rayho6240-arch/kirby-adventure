@@ -5,7 +5,8 @@
 #include <QKeyEvent>
 #include <QDebug>
 
-#include <QMediaContent>
+// 幫助我們得知.exe檔的路徑位置
+#include <QCoreApplication>
 
 // 遊戲物件與畫面
 #include <QGraphicsPixmapItem>
@@ -279,6 +280,8 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
         if(player->x() < 7900 && player->x() > 7800 && player->getOnGround()){
             if(key == Qt::Key_Up){
                 currentState = STATE_FINISH;
+                // 計算當前剩餘總血量
+                remain_Hp = player->getCurrentHp() + player->getCurrentlives() * 3 - 3;
                 loadFinish();
                 return;
             }
@@ -598,54 +601,83 @@ void MainWindow::loadGameOver(){
 
 
 // [待解決] 原本結算畫面我想直接截遊戲的影片，但好像qt不支援我的影片編碼，需要再想其他辦法
+// [完成] 現在我把影片切成幾百張圖片來運作，在kirby-advanture資料夾中創建了一個finish_animation資料夾，裡面有finish_1~7種結算動畫
 void MainWindow::loadFinish(){
-    // 1. 停止所有遊戲計時器 (避免在背景繼續運算)
+    // 1. 停止所有遊戲計時器
     timer->stop();
 
-    // 2. 徹底清空場景（這會殺死所有怪物、方塊、HUD）
+    // 2. 徹底清空場景
     scene->clear(); 
     bulletList.clear(); 
     enemyList.clear();
 
-    scene->setSceneRect(0,0,1620,1080);
+    // 🔴 【核心修改：定義邏輯尺寸】
+    // 我們將視窗的邏輯尺寸嚴格定義為 1620x1080，
+    // 所有的座標（0,0）到（1620,1080）都必須被我們掌握。
+    scene->setSceneRect(0, 0, 1620, 1080);
     
+    // 初始化動畫元件
+    finish_frame = 0;
+    finish_Item = new QGraphicsPixmapItem();
+    finish_Item->setPos(0, 0); 
+    scene->addItem(finish_Item);
+    
+    // 優雅地讓鏡頭對準這個邏輯場景的最中心
+    view->centerOn(810, 540); // (1620/2, 1080/2)
 
-    // 3. 初始化播放器與音訊輸出
-    m_finishPlayer = new QMediaPlayer(this);
+    // 當當前總血量為1~3時顯示finish_7動畫
+    if(remain_Hp == 1 || remain_Hp == 2){
+        remain_Hp = 3;
+    }
 
+    // 🔴 【核心修正 2】安全路徑安全網（本機測試、助教編譯通通都能抓到）
+    // 設定.exe檔所在的檔案位置
+    QString exePath = QCoreApplication::applicationDirPath();
+    
+    // 助教通常是在專案目錄下編譯，所以要相容兩種可能路徑
+    // 此為.exe與.kirby-advanture同一個資料夾下的情況
+    QString path1 = exePath + QString("/finish_animation/finish_%1/%2.png").arg(10-remain_Hp).arg(finish_frame); // build 內
 
-    connect(m_finishPlayer, static_cast<void(QMediaPlayer::*)(QMediaPlayer::Error)>(&QMediaPlayer::error),
-            this, [=](QMediaPlayer::Error error) {
-        qDebug() << "❌ 影片播放失敗！錯誤代碼:" << error;
-        qDebug() << "❌ 錯誤訊息:" << m_finishPlayer->errorString();
-    });
+    // 此為.exe在build.../debug資料夾下的情況，這部分到時候繳交的時候kirby-advanture要改成game，才能符合繳交格式
+    QString path2 = exePath + QString("/../kirby-adventure/finish_animation/finish_%1/%2.png").arg(10-remain_Hp).arg(finish_frame);
+    
+    // 檢查是否有此路徑
+    QString finalPath = QFile::exists(path1) ? path1 : path2;
+    QPixmap firstPic(finalPath);
+    
+    if(!firstPic.isNull()) {
+        // 讓圖片強行縮放到「目前視窗的大小」，保證 100% 填滿且置中
+        finish_Item->setPixmap(firstPic.scaled(1620, 1080, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+    }
 
+    // 啟動動畫切換圖片計時器
+    finish_timer = new QTimer(this);
+    connect(finish_timer, &QTimer::timeout, this, &MainWindow::finish_animation);
+    finish_timer->start(10);
+}
 
-    // 4. 建立場景影片元件並加入場景
-    m_videoItem = new QGraphicsVideoItem();
-    scene->addItem(m_videoItem);
+void MainWindow::finish_animation(){
+    if(finish_frame < finish_total[9-remain_Hp]){
+        // 設定.exe的檔案位置
+        QString exePath = QCoreApplication::applicationDirPath();
 
-    // 5. 設定影片大小（填滿你的遊戲視窗）
-    m_videoItem->setSize(QSizeF(1620, 1080));
-    m_videoItem->setPos(0, 0);
-    view->centerOn(m_videoItem->boundingRect().center());
+        // 助教通常是在專案目錄下編譯，所以要相容兩種可能路徑，此為.exe與.kirby-advanture同一個資料夾下的情況
+        QString path1 = exePath + QString("/finish_animation/finish_%1/%2.png").arg(10-remain_Hp).arg(finish_frame); // build 內
 
-    // 6. 連結播放器到影片元件
-    m_finishPlayer->setVideoOutput(m_videoItem);
-
-    // 7. 【關鍵】監聽影片播放狀態：播完後自動跳轉
-    connect(m_finishPlayer, &QMediaPlayer::mediaStatusChanged, this, [=](QMediaPlayer::MediaStatus status) {
-        qDebug() << "🎬 目前影片狀態改變:" << status; // 除錯用
-        if (status == QMediaPlayer::EndOfMedia) {
-            // 影片播完了！
-            m_finishPlayer->stop();
-            
-            // 這裡呼叫你原本回到主選單的函數
-            loadStartMenu(); 
+        // 此為.exe在build.../debug資料夾下的情況，這部分到時候繳交的時候kirby-advanture要改成game，才能符合繳交格式
+        QString path2 = exePath + QString("/../../kirby-adventure/finish_animation/finish_%1/%2.png").arg(10-remain_Hp).arg(finish_frame);
+        QString finalPath = QFile::exists(path1) ? path1 : path2;
+        
+        QPixmap originalPic(finalPath);
+        
+        if(!originalPic.isNull()){
+            // 每一格都完美動態縮放到跟視窗一模一樣大
+            finish_Item->setPixmap(originalPic.scaled(1620, 1080, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
         }
-    });
-
-    // 8. 載入檔案並播放 (注意路徑格式)
-    m_finishPlayer->setMedia(QMediaContent(QUrl("qrc:/Project2_Dataset/Image/Video/ranked_3.mp4")));
-    m_finishPlayer->play();
+    }
+    else{
+        finish_timer->stop();
+        loadStartMenu();
+    }
+    finish_frame++;
 }
