@@ -1,4 +1,5 @@
 #include "HotHead.h"
+#include "Fireball.h"
 #include "Kirby.h"
 #include <QPixmap>
 #include <QDebug>
@@ -71,7 +72,7 @@ void HotHead::update() {
     if (currentState == BEING_INHALED) {
         if (targetPlayer != nullptr) {
             qreal dist = qAbs(targetPlayer->x() - this->x());
-            if (dist < 20) { 
+            if (dist < 20) {
                 setIsDead(true);
                 setVisible(false);
                 return;
@@ -80,6 +81,16 @@ void HotHead::update() {
         handlePhysics(60, 60);
         updateSprite();
         return;
+    }
+
+    if (targetPlayer) {
+        checkAttackRange();
+        if (currentAttackMode == ATTACK_FLAME && currentState != FIRE && currentState != CHARGE) {
+            qDebug() << "HotHead: target within FLAME_RANGE, locking to CHARGE/FIRE";
+            currentState = CHARGE;
+            stateTimer = 0.0f;
+            vx = 0;
+        }
     }
 
     switch (currentState) {
@@ -103,22 +114,39 @@ void HotHead::update() {
         updateFacingDirection();
         stateTimer += 1.0f;
         if (stateTimer >= CHARGE_DURATION) {
-            currentState = FIRE;
-            stateTimer = 0.0f;
-            frameCounter = 0;
-            vx = 0;
+            checkAttackRange();
+            if (currentAttackMode != ATTACK_NONE) {
+                qDebug() << "HotHead: charging complete, entering FIRE mode:" <<
+                            (currentAttackMode == ATTACK_FLAME ? "FLAME" : "PROJECTILE");
+                currentState = FIRE;
+                stateTimer = 0.0f;
+                frameCounter = 0;
+                hasLaunchedProjectile = false;
+                vx = 0;
+            } else {
+                currentState = PATROL;
+                stateTimer = 0.0f;
+                vx = facingDirection * PATROL_SPEED;
+            }
         }
         updateSprite();
         break;
 
     case FIRE:
         stateTimer += 1.0f;
+        if (currentAttackMode == ATTACK_PROJECTILE && !hasLaunchedProjectile) {
+            launchFireball();
+            hasLaunchedProjectile = true;
+        }
         updateSprite();
-        applyFireDamage();
+        if (currentAttackMode == ATTACK_FLAME) {
+            applyFireDamage();
+        }
         if (stateTimer >= FIRE_DURATION) {
             currentState = COOLDOWN;
             stateTimer = 0.0f;
             if (fireEffect) fireEffect->setVisible(false);
+            currentAttackMode = ATTACK_NONE;
         }
         break;
 
@@ -150,12 +178,55 @@ void HotHead::checkPlayerDistance() {
     qreal dy = targetPlayer->y() - y();
     qreal distance = std::sqrt(dx * dx + dy * dy);
 
+    if (distance <= FLAME_RANGE) {
+        qDebug() << "HotHead: player too close for flame breath";
+        currentState = CHARGE;
+        stateTimer = 0.0f;
+        vx = 0;
+        facingDirection = dx >= 0 ? 1 : -1;
+        currentAttackMode = ATTACK_FLAME;
+        return;
+    }
+
     if (distance < DETECT_RANGE) {
+        qDebug() << "HotHead: player in projectile range, start chase";
         currentState = CHASE;
         stateTimer = 0.0f;
         vx = 0;
         facingDirection = dx >= 0 ? 1 : -1;
     }
+}
+
+void HotHead::checkAttackRange() {
+    if (!targetPlayer) {
+        currentAttackMode = ATTACK_NONE;
+        return;
+    }
+
+    qreal dx = targetPlayer->x() - x();
+    qreal dy = targetPlayer->y() - y();
+    qreal distance = std::sqrt(dx * dx + dy * dy);
+
+    if (distance <= FLAME_RANGE) {
+        currentAttackMode = ATTACK_FLAME;
+        qDebug() << "HotHead: chosen ATTACK_FLAME";
+    } else if (distance > FLAME_RANGE && distance <= DETECT_RANGE) {
+        currentAttackMode = ATTACK_PROJECTILE;
+        qDebug() << "HotHead: chosen ATTACK_PROJECTILE";
+    } else {
+        currentAttackMode = ATTACK_NONE;
+        qDebug() << "HotHead: chosen ATTACK_NONE";
+    }
+}
+
+void HotHead::launchFireball() {
+    if (!scene()) return;
+
+    qreal spawnX = x() + (facingDirection == 1 ? 60 : -40);
+    qreal spawnY = y() + 20;
+
+    Fireball *fireball = new Fireball(spawnX, spawnY, facingDirection);
+    scene()->addItem(fireball);
 }
 
 void HotHead::updateFacingDirection() {
@@ -193,7 +264,11 @@ void HotHead::updateSprite() {
 
     case FIRE: {
         setPixmap(facingDirection == 1 ? attackRight : attackLeft);
-        updateFireEffect();
+        if (currentAttackMode == ATTACK_FLAME) {
+            updateFireEffect();
+        } else {
+            if (fireEffect) fireEffect->setVisible(false);
+        }
         break;
     }
 
@@ -206,10 +281,8 @@ void HotHead::updateSprite() {
 void HotHead::updateFireEffect() {
     if (!fireEffect) return;
 
-    int cycle = static_cast<int>(std::floor(stateTimer / 20.0f)) % 3;
+    int cycle = (frameCounter / 10) % 2;
     if (cycle == 0) {
-        fireEffect->setPixmap(fire1);
-    } else if (cycle == 1) {
         fireEffect->setPixmap(facingDirection == 1 ? fire2Right : fire2Left);
     } else {
         fireEffect->setPixmap(facingDirection == 1 ? fire3Right : fire3Left);

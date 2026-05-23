@@ -19,6 +19,7 @@ SOURCES += \
     Sparky.cpp \
     StarBlock.cpp \
     StarBullet.cpp \
+    Fireball.cpp \
     WaddleDee.cpp \
     main.cpp \
     mainwindow.cpp
@@ -33,6 +34,7 @@ HEADERS += \
     Kirby.h \
     Sparky.h \
     StarBullet.h \
+    Fireball.h \
     Starblock.h \
     WaddleDee.h \
     mainwindow.h

@@ -58,11 +58,20 @@ private:
 
     void updateSprite();
     void checkPlayerDistance();
+    void checkAttackRange();
+    void launchFireball();
     void updateFacingDirection();
     void updateFireEffect();
     void applyFireDamage();
 
     HotHeadState currentState = PATROL;
+    enum AttackMode {
+        ATTACK_NONE,
+        ATTACK_PROJECTILE,
+        ATTACK_FLAME
+    };
+    AttackMode currentAttackMode = ATTACK_NONE;
+    bool hasLaunchedProjectile = false;
     float stateTimer = 0.0f;
     int facingDirection = -1; ///< -1 為左，1 為右
     int frameCounter = 0;
@@ -79,7 +88,8 @@ private:
     QGraphicsPixmapItem *fireEffect = nullptr;
 
     const float PATROL_SPEED = 2.0f;
-    const float DETECT_RANGE = 300.0f;
+    const float FLAME_RANGE = 120.0f;
+    const float DETECT_RANGE = 500.0f;
     const float CHASE_DURATION = 12.0f;   ///< 檢測後停下並面朝玩家的時間
     const float CHARGE_DURATION = 30.0f;  ///< 蓄力持續 0.5 秒
     const float FIRE_DURATION = 120.0f;   ///< 噴火持續 2 秒
