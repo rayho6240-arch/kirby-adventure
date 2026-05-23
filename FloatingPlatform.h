@@ -3,7 +3,7 @@
 
 #include "Block.h"
 #include <QBrush>
-
+#include <QPen>
 // 單向平台：從下面可以穿過，但可以站在上面
 class FloatingPlatform : public Block {
 public:

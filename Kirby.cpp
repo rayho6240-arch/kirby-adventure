@@ -217,6 +217,7 @@ void Kirby::update() {
     // --- 2. 垂直移動與碰撞 (Y 軸) ---
     setY(y() + vy);
     isOnGround = false; // 預設不在地上，等下如果踩到地板再設回 true
+    onFloatingPlatform = false; // 預設不在單向平台上
 
     QList<QGraphicsItem *> collidingItemsY = scene()->collidingItems(this,Qt::IntersectsItemShape);
     for (QGraphicsItem * const &item : collidingItemsY) {
@@ -225,11 +226,32 @@ void Kirby::update() {
             // 檢查是否為單向平台
             FloatingPlatform *plat = dynamic_cast<FloatingPlatform*>(item);
             if (plat) {
+                // 單向平台：如果正在執行穿過動作，就持續往下穿過直到離開平台
+                if (passThroughPlatform) {
+                    setY(y() + 5);
+                    vy = gravity * 3; // 讓卡比持續向下掉落
+                    isOnGround = false;
+
+                    QList<QGraphicsItem *> itemsAfterDrop = scene()->collidingItems(this, Qt::IntersectsItemShape);
+                    bool stillTouchingThisPlatform = false;
+                    for (QGraphicsItem *it : itemsAfterDrop) {
+                        if (it == item) {
+                            stillTouchingThisPlatform = true;
+                            break;
+                        }
+                    }
+                    if (!stillTouchingThisPlatform) {
+                        passThroughPlatform = false;
+                    }
+                    continue;
+                }
+
                 // 單向平台：只有在往下（vy>=0）且從上方落下時才碰撞
                 if (vy >= 0 && (oldY + KIRBY_PHYSICAL_HEIGHT <= block->y() + 30)) {
                     setY(block->y() - KIRBY_PHYSICAL_HEIGHT); // 腳貼齊地板
                     vy = 0;             // 垂直速度歸零
                     isOnGround = true;  // 標記為踩在地上
+                    onFloatingPlatform = true;
                     break;
                 } else {
                     // 從下面穿過或往上時，不視為碰撞

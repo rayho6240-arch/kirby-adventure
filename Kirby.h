@@ -127,6 +127,9 @@ public:
     
     // [新增] 得到是否在地上的資訊
     bool getOnGround();
+    bool getDown() const { return isDown; }
+    bool isOnFloatingPlatform() const { return onFloatingPlatform; }
+    void setPassThroughPlatform(bool pass) { passThroughPlatform = pass; }
     // [新增] 改變卡比邊界檢查的範圍
     void changeWidth(int width);
 
@@ -203,6 +206,10 @@ private:
 
     // [新增] 火焰特效物件
     QGraphicsPixmapItem *fireEffect = nullptr;
+
+    // [新增] 單向平台狀態與穿過旗標
+    bool onFloatingPlatform = false;
+    bool passThroughPlatform = false;
 
 };
 

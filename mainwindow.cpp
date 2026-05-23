@@ -345,8 +345,12 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
         else if (key == Qt::Key_X) {
             player->handleAttack(); // 讓 Kirby 內部自行判斷目前狀態該執行哪個動作
         }
-        // 7. 棄置能力
+        // 7. 棄置能力 / 平台下落
         else if (key == Qt::Key_V) {
+            if (player->getDown() && player->isOnFloatingPlatform()) {
+                player->setPassThroughPlatform(true);
+                return;
+            }
             player->discardAbility();
         }
     }
