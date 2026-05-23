@@ -12,6 +12,7 @@ SOURCES += \
     Block.cpp \
     Effect.cpp \
     Enemy.cpp \
+    FloatingPlatform.cpp \
     Gordo.cpp \
     HotHead.cpp \
     HUD.cpp \
@@ -28,6 +29,7 @@ HEADERS += \
     Block.h \
     Effect.h \
     Enemy.h \
+    FloatingPlatform.h \
     Gordo.h \
     HotHead.h \
     HUD.h \
