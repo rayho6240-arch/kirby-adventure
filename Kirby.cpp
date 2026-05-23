@@ -7,6 +7,7 @@
 #include <QGraphicsItem>
 #include <QtGlobal>        // 提供 qBound() 函數
 #include <QDebug>
+#include "FloatingPlatform.h"
 
 // =========================================================
 // 1. 初始化與外部指令介面 (Initialization & Interface)
@@ -166,6 +167,9 @@ void Kirby::update() {
     for (QGraphicsItem * const &item : collidingItemsX) { //去看Block.h的註解
         Block *block = qgraphicsitem_cast<Block *>(item); //如果卡比碰到了「星星」或「特效」，因為它們不是 <Block>，cast 會回傳 nullptr，這樣卡比就不會把它們當作牆壁卡住了。
         if (block) {
+            // 如果是單向平台，X 軸不當作牆壁處理，讓卡比可以從側邊穿過
+            FloatingPlatform *platX = dynamic_cast<FloatingPlatform*>(item);
+            if (platX) continue;
             // 判定是否為「牆壁」：只要卡比的垂直範圍跟方塊有重疊，就是撞到牆
             bool isWall = (y() + KIRBY_PHYSICAL_HEIGHT > block->y() + 5) &&
                           (y() < block->y() + block->boundingRect().height() - 5);
@@ -218,6 +222,20 @@ void Kirby::update() {
     for (QGraphicsItem * const &item : collidingItemsY) {
         Block *block = qgraphicsitem_cast<Block *>(item);
         if (block) {
+            // 檢查是否為單向平台
+            FloatingPlatform *plat = dynamic_cast<FloatingPlatform*>(item);
+            if (plat) {
+                // 單向平台：只有在往下（vy>=0）且從上方落下時才碰撞
+                if (vy >= 0 && (oldY + KIRBY_PHYSICAL_HEIGHT <= block->y() + 30)) {
+                    setY(block->y() - KIRBY_PHYSICAL_HEIGHT); // 腳貼齊地板
+                    vy = 0;             // 垂直速度歸零
+                    isOnGround = true;  // 標記為踩在地上
+                    break;
+                } else {
+                    // 從下面穿過或往上時，不視為碰撞
+                    continue;
+                }
+            }
             // 下落碰撞 (踩到地板)
             if (vy >= 0 && (oldY + KIRBY_PHYSICAL_HEIGHT <= block->y() + 30)) {
                 setY(block->y() - KIRBY_PHYSICAL_HEIGHT); // 腳貼齊地板

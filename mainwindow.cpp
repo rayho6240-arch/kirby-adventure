@@ -15,6 +15,7 @@
 #include "Kirby.h"
 #include "HUD.h"
 #include "Sparky.h"
+#include "FloatingPlatform.h"
 
 // =========================================================
 // 1. 建構子與解構子 (初始化遊戲世界)
@@ -549,6 +550,11 @@ void MainWindow::loadStage2(){
     slope1 << QPointF(0, 100) << QPointF(130, 100) << QPointF(130, 0); // 三個頂點
     Block* ramp = new Block(1080,800,slope1);
     scene->addItem(ramp);
+
+    // {新增} 範例 C：單向藍色平台（測試用）
+    // 位置：x=600, y=700, 寬度=240, 高度=20
+    FloatingPlatform *bluePlat = new FloatingPlatform(600, 700, 240, 20);
+    scene->addItem(bluePlat);
 
 
 
