@@ -267,6 +267,29 @@ void Kirby::update() {
     if (hasObjectInMouth || isFlying)  isDashing = false; //變胖不可以衝刺
 
     updateSprite(); // 最後更新動畫幀
+
+    if (isFireBreathAttack() && frameCounter >= 15 && fireEffect && fireEffect->isVisible()) {
+        applyFlameDamage();
+    }
+}
+
+void Kirby::applyFlameDamage() {
+    if (!scene()) return;
+
+    qreal hitboxOffsetX = isFacingRight ? 100.0 : -flameHitboxWidth - 40.0;
+    qreal hitboxOffsetY = 20.0;
+    QRectF flameHitbox(x() + hitboxOffsetX, y() + hitboxOffsetY, flameHitboxWidth, flameHitboxHeight);
+
+    QList<QGraphicsItem*> items = scene()->items();
+    for (QGraphicsItem *item : items) {
+        Enemy *enemy = dynamic_cast<Enemy*>(item);
+        if (!enemy || enemy->getIsDead() || !enemy->isVisible()) continue;
+
+        if (flameHitbox.intersects(enemy->sceneBoundingRect())) {
+            enemy->setIsDead(true);
+            enemy->setVisible(false);
+        }
+    }
 }
 
 // =========================================================

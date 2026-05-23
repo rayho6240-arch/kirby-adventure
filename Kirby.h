@@ -8,6 +8,7 @@
 #include <QPainter>
 #include <QString>
 #include <QImage>
+#include <QRectF>
 #include <QObject>
 
 // ==========================================
@@ -151,6 +152,8 @@ private:
      * @details 根據當前的各項 boolean 狀態，決定要播放哪一張動畫幀。
      */
     void updateSprite();
+    void applyFlameDamage();
+    bool isFireBreathAttack() const { return currentForm == Form::FireForm && isInhaling; }
 
     // ==========================================
     // 物理屬性參數 (Physics Parameters)
@@ -191,6 +194,8 @@ private:
     // ==========================================
     int frameCounter = 0;                   ///< 記錄一般動畫經過的幀數
     int flapCounter = 0;                    ///< 記錄飛行拍動翅膀的幀數
+    const qreal flameHitboxWidth = 130.0;   ///< 火焰判定區寬度
+    const qreal flameHitboxHeight = 100.0;  ///< 火焰判定區高度
     
     
     // [新增] 控制地圖寬度的變數，到了stage2可用changeWidth(int width)改變
