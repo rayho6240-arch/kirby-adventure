@@ -105,6 +105,8 @@ private:
 
     QList<StarBullet*> bulletList;  ///< 管理畫面上所有正在飛行的星星子彈
 
+    bool maximTomatoSpawned = false; ///< 全域旗標：Maxim Tomato 只生成一次
+    bool oneUpSpawned = false;       ///< 全域旗標：1UP 只生成一次
 
     // ==========================================
     // 5. 遊戲狀態 (Game States)(卡比有沒有死)[新增]

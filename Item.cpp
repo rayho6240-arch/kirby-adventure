@@ -8,7 +8,7 @@
 // =========================================================
 
 Item::Item(QGraphicsItem *parent): QObject(nullptr), QGraphicsPixmapItem(parent){
-    //empty
+    setShapeMode(QGraphicsPixmapItem::BoundingRectShape);
 }
 
 // =========================================================
@@ -22,7 +22,7 @@ MaximTomato::MaximTomato(QGraphicsItem *parent): Item(parent){
         pix = pix.scaledToHeight(60, Qt::SmoothTransformation);
         setPixmap(pix);
     }
-    setZValue(5); // 確保在背景之上
+    setZValue(15); // 確保在背景與平台前方
 }
 
 void MaximTomato::onConsumed(Kirby *kirby) {
@@ -46,7 +46,7 @@ OneUp::OneUp(QGraphicsItem *parent): Item(parent){
         pix = pix.scaledToHeight(60, Qt::SmoothTransformation);
         setPixmap(pix);
     }
-    setZValue(5);
+    setZValue(15);
 }
 
 void OneUp::onConsumed(Kirby *kirby) {

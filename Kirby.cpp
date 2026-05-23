@@ -8,6 +8,7 @@
 #include <QtGlobal>        // 提供 qBound() 函數
 #include <QDebug>
 #include "FloatingPlatform.h"
+#include "Item.h"
 
 // =========================================================
 // 1. 初始化與外部指令介面 (Initialization & Interface)
@@ -273,6 +274,25 @@ void Kirby::update() {
         }
     }
 
+    // --- 2.5. 道具碰撞與立即消耗 ---
+    if (scene()) {
+        QList<Item*> itemsToConsume;
+        QList<QGraphicsItem*> sceneItems = scene()->items();
+        for (QGraphicsItem *other : sceneItems) {
+            if (other == this) continue;
+            Item *item = dynamic_cast<Item *>(other);
+            if (!item || item->isConsumed()) continue;
+            if (sceneBoundingRect().intersects(item->sceneBoundingRect())) {
+                itemsToConsume.append(item);
+            }
+        }
+        for (Item *item : itemsToConsume) {
+            if (item && !item->isConsumed()) {
+                item->onConsumed(this);
+            }
+        }
+    }
+
     // --- 3. 處理受傷後的無敵時間與閃爍特效[新增] ---
     if (isInvincible) {
         invincibleTimer--;
@@ -487,6 +507,17 @@ void Kirby::discardAbility() {
     isDashing = false;
     isDown = false;
     setScale(1.0);
+}
+
+void Kirby::restoreFullHP() {
+    currentHp = maxHp;
+}
+
+void Kirby::addLife(int amount) {
+    currentlives += amount;
+    if (currentlives > maxlives) {
+        currentlives = maxlives;
+    }
 }
 
 

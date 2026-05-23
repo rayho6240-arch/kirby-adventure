@@ -17,6 +17,7 @@ SOURCES += \
     HotHead.cpp \
     HUD.cpp \
     Kirby.cpp \
+    Item.cpp \
     Sparky.cpp \
     StarBlock.cpp \
     StarBullet.cpp \
@@ -34,6 +35,7 @@ HEADERS += \
     HotHead.h \
     HUD.h \
     Kirby.h \
+    Item.h \
     Sparky.h \
     StarBullet.h \
     Fireball.h \

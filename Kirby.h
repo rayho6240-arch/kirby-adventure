@@ -118,6 +118,8 @@ public:
     void setCurrentHp(int hp = 3) { currentHp = hp; }
     void setCurrentlives(int live) { currentlives = live; }
 
+    void restoreFullHP();             ///< 恢復當前 HP 到最大值
+    void addLife(int amount = 1);      ///< 增加剩餘生命
 
     void takeDamage(int damage); // 承受傷害的函式
     bool getInhaling();          //讓外面得到資訊(傷害判定)

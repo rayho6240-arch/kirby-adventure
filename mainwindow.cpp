@@ -16,6 +16,7 @@
 #include "HUD.h"
 #include "Sparky.h"
 #include "FloatingPlatform.h"
+#include "Item.h"
 
 // =========================================================
 // 1. 建構子與解構子 (初始化遊戲世界)
@@ -349,9 +350,9 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
         else if (key == Qt::Key_V) {
             if (player->getDown() && player->isOnFloatingPlatform()) {
                 player->setPassThroughPlatform(true);
-                return;
+            } else {
+                player->discardAbility();
             }
-            player->discardAbility();
         }
     }
 }
@@ -578,6 +579,20 @@ void MainWindow::loadStage2(){
         spark->setPos(800 + (i * 500), 500);
         scene->addItem(spark);
         enemyList.append(spark);
+    }
+
+    // --- [新增] Stage2 道具生成 (只生成一次) ---
+    if (!maximTomatoSpawned) {
+        MaximTomato *tomato = new MaximTomato();
+        tomato->setPos(1600, 830);
+        scene->addItem(tomato);
+        maximTomatoSpawned = true;
+    }
+    if (!oneUpSpawned) {
+        OneUp *oneup = new OneUp();
+        oneup->setPos(1700, 830);
+        scene->addItem(oneup);
+        oneUpSpawned = true;
     }
     
     // --- [5. 誕生 HUD 並加入場景][新增] ---

@@ -112,5 +112,14 @@
         <file>Project2_Dataset/Image/Kirby_fire/kirbyfire_run(3)_R.png</file>
         <file>Project2_Dataset/Image/Kirby_fire/kirbyfire_stop_L.png</file>
         <file>Project2_Dataset/Image/Kirby_fire/kirbyfire_stop_R.png</file>
+        <file>Project2_Dataset/Image/item/1UP.png</file>
+        <file>Project2_Dataset/Image/item/brick.png</file>
+        <file>Project2_Dataset/Image/item/door.png</file>
+        <file>Project2_Dataset/Image/item/floor.png</file>
+        <file>Project2_Dataset/Image/item/goal_door.png</file>
+        <file>Project2_Dataset/Image/item/HP_0.png</file>
+        <file>Project2_Dataset/Image/item/HP_1.png</file>
+        <file>Project2_Dataset/Image/item/life.png</file>
+        <file>Project2_Dataset/Image/item/Maxim Tomato.png</file>
     </qresource>
 </RCC>
