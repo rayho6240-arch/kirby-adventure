@@ -41,17 +41,6 @@ Kirby::Kirby() {
     fireEffect->setZValue(1);
     // 初始化吸氣特效相關欄位
     inhaleEffect = nullptr;
-    inhaleFrameIndex = 0;
-    // 載入吸氣循環幀素材
-    for (int i = 0; i < 5; ++i) {
-        QString p = QString(":/Project2_Dataset/Image/inhalingBubble/inhale_smoke(%1).png").arg(i+1);
-        QPixmap pix(p);
-        if (!pix.isNull()) {
-            inhaleFrames[i] = pix.scaledToHeight(160, Qt::SmoothTransformation);
-        } else {
-            inhaleFrames[i] = QPixmap();
-        }
-    }
 }
 
 
@@ -357,32 +346,19 @@ void Kirby::update() {
     if (isInhaling && currentForm == Form::Normal) {
         // 尚未建立特效則產生（parent 設為 Kirby，本身會被 scene 管理）
         if (!inhaleEffect) {
-            inhaleEffect = new QGraphicsPixmapItem(this);
-            if (!inhaleFrames[0].isNull()) {
-                QPixmap frame = inhaleFrames[0];
-                if (!isFacingRight) {
-                    QImage img = frame.toImage().mirrored(true, false);
-                    frame = QPixmap::fromImage(img);
-                }
-                inhaleEffect->setPixmap(frame);
-            }
+            inhaleEffect = new Effect(this);
+            inhaleEffect->setEffect(":/Project2_Dataset/Image/inhalingBubble/inhale_smoke(%1).png", 5, 8, 160); // 5幀，延遲8幀，高度縮放到160
+            inhaleEffect->setLoop(true);
             inhaleEffect->setZValue(this->zValue() + 1);
-            inhaleFrameIndex = 0;
             inhaleEffect->setVisible(true);
         }
 
-        // 每隔 inhaleFrameDelay 幀切換一次影格
-        if (!inhaleFrames[0].isNull() && inhaleEffect) {
-            if ((frameCounter % inhaleFrameDelay) == 0) {
-                inhaleFrameIndex = (inhaleFrameIndex + 1) % 5;
-            }
-            QPixmap cur = inhaleFrames[inhaleFrameIndex];
+        if (inhaleEffect) {
             // 根據面向決定是否鏡像圖片
-            if (!isFacingRight) {
-                QImage img = cur.toImage().mirrored(true, false);
-                cur = QPixmap::fromImage(img);
-            }
-            inhaleEffect->setPixmap(cur);
+            inhaleEffect->setMirror(!isFacingRight);
+
+            // 更新影格動畫
+            inhaleEffect->updateAnimation();
 
             // 定位：在卡比面向方向的前方
             qreal baseOffset = 90.0; // 基本水平偏移
@@ -391,9 +367,9 @@ void Kirby::update() {
                 effectX = baseOffset;
             } else {
                 // 左向時讓特效貼近卡比左側，避免鏡像後遠離身體
-                effectX = -cur.width() + 20.0;
+                effectX = -inhaleEffect->boundingRect().width() + 20.0;
             }
-            qreal effectY = (this->boundingRect().height() - cur.height()) / 2.0;
+            qreal effectY = (this->boundingRect().height() - inhaleEffect->boundingRect().height()) / 2.0;
             inhaleEffect->setPos(effectX, effectY);
         }
     } else {
