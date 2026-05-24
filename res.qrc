@@ -121,5 +121,10 @@
         <file>Project2_Dataset/Image/item/HP_1.png</file>
         <file>Project2_Dataset/Image/item/life.png</file>
         <file>Project2_Dataset/Image/item/Maxim Tomato.png</file>
+        <file>Project2_Dataset/Image/inhalingBubble/inhale_smoke(1).png</file>
+        <file>Project2_Dataset/Image/inhalingBubble/inhale_smoke(2).png</file>
+        <file>Project2_Dataset/Image/inhalingBubble/inhale_smoke(3).png</file>
+        <file>Project2_Dataset/Image/inhalingBubble/inhale_smoke(4).png</file>
+        <file>Project2_Dataset/Image/inhalingBubble/inhale_smoke(5).png</file>
     </qresource>
 </RCC>

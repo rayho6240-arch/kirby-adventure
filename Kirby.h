@@ -7,6 +7,7 @@
 #include <QGraphicsPixmapItem>
 #include <QPainter>
 #include <QString>
+#include <QPixmap>
 #include <QImage>
 #include <QRectF>
 #include <QObject>
@@ -208,6 +209,12 @@ private:
 
     // [新增] 火焰特效物件
     QGraphicsPixmapItem *fireEffect = nullptr;
+
+    // [新增] 吸氣特效（循環幀）
+    QGraphicsPixmapItem *inhaleEffect = nullptr; ///< 動態產生的吸氣特效（parent 設為 Kirby）
+    QPixmap inhaleFrames[5];                     ///< 吸氣特效的 5 幀素材
+    int inhaleFrameIndex = 0;                    ///< 當前播放的吸氣幀索引
+    int inhaleFrameDelay = 30;                   ///< 每幾幀切換一次吸氣特效（Normal 形態播放更慢）
 
     // [新增] 單向平台狀態與穿過旗標
     bool onFloatingPlatform = false;

@@ -39,6 +39,19 @@ Kirby::Kirby() {
     fireEffect = new QGraphicsPixmapItem(this);
     fireEffect->setVisible(false);
     fireEffect->setZValue(1);
+    // 初始化吸氣特效相關欄位
+    inhaleEffect = nullptr;
+    inhaleFrameIndex = 0;
+    // 載入吸氣循環幀素材
+    for (int i = 0; i < 5; ++i) {
+        QString p = QString(":/Project2_Dataset/Image/inhalingBubble/inhale_smoke(%1).png").arg(i+1);
+        QPixmap pix(p);
+        if (!pix.isNull()) {
+            inhaleFrames[i] = pix.scaledToHeight(160, Qt::SmoothTransformation);
+        } else {
+            inhaleFrames[i] = QPixmap();
+        }
+    }
 }
 
 
@@ -72,7 +85,15 @@ void Kirby::setDown(bool down) {
 
 
 
-void Kirby::stopInhaling(){ isInhaling = false; }
+void Kirby::stopInhaling(){
+    isInhaling = false;
+    // 停止吸氣時移除特效
+    if (inhaleEffect) {
+        // inhaleEffect 是以 Kirby 為 parent，安全刪除
+        delete inhaleEffect;
+        inhaleEffect = nullptr;
+    }
+}
 
 void Kirby::startInhaling() {
     // 蹲下或飛行時不能吸氣
@@ -330,6 +351,57 @@ void Kirby::update() {
 
     if (isFireBreathAttack() && frameCounter >= 15 && fireEffect && fireEffect->isVisible()) {
         applyFlameDamage();
+    }
+
+    // --- 吸氣特效（循環播放） ---
+    if (isInhaling && currentForm == Form::Normal) {
+        // 尚未建立特效則產生（parent 設為 Kirby，本身會被 scene 管理）
+        if (!inhaleEffect) {
+            inhaleEffect = new QGraphicsPixmapItem(this);
+            if (!inhaleFrames[0].isNull()) {
+                QPixmap frame = inhaleFrames[0];
+                if (!isFacingRight) {
+                    QImage img = frame.toImage().mirrored(true, false);
+                    frame = QPixmap::fromImage(img);
+                }
+                inhaleEffect->setPixmap(frame);
+            }
+            inhaleEffect->setZValue(this->zValue() + 1);
+            inhaleFrameIndex = 0;
+            inhaleEffect->setVisible(true);
+        }
+
+        // 每隔 inhaleFrameDelay 幀切換一次影格
+        if (!inhaleFrames[0].isNull() && inhaleEffect) {
+            if ((frameCounter % inhaleFrameDelay) == 0) {
+                inhaleFrameIndex = (inhaleFrameIndex + 1) % 5;
+            }
+            QPixmap cur = inhaleFrames[inhaleFrameIndex];
+            // 根據面向決定是否鏡像圖片
+            if (!isFacingRight) {
+                QImage img = cur.toImage().mirrored(true, false);
+                cur = QPixmap::fromImage(img);
+            }
+            inhaleEffect->setPixmap(cur);
+
+            // 定位：在卡比面向方向的前方
+            qreal baseOffset = 90.0; // 基本水平偏移
+            qreal effectX;
+            if (isFacingRight) {
+                effectX = baseOffset;
+            } else {
+                // 左向時讓特效貼近卡比左側，避免鏡像後遠離身體
+                effectX = -cur.width() + 20.0;
+            }
+            qreal effectY = (this->boundingRect().height() - cur.height()) / 2.0;
+            inhaleEffect->setPos(effectX, effectY);
+        }
+    } else {
+        // 停止吸氣或非 Normal 形態時移除特效
+        if (inhaleEffect) {
+            delete inhaleEffect;
+            inhaleEffect = nullptr;
+        }
     }
 }
 
