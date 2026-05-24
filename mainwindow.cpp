@@ -549,6 +549,14 @@ void MainWindow::loadStage2(){
 
     Block* ground1 = new Block(0, 890, 8100, 400);
     scene->addItem(ground1);
+//stage 2階梯碰撞方塊
+    Block* stairBlock1 = new Block(2090, 825, 188, 60);//~~~~~~~~~~~~~~~~~~
+    scene->addItem(stairBlock1);
+    Block* stairBlock2 = new Block(2155, 760, 126, 60);
+    scene->addItem(stairBlock2);
+    Block* stairBlock3 = new Block(2220, 700, 64, 60);
+    scene->addItem(stairBlock3);
+
 
     // {新增}範例 B：建立一個三角形（斜坡）
     QPolygonF slope1;
@@ -557,10 +565,29 @@ void MainWindow::loadStage2(){
     scene->addItem(ramp);
 
     // {新增} 範例 C：單向藍色平台（測試用）
-    // 位置：x=600, y=700, 寬度=240, 高度=20
-    FloatingPlatform *bluePlat = new FloatingPlatform(600, 700, 240, 20);
-    scene->addItem(bluePlat);
+    FloatingPlatform *Plat1 = new FloatingPlatform(355, 750, 190, 30);
+    scene->addItem(Plat1);
+    FloatingPlatform *Plat2 = new FloatingPlatform(610, 690, 190, 30);
+    scene->addItem(Plat2);
+    FloatingPlatform *Plat3 = new FloatingPlatform(867, 620, 190, 30);
+    scene->addItem(Plat3);
+    FloatingPlatform *Plat4 = new FloatingPlatform(4045, 690, 285, 30);
+    scene->addItem(Plat4);
 
+    FloatingPlatform *Plat5 = new FloatingPlatform(4790, 630, 320, 30);
+    scene->addItem(Plat5);
+    FloatingPlatform *Plat5_1 = new FloatingPlatform(5235, 560, 190, 30);
+    scene->addItem(Plat5_1);
+    FloatingPlatform *Plat6 = new FloatingPlatform(5750, 500, 127, 30);
+    scene->addItem(Plat6);
+    FloatingPlatform *Plat7 = new FloatingPlatform(6389, 500, 127, 30);
+    scene->addItem(Plat7);
+    FloatingPlatform *Plat8 = new FloatingPlatform(7045, 560, 260, 30);
+    scene->addItem(Plat8);
+    FloatingPlatform *Plat9 = new FloatingPlatform(7680, 750, 253, 30);
+    scene->addItem(Plat9);
+    FloatingPlatform *Plat10 = new FloatingPlatform(7870, 630, 190, 30);
+    scene->addItem(Plat10);
 
 
     player = new Kirby(); //呼叫 Kirby.h 中的 ctor
