@@ -1,6 +1,27 @@
 #include "Effect.h"
 #include <QImage>
 
+Effect::Effect(EffectType type, QGraphicsItem *parent)
+    : QGraphicsPixmapItem(parent),
+      currentFrame(0),
+      frameDelay(0),
+      counter(0),
+      isLoop(false),
+      isMirrored(false),
+      finished(false) {
+    
+    if (type == EffectType::Inhale) {
+        setEffect(":/Project2_Dataset/Image/inhalingBubble/inhale_smoke(%1).png", 5, 8, 160);
+        setLoop(true);
+    } else if (type == EffectType::Fire) {
+        setEffect(":/Project2_Dataset/Image/Kirby_fire/kirbyfire_fire(%1)_R.png", 3, 4, 140);
+        setLoop(true);
+    } else if (type == EffectType::Spark) {
+        setEffect(":/Project2_Dataset/Image/Kirby_spark/Kirby_spark_attack(%1).png", 3, 4, 140);
+        setLoop(true);
+    }
+}
+
 Effect::Effect(QGraphicsItem *parent)
     : QGraphicsPixmapItem(parent),
       currentFrame(0),
@@ -102,4 +123,11 @@ void Effect::updatePixmap() {
     } else {
         setPixmap(frames[currentFrame]);
     }
+}
+
+void Effect::reset() {
+    currentFrame = 0;
+    counter = 0;
+    finished = false;
+    updatePixmap();
 }

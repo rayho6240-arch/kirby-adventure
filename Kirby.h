@@ -208,10 +208,9 @@ private:
     // [新增] 控制地圖寬度的變數，到了stage2可用changeWidth(int width)改變
     int mapwidth = 4860;
 
-    // [新增] 火焰特效物件
-    QGraphicsPixmapItem *fireEffect = nullptr;
-
-    // [新增] 吸氣特效
+    // [新增] 特效物件
+    Effect *fireEffect = nullptr;
+    Effect *sparkEffect = nullptr;
     Effect *inhaleEffect = nullptr; ///< 動態產生的吸氣特效（parent 設為 Kirby）
 
     // [新增] 單向平台狀態與穿過旗標

@@ -36,9 +36,14 @@ Kirby::Kirby() {
     // 3. 賦予演員這張圖片 (此時尚未加入場景，由 MainWindow 負責加入)
     setPixmap(kirbyImg);
 
-    fireEffect = new QGraphicsPixmapItem(this);
+    fireEffect = new Effect(Effect::EffectType::Fire, this);
     fireEffect->setVisible(false);
     fireEffect->setZValue(1);
+
+    sparkEffect = new Effect(Effect::EffectType::Spark, this);
+    sparkEffect->setVisible(false);
+    sparkEffect->setZValue(1);
+
     // 初始化吸氣特效相關欄位
     inhaleEffect = nullptr;
 }
@@ -377,6 +382,45 @@ void Kirby::update() {
         if (inhaleEffect) {
             delete inhaleEffect;
             inhaleEffect = nullptr;
+        }
+    }
+
+    // --- 火焰特效處理 ---
+    if (fireEffect) {
+        if (isInhaling && currentForm == Form::FireForm && frameCounter >= 15) {
+            fireEffect->setVisible(true);
+            fireEffect->setMirror(!isFacingRight);
+            fireEffect->updateAnimation();
+
+            // 定位在卡比前方
+            qreal baseHeight = 130.0;
+            qreal effectXOffset = isFacingRight ? 100.0 : (30.0 - fireEffect->boundingRect().width()); 
+            qreal effectYOffset = baseHeight - fireEffect->boundingRect().height();
+            fireEffect->setPos(effectXOffset, effectYOffset);
+        } else {
+            if (fireEffect->isVisible()) {
+                fireEffect->setVisible(false);
+                fireEffect->reset();
+            }
+        }
+    }
+
+    // --- 閃電特效處理 ---
+    if (sparkEffect) {
+        if (isSparkyElectricAttack()) {
+            sparkEffect->setVisible(true);
+            sparkEffect->setMirror(!isFacingRight);
+            sparkEffect->updateAnimation();
+
+            // 閃電護罩置中在卡比身上
+            qreal effectXOffset = (this->boundingRect().width() - sparkEffect->boundingRect().width()) / 2.0;
+            qreal effectYOffset = (this->boundingRect().height() - sparkEffect->boundingRect().height()) / 2.0;
+            sparkEffect->setPos(effectXOffset, effectYOffset);
+        } else {
+            if (sparkEffect->isVisible()) {
+                sparkEffect->setVisible(false);
+                sparkEffect->reset();
+            }
         }
     }
 }
@@ -789,26 +833,6 @@ void Kirby::updateSprite() {
         // 套用偏移，這不會移動碰撞盒，只會移動視覺上的圖片
         setOffset(xOffset, yOffset);
 
-        // --- 火焰特效處理 (進階呈現) ---
-        if (fireEffect) {
-            if (isInhaling && currentForm == Form::FireForm && frameCounter >= 15) {
-                fireEffect->setVisible(true);
-                int fireFrame = ((frameCounter - 15) / 4) % 3 + 1;
-                QString firePath = QString(":/Project2_Dataset/Image/Kirby_fire/kirbyfire_fire(%1)_%2.png")
-                                    .arg(fireFrame).arg(dir);
-                QPixmap firePix(firePath);
-                
-                firePix = firePix.scaledToHeight(140, Qt::SmoothTransformation);
-                fireEffect->setPixmap(firePix);
-                
-                // 定位在卡比前方
-                qreal effectXOffset = (dir == "R") ? 100 : (30 - firePix.width()); 
-                qreal effectYOffset = baseHeight - firePix.height();
-                fireEffect->setPos(effectXOffset, effectYOffset);
-            } else {
-                fireEffect->setVisible(false);
-            }
-        }
 
     } else {
         // Debug 用：如果路徑出錯，至少知道是哪張圖沒讀到
