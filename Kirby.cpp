@@ -139,6 +139,7 @@ void Kirby::update() {
     const qreal KIRBY_PHYSICAL_HEIGHT = 120;
     //const qreal KIRBY_PHYSICAL_WIDTH = 120;   // 建議設為固定值，避免因切換動畫圖片大小不同而卡牆
     const qreal SAFETY_MARGIN  = 2;          // 安全間距，防止退回時剛好黏在牆壁邊緣 //目前只能通靈出這個數字，normal我碰撞振動問題成功修復，但是fat 會黏住
+    bool hitCeilingThisFrame = false;
 
     // 【修正點】：不要寫死 const，根據卡比目前的狀態決定他有多胖！
     // 這裡的 isFlying 或是 isFat 請替換成你程式裡實際控制胖卡比的布林值
@@ -315,10 +316,20 @@ void Kirby::update() {
             }
             // 上升碰撞 (撞到天花板)
             else if (vy < 0 && (oldY >= block->y() + block->boundingRect().height() - 10)) {
-                setY(block->y() + block->boundingRect().height()); // 頭頂貼齊天花板
+                setY(block->sceneBoundingRect().bottom() - boundingRect().top() + 1);
                 vy = 0;
+                hitCeilingThisFrame = true;
+                autoFlapCooldown = 10;
+                break;
             }
         }
+    }
+
+    if (sceneBoundingRect().top() < 0) {
+        setY(-boundingRect().top() + 1);
+        vy = 0;
+        hitCeilingThisFrame = true;
+        autoFlapCooldown = 10;
     }
 
     moveMode = slopeCollision ? MoveMode::SlopeMode : MoveMode::NormalMode;
@@ -379,7 +390,7 @@ void Kirby::update() {
     if (autoFlapCooldown > 0) {
         autoFlapCooldown--;
     }
-    if (isUpPressed && currentForm == Form::Normal && !isOnGround && !isInhaling && !hasObjectInMouth && vy > -2.0 && autoFlapCooldown <= 0) {
+    if (isUpPressed && currentForm == Form::Normal && !hitCeilingThisFrame && !isOnGround && !isInhaling && !hasObjectInMouth && vy > -2.0 && autoFlapCooldown <= 0) {
         fly();
         autoFlapCooldown = 15;
     }

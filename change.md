@@ -22,3 +22,38 @@ Normal Kirby 切換蹲下圖片時，`QGraphicsPixmapItem` 會跟著 pixmap / al
 - Normal 實際選到 `down` 動作時，換圖後修正 `y()`，讓 Kirby 腳底保持固定。
 - 加入一次性的 `qDebug()`：`Normal crouch stabilizer active`。
 
+## Fix Normal Kirby ceiling collision and auto-flap escape
+
+### Changed file
+
+- `Kirby.cpp`
+
+### Problem
+
+Normal Kirby could fly into the ceiling while holding Up. After touching the ceiling, Kirby could continue moving above the visible screen, with debug output showing positions such as `y = -220`. In some cases this later looked like a teleport back to the spawn point, but the root issue was that Kirby was escaping above the ceiling instead of being stopped by collision.
+
+### Cause
+
+- Normal auto-flap runs after the Y-axis collision handling in `Kirby::update()`.
+- Ceiling collision set `vy = 0`, but holding Up could immediately trigger `fly()` again and set `vy = -8`.
+- The ceiling collision branch did not stop further Y-collision processing.
+- If Kirby had already moved above the ceiling, `collidingItems()` could stop detecting the ceiling block, so the normal ceiling collision branch no longer pulled Kirby back down.
+
+### Fix
+
+- Added a per-frame `hitCeilingThisFrame` flag in `Kirby::update()`.
+- When Kirby hits the ceiling:
+  - place Kirby back below the ceiling using `sceneBoundingRect()` / `boundingRect().top()`;
+  - set `vy = 0`;
+  - set `hitCeilingThisFrame = true`;
+  - set a short `autoFlapCooldown`;
+  - `break` out of Y-collision handling.
+- Added a small top-boundary guard: if Kirby's `sceneBoundingRect().top()` becomes negative, push him back below the top edge and stop upward velocity.
+- Normal auto-flap now checks `!hitCeilingThisFrame` before calling `fly()`.
+
+### Notes
+
+- Did not modify `respawnAt()`.
+- Did not modify abyss death handling.
+- Did not change Fire / Spark flight behavior.
+- Did not rewrite the physics or collision system.
