@@ -686,6 +686,25 @@ void Kirby::takeDamage(int damage) {
     }
 }
 
+void Kirby::respawnAt(qreal x, qreal y) {
+    setPos(x, y);
+    vx = 0;
+    vy = 0;
+    isDown = false;
+    isFlying = false;
+    isDashing = false;
+    isInhaling = false;
+    isSpitting = false;
+    passThroughPlatform = false;
+    onFloatingPlatform = false;
+    isOnGround = false;
+    setOpacity(1.0);
+
+    // 重生後給短暫無敵，避免剛回出生點就連續受傷。
+    isInvincible = true;
+    invincibleTimer = 120;
+}
+
 bool Kirby:: getInhaling(){
     return isInhaling;
 }

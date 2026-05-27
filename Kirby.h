@@ -129,6 +129,7 @@ public:
     void addLife(int amount = 1);      ///< 增加剩餘生命
 
     void takeDamage(int damage); // 承受傷害的函式
+    void respawnAt(qreal x, qreal y); // 重生並清除速度 / 暫時狀態
     bool getInhaling();          //讓外面得到資訊(傷害判定)
     bool getSpitting();
     bool getHasObjectInMouth() const { return hasObjectInMouth; } // 讓外部知道卡比嘴裡有沒有東西

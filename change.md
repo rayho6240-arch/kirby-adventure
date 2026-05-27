@@ -1,30 +1,52 @@
-# Change Log
+# 變更紀錄
 
-## Normal crouch jitter fix
+## Normal 蹲下抖動修復
 
-### Files changed
+### 修改檔案
 
 - `Kirby.cpp`
 
-### Functions changed
+### 修改函式
 
 - `Kirby::updateSprite()`
 
-### Root cause
+### 問題原因
 
-Normal Kirby's crouch sprite changes the pixmap / alpha mask used by `QGraphicsPixmapItem` collision. Because the physics step depends on `collidingItems()` and the crouch action is selected only when `isDown && isOnGround`, the Normal crouch image could briefly lose ground contact. The next frame then selected the standing / non-crouch sprite, restoring contact, which caused rapid stand-crouch flicker.
+Normal Kirby 切換蹲下圖片時，`QGraphicsPixmapItem` 會跟著 pixmap / alpha mask 改變碰撞形狀。因為目前物理判定依賴 `collidingItems()`，而蹲下動作只有在 `isDown && isOnGround` 時才會被選中，所以 Normal 蹲下圖片可能短暫失去地板接觸。
 
-Fire / Spark crouch did not show the same issue because their crouch sprites have different dimensions / masks and stayed more stable against the floor collision.
+下一幀失去 `isOnGround` 後，角色又會切回站立或非蹲下圖片；站立圖片恢復地板碰撞後，又再次進入蹲下。這就造成「站立 / 蹲下」快速來回切換。
 
-### Minimal patch
+### 最小修補
 
-- When Kirby is in `Form::Normal` and Down is held, `updateSprite()` now uses `QGraphicsPixmapItem::BoundingRectShape` for the collision shape.
-- When the selected Normal action is actually `down`, `updateSprite()` records Kirby's previous bottom Y and adjusts `y()` after `setPixmap()` / `setOffset()` so the feet stay anchored.
-- Added a small one-time `qDebug()` message: `Normal crouch stabilizer active`.
+- Normal 且按住 Down 時，改用 `QGraphicsPixmapItem::BoundingRectShape` 作為碰撞形狀。
+- Normal 實際選到 `down` 動作時，換圖後修正 `y()`，讓 Kirby 腳底保持固定。
+- 加入一次性的 `qDebug()`：`Normal crouch stabilizer active`。
 
-### Scope
+## 深淵掉落扣血與重生
 
-- No physics rewrite.
-- No state machine rewrite.
-- No changes to `MainWindow::keyPressEvent()` / `keyReleaseEvent()`.
-- Fire / Spark crouch behavior is preserved outside the Normal crouch stabilizer path.
+### 修改檔案
+
+- `Kirby.h`
+- `Kirby.cpp`
+- `mainwindow.cpp`
+
+### 修改函式
+
+- `Kirby::respawnAt()`
+- `MainWindow::gameLoop()`
+
+### 最小修補
+
+- 在 `MainWindow::gameLoop()` 檢查 Kirby 是否 `y() > 1400`。
+- 掉入深淵時輸出 `qDebug() << "Kirby fell into abyss";`。
+- 掉入深淵時呼叫現有 `player->takeDamage(1)` 扣 1 HP，沿用既有無敵與 HP / lives 邏輯。
+- 若不是最後一命 Game Over，將 Kirby 送回目前關卡出生點 `(400, 100)`。
+- 新增 `Kirby::respawnAt()`，重設位置、`vx`、`vy`、蹲下 / 飛行 / 衝刺 / 吸入等暫時狀態，並給予短暫無敵。
+- HP 歸零後的既有重生流程也改用 `respawnAt(400, 100)`，避免重生後保留掉落速度。
+
+### 影響範圍
+
+- 沒有重寫 physics。
+- 沒有新增大型 respawn system。
+- 沒有改 state machine。
+- 沒有改 scene 架構。

@@ -125,6 +125,14 @@ void MainWindow::gameLoop() {
     if (player) {
         player->update();
         player->processInhale(enemyList); // 讓卡比偵測是否吸入前方的敵人
+
+        if ((currentState == STATE_STAGE1 || currentState == STATE_STAGE2) && player->y() > 1400) {
+            qDebug() << "Kirby fell into abyss";
+            player->takeDamage(1);
+            if (!(player->getCurrentHp() <= 0 && player->getCurrentlives() <= 1)) {
+                player->respawnAt(400, 100);
+            }
+        }
     }
 
     // --- [2. 更新敵人狀態] ---
@@ -227,10 +235,10 @@ void MainWindow::gameLoop() {
     }
     else if(player->getCurrentHp() <= 0){
         if( currentState == STATE_STAGE1 ){
-            player->setPos(400,100);
+            player->respawnAt(400,100);
         }
         else if( currentState == STATE_STAGE2 ){
-            player->setPos(400,100);
+            player->respawnAt(400,100);
         }
         player->minusCurrentlives();
         player->setCurrentHp();
