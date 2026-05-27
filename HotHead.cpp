@@ -17,31 +17,31 @@ HotHead::HotHead(QGraphicsItem *player, QGraphicsItem *parent)
     enemyType = "HotHead";
 
     runLeft.load(":/Project2_Dataset/Image/Hot Head/Hot_head_run_L(2).png");
-    runLeft = runLeft.scaled(60, 60, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    runLeft = runLeft.scaled(100, 100, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 
     runRight.load(":/Project2_Dataset/Image/Hot Head/Hot_head_run_R(2).png");
-    runRight = runRight.scaled(60, 60, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    runRight = runRight.scaled(100, 100, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 
     attackLeft.load(":/Project2_Dataset/Image/Hot Head/Hot_head_attack_L.png");
-    attackLeft = attackLeft.scaled(60, 60, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    attackLeft = attackLeft.scaled(100, 100, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 
     attackRight.load(":/Project2_Dataset/Image/Hot Head/Hot_head_attack_R.png");
-    attackRight = attackRight.scaled(60, 60, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    attackRight = attackRight.scaled(100, 100, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 
     fire1.load(":/Project2_Dataset/Image/Hot Head/Hot_head_fire(1).png");
-    fire1 = fire1.scaled(60, 60, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    fire1 = fire1.scaled(100, 100, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 
     fire2Left.load(":/Project2_Dataset/Image/Hot Head/Hot_head_fire(2)_L.png");
-    fire2Left = fire2Left.scaled(60, 60, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    fire2Left = fire2Left.scaled(100, 100, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 
     fire2Right.load(":/Project2_Dataset/Image/Hot Head/Hot_head_fire(2)_R.png");
-    fire2Right = fire2Right.scaled(60, 60, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    fire2Right = fire2Right.scaled(100, 100, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 
     fire3Left.load(":/Project2_Dataset/Image/Hot Head/Hot_head_fire(3)_L.png");
-    fire3Left = fire3Left.scaled(60, 60, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    fire3Left = fire3Left.scaled(100, 100, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 
     fire3Right.load(":/Project2_Dataset/Image/Hot Head/Hot_head_fire(3)_R.png");
-    fire3Right = fire3Right.scaled(60, 60, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    fire3Right = fire3Right.scaled(100, 100, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 
     setPixmap(runLeft);
     setShapeMode(QGraphicsPixmapItem::BoundingRectShape);
@@ -78,7 +78,7 @@ void HotHead::update() {
                 return;
             }
         }
-        handlePhysics(60, 60);
+        handlePhysics(100, 100);
         updateSprite();
         return;
     }
@@ -96,7 +96,7 @@ void HotHead::update() {
     switch (currentState) {
     case PATROL:
         checkPlayerDistance();
-        handlePhysics(60, 60);
+        handlePhysics(100, 100);
         updateSprite();
         break;
 
@@ -222,7 +222,7 @@ void HotHead::checkAttackRange() {
 void HotHead::launchFireball() {
     if (!scene()) return;
 
-    qreal spawnX = x() + (facingDirection == 1 ? 60 : -40);
+    qreal spawnX = x() + (facingDirection == 1 ? 100 : -40);
     qreal spawnY = y() + 20;
 
     Fireball *fireball = new Fireball(spawnX, spawnY, facingDirection);

@@ -9,7 +9,7 @@ Sparky::Sparky(QGraphicsItem *player, QGraphicsItem *parent)
     enemyType = "Sparky";
 
     // 定義一個公用的縮放大小，確保跟物理 handlePhysics 對齊
-        QSize spawnSize(60, 60);
+        QSize spawnSize(100, 100);
 
         // 載入並縮放左邊圖 1
         leftImage1.load(":/Project2_Dataset/Image/Sparky/Sparky_left_1.png");
@@ -122,7 +122,7 @@ void Sparky::update(){
 
     // 3. 統一執行物理與動畫
     if (!isDead){
-        handlePhysics(60,60);
+        handlePhysics(100,100);
     }
 
     if (isDead) return;

@@ -15,6 +15,9 @@
 #include <QMediaPlayer>
 #include <QGraphicsVideoItem>
 
+
+#include <QMediaPlaylist>
+
 // ==========================================
 // 2. 自定義遊戲類別引入
 // ==========================================
@@ -149,6 +152,10 @@ private:
 
     int remain_Hp; // 計算從stage2到finish時剩餘總血量
     int finish_total[7] = {393 , 273 , 261 , 221 , 200 , 204 , 235}; // 每個結算動畫的總圖片數
+
+    QMediaPlayer *bgmPlayer;
+    QMediaPlaylist *playlist; // 💡 把播放清單移到這裡，讓全專案的函式都能用到
+
 protected:
     // ==========================================
     // 系統事件覆寫 (Event Overrides)
