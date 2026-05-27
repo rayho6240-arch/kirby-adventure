@@ -57,6 +57,11 @@ public:
         FireForm    // 已經獲得 Fire 技能 (變身完成)
     };
 
+    enum MoveMode {
+        NormalMode, // 平地模式
+        SlopeMode   // 斜坡向量移動模式
+    };
+
     CurrentAbility currentAbility = CurrentAbility::None;
 
 
@@ -128,6 +133,7 @@ public:
     bool getSpitting();
     bool getHasObjectInMouth() const { return hasObjectInMouth; } // 讓外部知道卡比嘴裡有沒有東西
     bool isSparkyElectricAttack() const { return currentForm == Form::Sparky && isInhaling; }
+    bool isNormal() const { return currentForm == Form::Normal; }
     
     // [新增] 得到是否在地上的資訊
     bool getOnGround();
@@ -160,6 +166,7 @@ private:
      */
     void updateSprite();
     void applyFlameDamage();
+    bool checkSlopeContact();
     bool isFireBreathAttack() const { return currentForm == Form::FireForm && isInhaling; }
 
     // ==========================================
@@ -185,6 +192,7 @@ private:
     bool hasObjectInMouth = false;          ///< 肚子裡/嘴裡是否有東西 (滿腹狀態)
     bool isSpitting;  // 記錄是否正在吐星
     int spitTimer;    // 吐星狀態的持續時間計時器
+    MoveMode moveMode = NormalMode;         ///< 卡比目前的移動模式
 
     //生命狀態
     int maxHp;              // 最大血量

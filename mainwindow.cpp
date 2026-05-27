@@ -8,6 +8,8 @@
 // 幫助我們得知.exe檔的路徑位置
 #include <QCoreApplication>
 
+#include <QDir>
+
 // 遊戲物件與畫面
 #include <QGraphicsPixmapItem>
 #include <QApplication>
@@ -17,6 +19,7 @@
 #include "Sparky.h"
 #include "FloatingPlatform.h"
 #include "Item.h"
+#include "Slope.h"
 
 // =========================================================
 // 1. 建構子與解構子 (初始化遊戲世界)
@@ -55,6 +58,35 @@ MainWindow::MainWindow(QWidget *parent)
     // 設定視窗可以接收鍵盤事件
     this->setFocusPolicy(Qt::StrongFocus);
     this->setFocus();
+
+    playlist = new QMediaPlaylist(this);
+    
+    // 💡 依序加入你所有的音樂（順序很重要！）
+    // Index 0：主選單音樂
+    QString menuPath = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/../../kirby-adventure/bg_music/01_Main_Title.mp3");
+    // 🎯 加上這行，在下方的 Application Output 視窗看它印出什麼
+    qDebug() << "真正的音樂路徑是：" << menuPath;
+    playlist->addMedia(QUrl::fromLocalFile(menuPath));
+    
+    //Index 1：遊戲關卡背景音樂
+    QString stagePath = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/../../kirby-adventure/bg_music/91_Vegetable_Valley_(No Intro).mp3");
+    // 🎯 加上這行，在下方的 Application Output 視窗看它印出什麼
+    qDebug() << "真正的音樂路徑是：" << stagePath;
+    playlist->addMedia(QUrl::fromLocalFile(stagePath));
+    
+    // Index 2：結局動畫音樂
+    QString finishPath = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/../../kirby-adventure/bg_music/41_Goal.mp3");
+    // 🎯 加上這行，在下方的 Application Output 視窗看它印出什麼
+    qDebug() << "真正的音樂路徑是：" << finishPath;
+    playlist->addMedia(QUrl::fromLocalFile(finishPath));
+    
+
+    // 設定循環模式
+    playlist->setPlaybackMode(QMediaPlaylist::CurrentItemInLoop);
+
+    bgmPlayer = new QMediaPlayer(this);
+    bgmPlayer->setPlaylist(playlist);
+    bgmPlayer->setVolume(50);
 
 
 
@@ -266,7 +298,7 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
     // [新增] 狀態 2：如果目前在 Stage1 並且在門的地方按下 Up ，則切換場景為 Stage2
     // ==========================================
     if (currentState == STATE_STAGE1) {
-        if(player->x() < 4650 && player->x() > 4630 && player->getOnGround()){
+        if(player->x() < 4680 && player->x() > 4600 && player->getOnGround()){
             if(key == Qt::Key_Up){
                 currentState = STATE_STAGE2;
                 loadStage2();
@@ -404,6 +436,10 @@ void MainWindow::loadStartMenu(){
     QGraphicsPixmapItem* title = new QGraphicsPixmapItem(QPixmap(":/Project2_Dataset/Image/background/start.png"));
     scene->addItem(title);
     
+    // 🎯 遊戲一開始，預設播放第 0 首（主選單音樂）
+    playlist->setCurrentIndex(0);
+    bgmPlayer->play();
+
     // 停止遊戲迴圈，因為選單不需要更新物理運算
     timer->stop();
 }
@@ -504,6 +540,8 @@ void MainWindow::loadStage1(){
     gameHUD = new HUD();
     scene->addItem(gameHUD);
 
+    playlist->setCurrentIndex(1); 
+    bgmPlayer->play(); // 切換後確保有在播放
 
 
     // --- [7. 訊號與槽連線 (Signals & Slots)] ---
@@ -549,7 +587,7 @@ void MainWindow::loadStage2(){
 
     Block* ground1 = new Block(0, 890, 8100, 400);
     scene->addItem(ground1);
-//stage 2階梯碰撞方塊
+    //stage 2階梯碰撞方塊
     Block* stairBlock1 = new Block(2090, 825, 188, 60);//~~~~~~~~~~~~~~~~~~
     scene->addItem(stairBlock1);
     Block* stairBlock2 = new Block(2155, 760, 126, 60);
@@ -560,9 +598,24 @@ void MainWindow::loadStage2(){
 
     // {新增}範例 B：建立一個三角形（斜坡）
     QPolygonF slope1;
-    slope1 << QPointF(0, 100) << QPointF(130, 100) << QPointF(130, 0); // 三個頂點
-    Block* ramp = new Block(1080,800,slope1);
+    slope1 << QPointF(0, 150) << QPointF(150, 150) << QPointF(150, 0); // 三個頂點
+    Slope* ramp = new Slope(1100, 750, slope1);
     scene->addItem(ramp);
+
+    QPolygonF slope2;
+    slope2 << QPointF(0, 150) << QPointF(280, 150) << QPointF(280, 0); // 三個頂點
+    Slope* ramp1 = new Slope(1250, 600, slope2);
+    scene->addItem(ramp1);
+
+    QPolygonF slope3;
+    slope3 << QPointF(0, 150) << QPointF(0, 0) << QPointF(280, 150); // 三個頂點
+    Slope* ramp2 = new Slope(1530, 600, slope3);
+    scene->addItem(ramp2);
+
+    QPolygonF slope4;
+    slope4 << QPointF(0, 150) << QPointF(0, 0) << QPointF(150, 150); // 三個頂點
+    Slope* ramp3 = new Slope(1810, 750, slope4);
+    scene->addItem(ramp3);
 
     // {新增} 範例 C：單向藍色平台（測試用）
     FloatingPlatform *Plat1 = new FloatingPlatform(355, 750, 190, 30);
@@ -691,11 +744,14 @@ void MainWindow::loadFinish(){
     QString path1 = exePath + QString("/finish_animation/finish_%1/%2.png").arg(10-remain_Hp).arg(finish_frame); // build 內
 
     // 此為.exe在build.../debug資料夾下的情況，這部分到時候繳交的時候kirby-advanture要改成game，才能符合繳交格式
-    QString path2 = exePath + QString("/../kirby-adventure/finish_animation/finish_%1/%2.png").arg(10-remain_Hp).arg(finish_frame);
+    QString path2 = exePath + QString("/../../kirby-adventure/finish_animation/finish_%1/%2.png").arg(10-remain_Hp).arg(finish_frame);
     
     // 檢查是否有此路徑
     QString finalPath = QFile::exists(path1) ? path1 : path2;
     QPixmap firstPic(finalPath);
+
+    playlist->setCurrentIndex(2); 
+    bgmPlayer->play(); // 切換後確保有在播放
     
     if(!firstPic.isNull()) {
         // 讓圖片強行縮放到「目前視窗的大小」，保證 100% 填滿且置中

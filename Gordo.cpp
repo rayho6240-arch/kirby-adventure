@@ -13,10 +13,10 @@ Gordo::Gordo(QGraphicsItem *parent) : Enemy(parent) {
 
     // --- 預載入圖片 ---
     gordo0.load(":/Project2_Dataset/Image/Gordo/Gordo(0).png");
-    gordo0 = gordo0.scaled(60, 60, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    gordo0 = gordo0.scaled(100, 100, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 
     gordo1.load(":/Project2_Dataset/Image/Gordo/Gordo(1).png");
-    gordo1 = gordo1.scaled(60, 60, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    gordo1 = gordo1.scaled(100, 100, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 
     // --- 設定初始圖片與物理參數 ---
     setPixmap(gordo0);

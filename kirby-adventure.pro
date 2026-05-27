@@ -24,7 +24,8 @@ SOURCES += \
     Fireball.cpp \
     WaddleDee.cpp \
     main.cpp \
-    mainwindow.cpp
+    mainwindow.cpp \
+    Slope.cpp
 
 HEADERS += \
     Block.h \
@@ -41,7 +42,8 @@ HEADERS += \
     Fireball.h \
     Starblock.h \
     WaddleDee.h \
-    mainwindow.h
+    mainwindow.h \
+    Slope.h
 
 FORMS += \
     mainwindow.ui

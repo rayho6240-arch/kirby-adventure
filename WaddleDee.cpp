@@ -19,7 +19,7 @@ WaddleDee::WaddleDee(QGraphicsItem *parent) : Enemy(parent) {
     */
     // [待修改] 改成WaddleDee圖片後，人物不斷生成而接觸到地面又消失
     QPixmap pix(":/Project2_Dataset/Image/Waddle Dee/Waddle_Dee_6.png");
-    pix = pix.scaled(60, 60, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    pix = pix.scaled(100, 100, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
     setPixmap(pix);
 }
 
@@ -75,6 +75,6 @@ void WaddleDee::updateSprite(){
     QString path;
     path = QString(":/Project2_Dataset/Image/Waddle Dee/Waddle_Dee_%1.png").arg(frame);
     QPixmap pix(path);
-    pix = pix.scaled(60, 60, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    pix = pix.scaled(100, 100, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
     setPixmap(pix);
 }

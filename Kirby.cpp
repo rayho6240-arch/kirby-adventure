@@ -1,5 +1,6 @@
 #include "Kirby.h"         // 引入卡比自己的標頭檔 (必須放在最前面)
 #include "Block.h"         // 為了使用 qgraphicsitem_cast 辨識 Block 地形
+#include "Slope.h"         // 斜坡地形類別
 #include "StarBullet.h"    // 吐出星星時需要用到
 
 #include <QGraphicsScene>
@@ -183,6 +184,10 @@ void Kirby::update() {
     for (QGraphicsItem * const &item : collidingItemsX) { //去看Block.h的註解
         Block *block = qgraphicsitem_cast<Block *>(item); //如果卡比碰到了「星星」或「特效」，因為它們不是 <Block>，cast 會回傳 nullptr，這樣卡比就不會把它們當作牆壁卡住了。
         if (block) {
+            // 斜坡不視為傳統 X 軸牆壁，避免 X/Y 分離碰撞邏輯衝突
+            Slope *slopeX = dynamic_cast<Slope*>(item);
+            if (slopeX) continue;
+
             // 如果是單向平台，X 軸不當作牆壁處理，讓卡比可以從側邊穿過
             FloatingPlatform *platX = dynamic_cast<FloatingPlatform*>(item);
             if (platX) continue;
@@ -235,8 +240,28 @@ void Kirby::update() {
     isOnGround = false; // 預設不在地上，等下如果踩到地板再設回 true
     onFloatingPlatform = false; // 預設不在單向平台上
 
-    QList<QGraphicsItem *> collidingItemsY = scene()->collidingItems(this,Qt::IntersectsItemShape);
+    QList<QGraphicsItem *> collidingItemsY = scene()->collidingItems(this, Qt::IntersectsItemShape);
+    bool slopeCollision = false;
     for (QGraphicsItem * const &item : collidingItemsY) {
+        if (item == this) continue;
+        Slope *slope = dynamic_cast<Slope*>(item);
+        if (slope) {
+            qreal footCenterX = x() + offsetX + currentPhysicalWidth / 2.0;
+            qreal surfaceY = slope->getSurfaceY(footCenterX);
+            qreal oldFootY = oldY + currentPhysicalHeight;
+            qreal newFootY = y() + currentPhysicalHeight;
+
+            if (vy >= 0 && oldFootY <= surfaceY + 30 && newFootY >= surfaceY) {
+                setY(surfaceY - currentPhysicalHeight);
+                vy = 0;
+                isOnGround = true;
+                onFloatingPlatform = false;
+                slopeCollision = true;
+                break;
+            }
+            continue;
+        }
+
         Block *block = qgraphicsitem_cast<Block *>(item);
         if (block) {
             // 檢查是否為單向平台
@@ -288,6 +313,9 @@ void Kirby::update() {
             }
         }
     }
+
+    moveMode = slopeCollision ? MoveMode::SlopeMode : MoveMode::NormalMode;
+    checkSlopeContact();
 
     // --- 2.5. 道具碰撞與立即消耗 ---
     if (scene()) {
@@ -444,6 +472,33 @@ void Kirby::applyFlameDamage() {
     }
 }
 
+bool Kirby::checkSlopeContact() {
+    if (!scene()) return false;
+
+    setY(y() + 4);
+    QList<QGraphicsItem *> groundItems = scene()->collidingItems(this, Qt::IntersectsItemShape);
+    setY(y() - 4);
+
+    bool touchSlope = false;
+    for (QGraphicsItem *item : groundItems) {
+        if (dynamic_cast<Slope *>(item)) {
+            touchSlope = true;
+            break;
+        }
+    }
+
+    if (touchSlope) {
+        moveMode = MoveMode::SlopeMode;
+        isOnGround = true;
+        return true;
+    }
+
+    if (moveMode == MoveMode::SlopeMode) {
+        moveMode = MoveMode::NormalMode;
+    }
+    return false;
+}
+
 // =========================================================
 // 3. 戰鬥與吸星系統 (Combat & Inhale Logic)
 // =========================================================
@@ -569,15 +624,6 @@ void Kirby::spit() {
  */
 void Kirby::setFullStatus(bool full) {
     hasObjectInMouth = full;
-
-    // [更改] 將變胖動畫加到下面的動畫渲染系統
-    //if (full) {
-        // TODO: 之後可以換成變胖的圖片 setPixmap(QPixmap(":/res/kirby_full.png"));
-       // setScale(1.5);  // 先暫時放大 1.5 倍來 debug，一眼就看出吸到了
-    //} else {
-        // 恢復原狀
-       // setScale(1.0);
-    //}
 }
 
 void Kirby::discardAbility() {
@@ -811,7 +857,14 @@ void Kirby::updateSprite() {
         // --- 關鍵修正：讓圖片縮放到適合物理框的高度 ---
         // 假設我們希望卡比的身體（不含帽子）大約是 130 像素高
         // 我們可以強制將圖檔等比例縮放到高度 = 140 (或你覺得合適的數值)
-        pix = pix.scaledToHeight(140, Qt::SmoothTransformation);
+        //pix = pix.scaledToHeight(140, Qt::SmoothTransformation);
+
+        if(currentForm == Form::Normal){
+            pix = pix.scaledToHeight(100, Qt::SmoothTransformation);
+        }
+        else {
+            pix = pix.scaledToHeight(140, Qt::SmoothTransformation);
+        }
 
 
 
