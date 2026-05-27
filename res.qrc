@@ -126,5 +126,6 @@
         <file>Project2_Dataset/Image/inhalingBubble/inhale_smoke(3).png</file>
         <file>Project2_Dataset/Image/inhalingBubble/inhale_smoke(4).png</file>
         <file>Project2_Dataset/Image/inhalingBubble/inhale_smoke(5).png</file>
+        <file>Project2_Dataset/Image/background/stage2_augment.jpg</file>
     </qresource>
 </RCC>
