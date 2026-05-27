@@ -868,6 +868,10 @@ void Kirby::updateSprite() {
 
 
 
+        const bool useNormalCrouchShape = (currentForm == Form::Normal && isDown);
+        const bool lockNormalCrouchBottom = (currentForm == Form::Normal && action == "down");
+        const qreal oldBottomY = sceneBoundingRect().bottom();
+
         setPixmap(pix);
 
         // --- 【核心修正：腳底對齊】 ---
@@ -885,6 +889,26 @@ void Kirby::updateSprite() {
 
         // 套用偏移，這不會移動碰撞盒，只會移動視覺上的圖片
         setOffset(xOffset, yOffset);
+
+        if (useNormalCrouchShape) {
+            // Normal crouch uses a stable rectangle and keeps Kirby's feet anchored.
+            setShapeMode(QGraphicsPixmapItem::BoundingRectShape);
+            if (lockNormalCrouchBottom) {
+                const qreal bottomDelta = oldBottomY - sceneBoundingRect().bottom();
+                if (qAbs(bottomDelta) > 0.01) {
+                    setY(y() + bottomDelta);
+                    qDebug() << "Normal crouch bottom lock adjusted Y by" << bottomDelta;
+                }
+            }
+
+            static bool loggedNormalCrouchFix = false;
+            if (!loggedNormalCrouchFix) {
+                qDebug() << "Normal crouch stabilizer active";
+                loggedNormalCrouchFix = true;
+            }
+        } else {
+            setShapeMode(QGraphicsPixmapItem::MaskShape);
+        }
 
 
     } else {

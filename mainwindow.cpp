@@ -79,12 +79,12 @@ MainWindow::MainWindow(QWidget *parent)
     playlist->addMedia(QUrl::fromLocalFile(stagePath));
     
     // Index 2：結局動畫音樂
-    QString finishPath = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/../../kirby-adventure/bg_music/41_Goal.mp3");
+    QString finishPath1 = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/../../kirby-adventure/bg_music/41_Goal.mp3");
     QString finishPath2 = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/bg_music/41_Goal.mp3");
-    QString finishPath = QFile::exists(finishPath1) ? finishPath1 : finishPath2; // 嘗試兩個路徑，哪個存在就用哪個
+    QString finishPath3 = QFile::exists(finishPath1) ? finishPath1 : finishPath2; // 嘗試兩個路徑，哪個存在就用哪個
     // 🎯 加上這行，在下方的 Application Output 視窗看它印出什麼
-    qDebug() << "真正的音樂路徑是：" << finishPath;
-    playlist->addMedia(QUrl::fromLocalFile(finishPath));
+    qDebug() << "真正的音樂路徑是：" << finishPath1;
+    playlist->addMedia(QUrl::fromLocalFile(finishPath1));
     
 
     // 設定循環模式
