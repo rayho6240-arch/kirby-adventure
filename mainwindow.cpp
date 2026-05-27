@@ -63,19 +63,25 @@ MainWindow::MainWindow(QWidget *parent)
     
     // 💡 依序加入你所有的音樂（順序很重要！）
     // Index 0：主選單音樂
-    QString menuPath = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/../../kirby-adventure/bg_music/01_Main_Title.mp3");
+    QString menuPath1 = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/../../kirby-adventure/bg_music/01_Main_Title.mp3");
+    QString menuPath2 = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/bg_music/01_Main_Title.mp3");
+    QString menuPath = QFile::exists(menuPath1) ? menuPath1 : menuPath2; // 嘗試兩個路徑，哪個存在就用哪個
     // 🎯 加上這行，在下方的 Application Output 視窗看它印出什麼
     qDebug() << "真正的音樂路徑是：" << menuPath;
     playlist->addMedia(QUrl::fromLocalFile(menuPath));
     
     //Index 1：遊戲關卡背景音樂
-    QString stagePath = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/../../kirby-adventure/bg_music/91_Vegetable_Valley_(No Intro).mp3");
-    // 🎯 加上這行，在下方的 Application Output 視窗看它印出什麼
+    QString stagePath1 = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/../../kirby-adventure/bg_music/91_Vegetable_Valley_(No Intro).mp3");
+    QString stagePath2 = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/bg_music/91_Vegetable_Valley_(No Intro).mp3");
+    QString stagePath = QFile::exists(stagePath1) ? stagePath1 : stagePath2; // 嘗試兩個路徑，哪個存在就用哪個
+    // 🎯 加上這行，在下方的 Application Output 視窗看它印出什麼// 🎯 加上這行，在下方的 Application Output 視窗看它印出什麼
     qDebug() << "真正的音樂路徑是：" << stagePath;
     playlist->addMedia(QUrl::fromLocalFile(stagePath));
     
     // Index 2：結局動畫音樂
     QString finishPath = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/../../kirby-adventure/bg_music/41_Goal.mp3");
+    QString finishPath2 = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/bg_music/41_Goal.mp3");
+    QString finishPath = QFile::exists(finishPath1) ? finishPath1 : finishPath2; // 嘗試兩個路徑，哪個存在就用哪個
     // 🎯 加上這行，在下方的 Application Output 視窗看它印出什麼
     qDebug() << "真正的音樂路徑是：" << finishPath;
     playlist->addMedia(QUrl::fromLocalFile(finishPath));
@@ -582,11 +588,25 @@ void MainWindow::loadStage2(){
     Bg2->setPos(0, 0);
     scene->addItem(Bg2);
 
+    QPixmap bag(":/Project2_Dataset/Image/background/stage2_augment.jpg");
+    QGraphicsPixmapItem* bgs = new QGraphicsPixmapItem(bag);
+    bgs->setScale(scaleFactor);
+    qreal pos = 160*scaleFactor + 400;
+    bgs->setPos(0, pos);
+    scene->addItem(bgs);
+
     bg2->setZValue(-10);
     Bg2->setZValue(-20);
 
-    Block* ground1 = new Block(0, 890, 8100, 400);
+    Block* ground1 = new Block(0, 890, 2720, 400);
     scene->addItem(ground1);
+
+    Block* ground2 = new Block(3180, 890, 4920, 400);
+    scene->addItem(ground2);
+
+    Block* ceil = new Block(0, -100, 8100, 100);
+    scene->addItem(ceil);
+
     //stage 2階梯碰撞方塊
     Block* stairBlock1 = new Block(2090, 825, 188, 60);//~~~~~~~~~~~~~~~~~~
     scene->addItem(stairBlock1);
@@ -616,6 +636,71 @@ void MainWindow::loadStage2(){
     slope4 << QPointF(0, 150) << QPointF(0, 0) << QPointF(150, 150); // 三個頂點
     Slope* ramp3 = new Slope(1810, 750, slope4);
     scene->addItem(ramp3);
+
+    QPolygonF slope5;
+    slope5 << QPointF(0, 140) << QPointF(250, 140) << QPointF(250, 0); // 三個頂點
+    Slope* ramp4 = new Slope(2410, 755, slope5);
+    scene->addItem(ramp4);
+
+    QPolygonF slope6;
+    slope6 << QPointF(0, 215) << QPointF(0, 0) << QPointF(400, 215); // 三個頂點
+    Slope* ramp5 = new Slope(3230, 680, slope6);
+    scene->addItem(ramp5);
+
+    QPolygonF slope7;
+    slope7 << QPointF(0, 75) << QPointF(130, 75) << QPointF(130, 0); // 三個頂點
+    Slope* ramp6 = new Slope(4850, 815, slope7);
+    scene->addItem(ramp6);
+
+    QPolygonF slope8;
+    slope8 << QPointF(0, 65) << QPointF(140, 65) << QPointF(140, 0); // 三個頂點
+    Slope* ramp7 = new Slope(5240, 750, slope8);
+    scene->addItem(ramp7);
+
+    QPolygonF slope9;
+    slope9 << QPointF(0, 65) << QPointF(120, 65) << QPointF(120, 0); // 三個頂點
+    Slope* ramp8 = new Slope(5640, 685, slope9);
+    scene->addItem(ramp8);
+
+    QPolygonF slope10;
+    slope10 << QPointF(0, 0) << QPointF(0, 75) << QPointF(130, 75); // 三個頂點
+    Slope* ramp9 = new Slope(6500, 685, slope10);
+    scene->addItem(ramp9);
+
+    QPolygonF slope11;
+    slope11 << QPointF(0, 0) << QPointF(0, 130) << QPointF(260, 130); // 三個頂點
+    Slope* ramp10 = new Slope(7020, 760, slope11);
+    scene->addItem(ramp10);
+
+    Block* wall1 = new Block(2660, 755, 60, 140);
+    scene->addItem(wall1);
+
+    Block* wall2 = new Block(3180, 680, 50, 215);
+    scene->addItem(wall2);
+
+    Block* wall3 = new Block(4980, 815, 885, 75);
+    scene->addItem(wall3);
+
+    Block* wall4 = new Block(5380, 750, 495, 65);
+    scene->addItem(wall4);   
+
+    Block* wall5 = new Block(5760, 685, 115, 65);
+    scene->addItem(wall5); 
+
+    Block* wall6 = new Block(5875, 840, 515, 50);
+    scene->addItem(wall6); 
+
+    Block* wall7 = new Block(6390, 685, 110, 75);
+    scene->addItem(wall7); 
+
+    Block* wall8 = new Block(6390, 760, 630, 130);
+    scene->addItem(wall8); 
+    
+    Block* block1 = new Block(2720, 950, 60, 60);
+    scene->addItem(block1);
+
+    Block* block2 = new Block(3120, 950, 60, 60);
+    scene->addItem(block2);
 
     // {新增} 範例 C：單向藍色平台（測試用）
     FloatingPlatform *Plat1 = new FloatingPlatform(355, 750, 190, 30);
