@@ -626,6 +626,8 @@ void Kirby::spit() {
 
     // 恢復正常狀態
     setFullStatus(false);
+    currentForm = Form::Normal;
+    currentAbility = CurrentAbility::None;
     isInhaling = false;
 }
 
