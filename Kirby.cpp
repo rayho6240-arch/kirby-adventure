@@ -75,6 +75,13 @@ void Kirby::setDown(bool down) {
     }
 }
 
+void Kirby::setUpPressed(bool pressed) {
+    isUpPressed = pressed;
+    if (!pressed) {
+        autoFlapCooldown = 0;
+    }
+}
+
 
 
 
@@ -369,8 +376,15 @@ void Kirby::update() {
     else if (currentVx < 0) isFacingRight = false;
     if (hasObjectInMouth || isFlying)  isDashing = false; //變胖不可以衝刺
 
-    updateSprite(); // 最後更新動畫幀
+    if (autoFlapCooldown > 0) {
+        autoFlapCooldown--;
+    }
+    if (isUpPressed && currentForm == Form::Normal && !isOnGround && !isInhaling && !hasObjectInMouth && vy > -2.0 && autoFlapCooldown <= 0) {
+        fly();
+        autoFlapCooldown = 15;
+    }
 
+    updateSprite(); // 最後更新動畫幀
     if (isFireBreathAttack() && frameCounter >= 15 && fireEffect && fireEffect->isVisible()) {
         applyFlameDamage();
     }
@@ -695,6 +709,8 @@ void Kirby::respawnAt(qreal x, qreal y) {
     isDashing = false;
     isInhaling = false;
     isSpitting = false;
+    isUpPressed = false;
+    autoFlapCooldown = 0;
     passThroughPlatform = false;
     onFloatingPlatform = false;
     isOnGround = false;

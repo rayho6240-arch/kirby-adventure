@@ -356,7 +356,14 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
         else if (key == Qt::Key_Up) {
             // 注意：這裡如果你要實作碰到傳送門按上鍵進入 Stage 2，
             // 可以在這裡呼叫一個 player->checkPortal() 或是將邏輯寫在 player->fly() 裡判斷
-            player->fly();
+            if (player->isNormal()) {
+                player->setUpPressed(true);
+                if (player->getOnGround()) {
+                    player->jump();
+                }
+            } else {
+                player->fly();
+            }
         }
         // 4. 往右移動與衝刺
         else if (key == Qt::Key_Right) {
@@ -421,6 +428,9 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event) {
         // 解除蹲下
         if (key == Qt::Key_Down) {
             player->setDown(false);
+        }
+        else if (key == Qt::Key_Up) {
+            player->setUpPressed(false);
         }
         // 解除左右移動，並啟動雙擊計時器準備判定衝刺
         else if (key == Qt::Key_Left || key == Qt::Key_Right) {

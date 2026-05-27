@@ -130,6 +130,7 @@ public:
 
     void takeDamage(int damage); // 承受傷害的函式
     void respawnAt(qreal x, qreal y); // 重生並清除速度 / 暫時狀態
+    void setUpPressed(bool pressed);  // 記錄 Up 是否正在長按
     bool getInhaling();          //讓外面得到資訊(傷害判定)
     bool getSpitting();
     bool getHasObjectInMouth() const { return hasObjectInMouth; } // 讓外部知道卡比嘴裡有沒有東西
@@ -216,6 +217,8 @@ private:
     
     // [新增] 控制地圖寬度的變數，到了stage2可用changeWidth(int width)改變
     int mapwidth = 4860;
+    bool isUpPressed = false;               ///< Up 是否正在長按
+    int autoFlapCooldown = 0;                ///< 自動拍翅冷卻，避免每幀都給向上速度
 
     // [新增] 特效物件
     Effect *fireEffect = nullptr;
