@@ -82,13 +82,11 @@ MainWindow::MainWindow(QWidget *parent)
     // Index 2：結局動畫音樂
     QString finishPath1 = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/../../kirby-adventure/bg_music/41_Goal.mp3");
     QString finishPath2 = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/bg_music/41_Goal.mp3");
-    QString finishPath = QFile::exists(finishPath1) ? finishPath1 : finishPath2; // 嘗試兩個路徑，哪個存在就用哪個
-    qDebug() << "真正的結算音樂路徑是：" << finishPath;
-    if (QFile::exists(finishPath)) {
-        playlist->addMedia(QUrl::fromLocalFile(finishPath));
-    } else {
-        qDebug() << "Error: finish music file not found:" << finishPath1 << finishPath2;
-    }
+    QString finishPath3 = QFile::exists(finishPath1) ? finishPath1 : finishPath2; // 嘗試兩個路徑，哪個存在就用哪個
+    // 🎯 加上這行，在下方的 Application Output 視窗看它印出什麼
+    qDebug() << "真正的音樂路徑是：" << finishPath3;
+    playlist->addMedia(QUrl::fromLocalFile(finishPath3));
+    
 
     // 設定循環模式
     playlist->setPlaybackMode(QMediaPlaylist::CurrentItemInLoop);
@@ -131,7 +129,7 @@ void MainWindow::gameLoop() {
 
         if ((currentState == STATE_STAGE1 || currentState == STATE_STAGE2) && player->y() > 1400) {
             qDebug() << "Kirby fell into abyss";
-            player->takeDamage(1);
+            player->setCurrentHp(0);
             if (!(player->getCurrentHp() <= 0 && player->getCurrentlives() <= 1)) {
                 player->respawnAt(400, 100);
             }
