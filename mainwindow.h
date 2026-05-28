@@ -38,7 +38,9 @@ enum GameState {
     STATE_STAGE1,
     STATE_STAGE2,
     GAMEOVER,
-    STATE_FINISH
+    STATE_FINISH,
+    STATE_STAGE3,
+    STATE_STAGE4
 };
 
 /**
@@ -138,6 +140,8 @@ private:
     void loadGameOver();
     void loadFinish(); // 負責管理整個結束畫面
     void finish_animation(); // 負責播放結束動畫
+    void loadStage3();
+    void loadStage4();
 
 
     QGraphicsPixmapItem* gameover;
