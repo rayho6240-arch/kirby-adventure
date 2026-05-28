@@ -221,10 +221,12 @@ void MainWindow::gameLoop() {
     //  --- [5. 同步卡比的血量給 HUD] ---[新增]
     gameHUD->updateHealth(player->getCurrentHp(), player->getMaxHp(), player->getCurrentlives(), player->getMaxlives());
 
-        // 讓 HUD 永遠跟著卡比走 (保持在視窗左上角)
-    qreal uiX = player->x() - 350;
-    if (uiX < 10) uiX = 10;
-    gameHUD->setPos(uiX, 20);
+    // 🎯 1. 告訴 Qt：我要視窗內左上角 (20, 20) 的地方。請幫我換算出場景的絕對座標！
+    // (請把下面的 view 換成你程式裡 QGraphicsView 的變數名稱，例如 ui->graphicsView)
+    QPointF hudScenePos = view->mapToScene(500, 930); 
+
+    // 🎯 2. 直接把 HUD 貼過去，不論卡比怎麼飛、鏡頭怎麼晃，它在螢幕上的位置動都不會動！
+    gameHUD->setPos(hudScenePos);
 
         // 檢查死亡
     if (player->getCurrentHp() <= 0 && player->getCurrentlives() <= 1) {
