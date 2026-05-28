@@ -20,6 +20,7 @@
 #include "FloatingPlatform.h"
 #include "Item.h"
 #include "Slope.h"
+#include "WaddleDoo.h"
 
 // =========================================================
 // 1. 建構子與解構子 (初始化遊戲世界)
@@ -327,7 +328,7 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
     // [新增] 狀態 ：如果目前在 Stage2 並且在門的x位置的地方按下 Up ，則切換場景為 Finish
     // ==========================================
     if (currentState == STATE_STAGE2) {
-        if(player->x() < 7900 && player->x() > 7800 && player->getOnGround()){
+        if(player->x() < 7900 && player->x() > 7800 && player->getOnGround() && player->y() < 600){
             if(key == Qt::Key_Up){
                 currentState = STATE_FINISH;
                 // 計算當前剩餘總血量
@@ -549,6 +550,22 @@ void MainWindow::loadStage1(){
         scene->addItem(newDee);
         enemyList.append(newDee);
     }
+
+    // 敵人 (WaddleDoo - 光束鞭攻擊)
+    WaddleDoo *doo1 = new WaddleDoo(player);
+    doo1->setPos(1600, 520);
+    scene->addItem(doo1);
+    enemyList.append(doo1);
+
+    WaddleDoo *doo2 = new WaddleDoo(player);
+    doo2->setPos(2350, 520);
+    scene->addItem(doo2);
+    enemyList.append(doo2);
+
+    WaddleDoo *doo3 = new WaddleDoo(player);
+    doo3->setPos(4600, 520);
+    scene->addItem(doo3);
+    enemyList.append(doo3);
 
     // 敵人 (Gordo - 原地待機敵人)
     Gordo *gordo = new Gordo();
@@ -835,32 +852,28 @@ void MainWindow::loadFinish(){
     // 優雅地讓鏡頭對準這個邏輯場景的最中心
     view->centerOn(810, 540); // (1620/2, 1080/2)
 
-    // 當當前總血量為1~3時顯示finish_7動畫
-    if(remain_Hp == 1 || remain_Hp == 2){
+    // 當當前總血量為1~2時顯示 finish_7，並把 remain_Hp 鎖定在合法範圍 3..9
+    if (remain_Hp <= 2) {
         remain_Hp = 3;
     }
+    remain_Hp = qBound(3, remain_Hp, 9);
+
+    int animationDir = qBound(1, 10 - remain_Hp, 7);
 
     // 🔴 【核心修正 2】安全路徑安全網（本機測試、助教編譯通通都能抓到）
-    // 設定.exe檔所在的檔案位置
     QString exePath = QCoreApplication::applicationDirPath();
-    
-    // 助教通常是在專案目錄下編譯，所以要相容兩種可能路徑
-    // 此為.exe與.kirby-advanture同一個資料夾下的情況
-    QString path1 = exePath + QString("/finish_animation/finish_%1/%2.png").arg(10-remain_Hp).arg(finish_frame); // build 內
-
-    // 此為.exe在build.../debug資料夾下的情況，這部分到時候繳交的時候kirby-advanture要改成game，才能符合繳交格式
-    QString path2 = exePath + QString("/../../kirby-adventure/finish_animation/finish_%1/%2.png").arg(10-remain_Hp).arg(finish_frame);
-    
-    // 檢查是否有此路徑
+    QString path1 = QDir::cleanPath(exePath + QString("/finish_animation/finish_%1/%2.png").arg(animationDir).arg(finish_frame));
+    QString path2 = QDir::cleanPath(exePath + QString("/../../kirby-adventure/finish_animation/finish_%1/%2.png").arg(animationDir).arg(finish_frame));
     QString finalPath = QFile::exists(path1) ? path1 : path2;
     QPixmap firstPic(finalPath);
 
-    playlist->setCurrentIndex(2); 
-    bgmPlayer->play(); // 切換後確保有在播放
-    
-    if(!firstPic.isNull()) {
-        // 讓圖片強行縮放到「目前視窗的大小」，保證 100% 填滿且置中
+    playlist->setCurrentIndex(2);
+    bgmPlayer->play();
+
+    if (!firstPic.isNull()) {
         finish_Item->setPixmap(firstPic.scaled(1620, 1080, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+    } else {
+        qDebug() << "finish load failed:" << finalPath << "animationDir=" << animationDir << "remain_Hp=" << remain_Hp;
     }
 
     // 啟動動畫切換圖片計時器
@@ -870,27 +883,42 @@ void MainWindow::loadFinish(){
 }
 
 void MainWindow::finish_animation(){
-    if(finish_frame < finish_total[9-remain_Hp]){
-        // 設定.exe的檔案位置
-        QString exePath = QCoreApplication::applicationDirPath();
+    int animationDir = qBound(1, 10 - remain_Hp, 7);
+    int animationIndex = animationDir - 1;
+    int totalFrames = finish_total[animationIndex];
 
-        // 助教通常是在專案目錄下編譯，所以要相容兩種可能路徑，此為.exe與.kirby-advanture同一個資料夾下的情況
-        QString path1 = exePath + QString("/finish_animation/finish_%1/%2.png").arg(10-remain_Hp).arg(finish_frame); // build 內
-
-        // 此為.exe在build.../debug資料夾下的情況，這部分到時候繳交的時候kirby-advanture要改成game，才能符合繳交格式
-        QString path2 = exePath + QString("/../../kirby-adventure/finish_animation/finish_%1/%2.png").arg(10-remain_Hp).arg(finish_frame);
-        QString finalPath = QFile::exists(path1) ? path1 : path2;
-        
-        QPixmap originalPic(finalPath);
-        
-        if(!originalPic.isNull()){
-            // 每一格都完美動態縮放到跟視窗一模一樣大
-            finish_Item->setPixmap(originalPic.scaled(1620, 1080, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
-        }
-    }
-    else{
+    if (finish_frame >= totalFrames) {
         finish_timer->stop();
         loadStartMenu();
+        return;
     }
+
+    QString exePath = QCoreApplication::applicationDirPath();
+    QString path1 = QDir::cleanPath(exePath + QString("/finish_animation/finish_%1/%2.png").arg(animationDir).arg(finish_frame));
+    QString path2 = QDir::cleanPath(exePath + QString("/../../kirby-adventure/finish_animation/finish_%1/%2.png").arg(animationDir).arg(finish_frame));
+    QString finalPath = QFile::exists(path1) ? path1 : path2;
+
+    QPixmap originalPic(finalPath);
+    if (!originalPic.isNull()) {
+        finish_Item->setPixmap(originalPic.scaled(1620, 1080, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+    } else {
+        qDebug() << "finish frame load failed:" << finalPath << "frame=" << finish_frame << "animationDir=" << animationDir << "total=" << totalFrames;
+    }
+
     finish_frame++;
+}
+
+void MainWindow::loadStage3(){
+    timer->stop();
+    
+    //繼承stage1的血量
+    c_Hp = player->getCurrentHp();
+    c_lives = player->getCurrentlives();
+
+
+    scene->clear(); 
+    bulletList.clear(); 
+    enemyList.clear();
+    
+    scene->setSceneRect(0, 0, 8100, 1080);
 }

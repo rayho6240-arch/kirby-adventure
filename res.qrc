@@ -133,5 +133,26 @@
         <file>Project2_Dataset/Image/item/lives-0.png</file>
         <file>Project2_Dataset/Image/item/lives-1.png</file>
         <file>Project2_Dataset/Image/item/lives-2.png</file>
+        <file>Project2_Dataset/Image/Waddle Doo/attack_0.png</file>
+        <file>Project2_Dataset/Image/Waddle Doo/attack_1.png</file>
+        <file>Project2_Dataset/Image/Waddle Doo/attack_2.png</file>
+        <file>Project2_Dataset/Image/Waddle Doo/attack_3.png</file>
+        <file>Project2_Dataset/Image/Waddle Doo/attack_4.png</file>
+        <file>Project2_Dataset/Image/Waddle Doo/attack_5.png</file>
+        <file>Project2_Dataset/Image/Waddle Doo/attack_6.png</file>
+        <file>Project2_Dataset/Image/Waddle Doo/attack_7.png</file>
+        <file>Project2_Dataset/Image/Waddle Doo/attack_8.png</file>
+        <file>Project2_Dataset/Image/Waddle Doo/attack_9.png</file>
+        <file>Project2_Dataset/Image/Waddle Doo/attack_10.png</file>
+        <file>Project2_Dataset/Image/Waddle Doo/attack_11.png</file>
+        <file>Project2_Dataset/Image/Waddle Doo/attack_12.png</file>
+        <file>Project2_Dataset/Image/Waddle Doo/attack_13.png</file>
+        <file>Project2_Dataset/Image/Waddle Doo/attack_14.png</file>
+        <file>Project2_Dataset/Image/Waddle Doo/attack_15.png</file>
+        <file>Project2_Dataset/Image/Waddle Doo/walk_1.png</file>
+        <file>Project2_Dataset/Image/Waddle Doo/walk_2.png</file>
+        <file>Project2_Dataset/Image/Waddle Doo/walk_3.png</file>
+        <file>Project2_Dataset/Image/Waddle Doo/walk_4.png</file>
+        <file>Project2_Dataset/Image/Waddle Doo/walk_5.png</file>
     </qresource>
 </RCC>

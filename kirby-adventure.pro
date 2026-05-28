@@ -23,6 +23,7 @@ SOURCES += \
     StarBullet.cpp \
     Fireball.cpp \
     WaddleDee.cpp \
+    WaddleDoo.cpp \
     main.cpp \
     mainwindow.cpp \
     Slope.cpp
@@ -42,6 +43,7 @@ HEADERS += \
     Fireball.h \
     Starblock.h \
     WaddleDee.h \
+    WaddleDoo.h \
     mainwindow.h \
     Slope.h
 
