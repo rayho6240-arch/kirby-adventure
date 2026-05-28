@@ -2,6 +2,7 @@
 #define HUD_H
 
 #include <QGraphicsItemGroup>
+#include <QGraphicsPixmapItem>
 #include <QGraphicsTextItem>
 #include <QFont>
 #include <QString>
@@ -19,7 +20,9 @@ public:
     void showGameOver();
 
 private:
-    QGraphicsTextItem *hpText; ///< 負責顯示血量的文字物件
+    QGraphicsTextItem *hpText; ///< 保留文字作為備援顯示
+    QGraphicsPixmapItem *hpPixmap; ///< 用來顯示 HP 圖片
+    QGraphicsPixmapItem *livesPixmap; ///< 用來顯示 Lives 圖片
 };
 
 #endif // HUD_H
