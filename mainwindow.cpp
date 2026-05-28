@@ -83,8 +83,8 @@ MainWindow::MainWindow(QWidget *parent)
     QString finishPath2 = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/bg_music/41_Goal.mp3");
     QString finishPath3 = QFile::exists(finishPath1) ? finishPath1 : finishPath2; // 嘗試兩個路徑，哪個存在就用哪個
     // 🎯 加上這行，在下方的 Application Output 視窗看它印出什麼
-    qDebug() << "真正的音樂路徑是：" << finishPath1;
-    playlist->addMedia(QUrl::fromLocalFile(finishPath1));
+    qDebug() << "真正的音樂路徑是：" << finishPath3;
+    playlist->addMedia(QUrl::fromLocalFile(finishPath3));
     
 
     // 設定循環模式
@@ -128,7 +128,7 @@ void MainWindow::gameLoop() {
 
         if ((currentState == STATE_STAGE1 || currentState == STATE_STAGE2) && player->y() > 1400) {
             qDebug() << "Kirby fell into abyss";
-            player->takeDamage(1);
+            player->setCurrentHp(0);
             if (!(player->getCurrentHp() <= 0 && player->getCurrentlives() <= 1)) {
                 player->respawnAt(400, 100);
             }
