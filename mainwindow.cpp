@@ -143,6 +143,27 @@ void MainWindow::gameLoop() {
 
     if (boss && !boss->isDead()) {
         boss->update();
+        QPointF bombPos;
+        double bombVx = 0.0;
+        double bombVy = 0.0;
+        if (boss->consumeBombSpawnRequest(bombPos, bombVx, bombVy)) {
+            Bomb *bomb = new Bomb(bombPos.x(), bombPos.y(), bombVx, bombVy, bossGroundY, player);
+            scene->addItem(bomb);
+            bombList.append(bomb);
+            qDebug() << "Bomb spawned at" << bombPos << "vx =" << bombVx << "vy =" << bombVy;
+        }
+    }
+
+    for (int i = 0; i < bombList.size(); ++i) {
+        Bomb *bomb = bombList[i];
+        bomb->update();
+
+        if (bomb->isDead()) {
+            scene->removeItem(bomb);
+            bombList.removeAt(i);
+            delete bomb;
+            i--;
+        }
     }
 
 
@@ -339,7 +360,7 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
     // ==========================================
     if (currentState == STATE_STAGE2) {
         if(player->x() < 7900 && player->x() > 7800 && player->getOnGround() && player->y() < 600){
-            if(key == Qt::Key_Up && (!boss || boss->isDead())){
+            if(key == Qt::Key_Up){
                 currentState = STATE_FINISH;
                 // 計算當前剩餘總血量
                 remain_Hp = player->getCurrentHp() + player->getCurrentlives() * 3 - 3;
@@ -467,6 +488,7 @@ void MainWindow::loadStartMenu(){
     currentState = STATE_MENU; // 設定現在為初始場景
     scene->clear();
     bulletList.clear(); 
+    bombList.clear();
     enemyList.clear();
     boss = nullptr;
     scene->setSceneRect(0, 0, 1620, 1080);
@@ -491,6 +513,7 @@ void MainWindow::loadStage1(){
     // 注意：scene->clear() 會自動 delete 裡面的指標，避免記憶體外洩
     scene->clear(); 
     bulletList.clear(); 
+    bombList.clear();
     enemyList.clear();
     boss = nullptr;
     scene->setSceneRect(0, 0, 4860, 1080);
@@ -620,6 +643,7 @@ void MainWindow::loadStage2(){
 
     scene->clear(); 
     bulletList.clear(); 
+    bombList.clear();
     enemyList.clear();
     boss = nullptr;
     
@@ -788,9 +812,6 @@ void MainWindow::loadStage2(){
 
     scene->addItem(player);
 
-    const double bossArenaLeft = 6900.0;
-    const double bossArenaRight = 7700.0;
-    const double bossGroundY = 890.0;
     boss = new Boss(bossArenaLeft, bossArenaRight, bossGroundY, player);
     scene->addItem(boss);
 
@@ -837,6 +858,7 @@ void MainWindow::loadGameOver(){
     currentState = GAMEOVER;
     scene->clear(); 
     bulletList.clear(); 
+    bombList.clear();
     enemyList.clear();
     boss = nullptr;
     scene->setSceneRect(0,0,1620,1080);
@@ -856,6 +878,7 @@ void MainWindow::loadFinish(){
     // 2. 徹底清空場景
     scene->clear(); 
     bulletList.clear(); 
+    bombList.clear();
     enemyList.clear();
     boss = nullptr;
 
@@ -939,6 +962,7 @@ void MainWindow::loadStage3(){
 
     scene->clear(); 
     bulletList.clear(); 
+    bombList.clear();
     enemyList.clear();
     boss = nullptr;
     

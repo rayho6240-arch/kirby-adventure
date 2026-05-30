@@ -5,6 +5,8 @@
 #include <QPen>
 #include <QPixmap>
 #include <QtGlobal>
+#include <QDebug>
+#include <cmath>
 
 Boss::Boss(double leftBound, double rightBound, double groundY, Kirby *player)
     : leftBound(leftBound),
@@ -49,7 +51,7 @@ void Boss::update()
     } else if (state == BossState::VerticalHopPrepare && onGround) {
         launchVerticalHop();
     } else if (state == BossState::DropBomb && onGround) {
-        // TODO Phase 2: spawn Bomb here.
+        // Bomb is requested at the VerticalHopPrepare apex; this state closes the cycle.
         setState(BossState::SmallHop);
     }
 
@@ -77,6 +79,17 @@ bool Boss::isDead() const
     return dead;
 }
 
+bool Boss::consumeBombSpawnRequest(QPointF &pos, double &vx, double &vy)
+{
+    if (!bombSpawnRequested) return false;
+
+    pos = requestedBombPos;
+    vx = requestedBombVx;
+    vy = requestedBombVy;
+    bombSpawnRequested = false;
+    return true;
+}
+
 void Boss::applyPhysics()
 {
     if (onGround && vy == 0.0) {
@@ -84,7 +97,13 @@ void Boss::applyPhysics()
         return;
     }
 
+    const double previousVy = vy;
     vy += gravity;
+    if (state == BossState::VerticalHopPrepare && !bombDroppedThisCycle && previousVy < 0.0 && vy >= 0.0) {
+        requestBombSpawn();
+        bombDroppedThisCycle = true;
+    }
+
     setX(x() + vx);
     setY(y() + vy);
     clampToArena();
@@ -182,6 +201,9 @@ void Boss::setState(BossState newState)
 {
     state = newState;
     stateTimer = 0;
+    if (newState == BossState::VerticalHopPrepare) {
+        bombDroppedThisCycle = false;
+    }
 }
 
 void Boss::updateHealthBar()
@@ -196,6 +218,30 @@ void Boss::updateHealthBar()
 
     healthBack->setRect(barX, barY, barWidth, barHeight);
     healthFill->setRect(barX + 1.0, barY + 1.0, (barWidth - 2.0) * hpRatio, barHeight - 2.0);
+}
+
+void Boss::requestBombSpawn()
+{
+    const QPointF bombPos = sceneBoundingRect().center();
+    QPointF targetPos = player ? player->sceneBoundingRect().center() : QPointF(bombPos.x() + moveDirection, bombPos.y());
+    targetPos.setY(targetPos.y() - aimYOffset);
+
+    double dx = targetPos.x() - bombPos.x();
+    double dy = targetPos.y() - bombPos.y();
+    double length = std::sqrt(dx * dx + dy * dy);
+
+    if (length < 1.0) {
+        dx = player && player->x() < x() ? -1.0 : 1.0;
+        dy = -0.8;
+        length = std::sqrt(dx * dx + dy * dy);
+    }
+
+    requestedBombPos = bombPos;
+    requestedBombVx = bombLaunchSpeed * dx / length;
+    requestedBombVy = bombLaunchSpeed * dy / length;
+    bombSpawnRequested = true;
+
+    qDebug() << "Boss requested bomb spawn";
 }
 
 double Boss::standingY() const
