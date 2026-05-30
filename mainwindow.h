@@ -27,6 +27,7 @@
 #include "HotHead.h"
 #include "StarBullet.h"
 #include "HUD.h"
+#include "Boss.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; } //後面就不打 "mainwindow::"
@@ -106,6 +107,8 @@ private:
      * @note 這裡使用多型 (Polymorphism)，以 Enemy* 基底指標儲存，
      * 這樣陣列裡就可以同時存放 WaddleDee 或未來新增的各種敵人。
      */
+    Boss *boss = nullptr;
+
     QList<Enemy*> enemyList;
 
     QList<StarBullet*> bulletList;  ///< 管理畫面上所有正在飛行的星星子彈
