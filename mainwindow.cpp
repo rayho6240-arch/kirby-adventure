@@ -21,6 +21,8 @@
 #include "Item.h"
 #include "Slope.h"
 #include "WaddleDoo.h"
+#include <QGraphicsScene>
+#include "Boss.h"
 
 // =========================================================
 // 1. 建構子與解構子 (初始化遊戲世界)
@@ -141,6 +143,10 @@ void MainWindow::gameLoop() {
         e->update();
     }
 
+    if (boss && !boss->isDead()) {
+        boss->update();
+    }
+
 
 
     // --- [3. 物理碰撞偵測層] ---
@@ -177,6 +183,12 @@ void MainWindow::gameLoop() {
     }
 
     // --- [4. 更新星星子彈 (含邊界與銷毀判定)] ---
+    if (player && boss && !boss->isDead() && boss->isVisible()) {
+        if (player->collidesWithItem(boss)) {
+            player->takeDamage(1);
+        }
+    }
+
     for (int i = 0; i < bulletList.size(); ++i) {
         StarBullet *b = bulletList[i];
         b->update();
@@ -329,7 +341,7 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
     // ==========================================
     if (currentState == STATE_STAGE2) {
         if(player->x() < 7900 && player->x() > 7800 && player->getOnGround() && player->y() < 600){
-            if(key == Qt::Key_Up){
+            if(key == Qt::Key_Up && (!boss || boss->isDead())){
                 currentState = STATE_FINISH;
                 // 計算當前剩餘總血量
                 remain_Hp = player->getCurrentHp() + player->getCurrentlives() * 3 - 3;
@@ -458,6 +470,7 @@ void MainWindow::loadStartMenu(){
     scene->clear();
     bulletList.clear(); 
     enemyList.clear();
+    boss = nullptr;
     scene->setSceneRect(0, 0, 1620, 1080);
     
     QGraphicsPixmapItem* title = new QGraphicsPixmapItem(QPixmap(":/Project2_Dataset/Image/background/start.png"));
@@ -481,6 +494,7 @@ void MainWindow::loadStage1(){
     scene->clear(); 
     bulletList.clear(); 
     enemyList.clear();
+    boss = nullptr;
     scene->setSceneRect(0, 0, 4860, 1080);
 
     // --- [3. 鋪設背景大圖 (Level Design)] ---
@@ -609,6 +623,7 @@ void MainWindow::loadStage2(){
     scene->clear(); 
     bulletList.clear(); 
     enemyList.clear();
+    boss = nullptr;
     
     scene->setSceneRect(0, 0, 8100, 1080);
 
@@ -775,6 +790,12 @@ void MainWindow::loadStage2(){
 
     scene->addItem(player);
 
+    const double bossArenaLeft = 6900.0;
+    const double bossArenaRight = 7700.0;
+    const double bossGroundY = 890.0;
+    boss = new Boss(bossArenaLeft, bossArenaRight, bossGroundY, player);
+    scene->addItem(boss);
+
     //新增敵人sparky
     for (int i = 0; i < 3; ++i) {
         Sparky *spark = new Sparky(player);
@@ -819,6 +840,7 @@ void MainWindow::loadGameOver(){
     scene->clear(); 
     bulletList.clear(); 
     enemyList.clear();
+    boss = nullptr;
     scene->setSceneRect(0,0,1620,1080);
     gameover = new QGraphicsPixmapItem(QPixmap(":/Project2_Dataset/Image/background/game_over_continue.png"));
     scene->addItem(gameover);

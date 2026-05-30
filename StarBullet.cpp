@@ -1,5 +1,7 @@
 #include "StarBullet.h"
-
+#include <QGraphicsScene>
+#include <QList>
+#include "Block.h"
 // =========================================================
 // 1. 初始化與建構子 (Initialization)
 // =========================================================
@@ -60,4 +62,15 @@ void StarBullet::update() {
     // TODO: 之後可以在這裡加上 scene()->collidingItems(this) 的檢查。
     // 1. 如果碰到 Block (qgraphicsitem_cast<Block*>) -> 隱藏自己 / 播放爆炸特效
     // 2. 如果碰到 Enemy (qgraphicsitem_cast<Enemy*>) -> 殺死敵人 -> 隱藏自己
+    QList<QGraphicsItem *> colliding = scene()->collidingItems(this);
+    for (QGraphicsItem *item : colliding) {
+        if (item == this) continue;
+
+        Block *block = dynamic_cast<Block *>(item);
+        if (block) {
+            setVisible(false);
+            deleteLater();
+            return;
+        }
+    }
 }

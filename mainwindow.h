@@ -27,6 +27,7 @@
 #include "HotHead.h"
 #include "StarBullet.h"
 #include "HUD.h"
+#include "Boss.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; } //後面就不打 "mainwindow::"
@@ -99,6 +100,7 @@ private:
     // 4. 遊戲實體物件 (Game Entities)
     // ==========================================
     Kirby *player;                  ///< 玩家操作的卡比
+    Boss *boss = nullptr;
     
 
     /**

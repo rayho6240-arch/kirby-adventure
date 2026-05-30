@@ -9,6 +9,7 @@ CONFIG += c++11
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    Boss.cpp \
     Block.cpp \
     Effect.cpp \
     Enemy.cpp \
@@ -19,7 +20,6 @@ SOURCES += \
     Kirby.cpp \
     Item.cpp \
     Sparky.cpp \
-    StarBlock.cpp \
     StarBullet.cpp \
     Fireball.cpp \
     WaddleDee.cpp \
@@ -29,6 +29,7 @@ SOURCES += \
     Slope.cpp
 
 HEADERS += \
+    Boss.h \
     Block.h \
     Effect.h \
     Enemy.h \
@@ -41,7 +42,6 @@ HEADERS += \
     Sparky.h \
     StarBullet.h \
     Fireball.h \
-    Starblock.h \
     WaddleDee.h \
     WaddleDoo.h \
     mainwindow.h \
