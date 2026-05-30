@@ -154,5 +154,6 @@
         <file>Project2_Dataset/Image/Waddle Doo/walk_3.png</file>
         <file>Project2_Dataset/Image/Waddle Doo/walk_4.png</file>
         <file>Project2_Dataset/Image/Waddle Doo/walk_5.png</file>
+        <file>Project2_Dataset/Image/boss/boss_jump(1).png</file>
     </qresource>
 </RCC>
