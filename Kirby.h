@@ -46,7 +46,8 @@ public:
     enum class CurrentAbility {
         None,
         Spark,
-        Fire
+        Fire,
+        Beam
     };
 
     enum class Form {
@@ -54,7 +55,9 @@ public:
         SparkyFat,  // 吃掉 Sparky 變胖了 (準備變身)
         Sparky,     // 已經獲得 Spark 技能 (變身完成)
         FireFat,    // 吃掉 HotHead 變胖了 (準備變身)
-        FireForm    // 已經獲得 Fire 技能 (變身完成)
+        FireForm,    // 已經獲得 Fire 技能 (變身完成)
+        BeamFat,    // 吃掉 WaddleDoo 變胖了 (準備變身)
+        BeamForm    // 已經獲得 WaddleDoo 技能 (變身完成)
     };
 
     enum MoveMode {

@@ -28,15 +28,23 @@ private:
     enum State {
         STATE_WALK,
         STATE_ATTACK,
-        STATE_DEAD
+        STATE_DEAD,
+        BEING_INHALED
     };
+
+    QPixmap attackStarPixmap; // 👈 儲存 attack_star.png
+    QPixmap attackWaddleDooChargePixmap;
+    QPixmap attackWaddleDooWalkPixmap;
+
+    
+    // 👈 核心：統一管理每一幀光束方塊位置的函數
+    QList<QRectF> getBeamRects(int frame) const;
 
     void loadWalkFrames();
     void loadAttackFrames();
     void updateStateMachine();
     void updateAnimation();
     void updateFacingDirection();
-    void addBeamShape(QPainterPath &path, int frame) const;
 
     State currentState = STATE_WALK;
     int currentFrame = 3;

@@ -34,7 +34,28 @@ void WaddleDoo::update() {
         currentState = STATE_DEAD;
         return;
     }
-    
+/*  實作被吸邏輯：一旦被吸，就強制切換到 BEING_INHALED 狀態，並且完全不受其他狀態影響
+    此部分待修改
+    if (isInhaled) {
+        if (currentState != BEING_INHALED) {
+            currentState = BEING_INHALED;
+        }
+    }
+
+    if (currentState == BEING_INHALED) {
+        if (targetPlayer != nullptr) {
+            qreal dist = qAbs(targetPlayer->x() - this->x());
+            if (dist < 20) {
+                setIsDead(true);
+                setVisible(false);
+                return;
+            }
+        }
+        handlePhysics(100, 100);
+        updateSprite();
+        return;
+    }
+*/    
     updateStateMachine();
     updateAnimation();
     
@@ -136,24 +157,27 @@ void WaddleDoo::updateFacingDirection() {
 // =========================================================
 
 void WaddleDoo::updateAnimation() {
-    frameCounter += 1;
-
-    // ⭕ 關鍵修正：因為接下來的邏輯會改變縮放比例，進而改變 boundingRect 的大小，
-    // 必須先通知 Qt 刷新幾何緩存，徹底解決破圖與殘影問題！
+frameCounter += 1;
     prepareGeometryChange();
 
     if (currentState == STATE_ATTACK) {
-        setPixmap(attackFrames[currentFrame]);
-        currentScaleX = attackScaleX[currentFrame];
-        currentScaleY = attackScaleY[currentFrame];
-    } else {
-        if (WALK_FRAME_COUNT > 0) {
-            walkFrameIndex = (frameCounter / 10) % WALK_FRAME_COUNT;
-            setPixmap(walkFrames[walkFrameIndex]);
+        // 👉 核心邏輯：利用這兩張乾淨的身體，實現眼睛顏色閃爍！
+        // 奇數幀用 charge，偶數幀用 walk
+        if (currentFrame % 2 != 0) {
+            setPixmap(attackWaddleDooChargePixmap);
+        } else {
+            setPixmap(attackWaddleDooWalkPixmap);
         }
-        currentScaleX = 1.0;
-        currentScaleY = 1.0;
+    } else {
+            if (WALK_FRAME_COUNT > 0) {
+                walkFrameIndex = (frameCounter / 10) % WALK_FRAME_COUNT;
+                setPixmap(walkFrames[walkFrameIndex]);
+            }
     }
+
+    // ⭕ 本體比例徹底回歸 1.0 原始比例，不再拉扁
+    currentScaleX = 1.0;
+    currentScaleY = 1.0;
 
     QTransform transform;
     qreal horizontalFlip = (facingDirection == -1) ? -1.0 : 1.0;
@@ -169,15 +193,19 @@ void WaddleDoo::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
     Q_UNUSED(widget)
 
     painter->save();
-
-    // ⭕ 視覺形變：在這裡套用你在 loadAttackFrames 寫好的拉伸比例
-    painter->translate(50, 100); 
-    painter->scale(currentScaleX, currentScaleY);
-    painter->translate(-50, -100);
-
     painter->setRenderHint(QPainter::SmoothPixmapTransform);
-    // 注意：不用再判斷面向左右翻轉了，因為外層的 setTransform 已經翻轉過了
+
+    // 1. 繪製 Waddle Doo 本體 (此時身體是完美的 1:1，不再被拉長)
     painter->drawPixmap(0, 0, pixmap());
+    
+    // 2. ⭕ 核心進階：如果正在攻擊，程式自動在對應位置畫出 attack_star
+    if (currentState == STATE_ATTACK) {
+        // 抓取座標黑盒子裡的矩形資料
+        for (const QRectF &rect : getBeamRects(currentFrame)) {
+            // 把單張 attack_star 精準繪製到指定的矩形區域內
+            painter->drawPixmap(rect, attackStarPixmap, attackStarPixmap.rect());
+        }
+    }
     
     painter->restore();
 }
@@ -191,62 +219,93 @@ QPainterPath WaddleDoo::shape() const {
         return path;
     }
 
-    // 身體底部碰撞：固定在左下角（100x100 座標系）
+    // 1. 身體底部碰撞
     path.addEllipse(QRectF(10, 40, 55, 55));
 
-    // ⭕ 關鍵修正：只有在「非地形物理檢測」時，才把光束加進碰撞箱
+    // 2. ⭕ 完美整合：直接呼叫 getBeamRects，把星星方塊加進碰撞路徑中
     if (currentState == STATE_ATTACK && !inPhysicsCheck) {
-        addBeamShape(path, currentFrame);
+        for (const QRectF &rect : getBeamRects(currentFrame)) {
+            path.addRect(rect);
+        }
     }
+    
     return path;
 }
 
-void WaddleDoo::addBeamShape(QPainterPath &path, int frame) const {
-    switch (frame) {
-    case 3:
-        path.addRect(QRectF(81, 14, 25, 17));
-        path.addRect(QRectF(104, 31, 25, 14));
-        break;
-    case 4:
-        path.addRect(QRectF(76, 20, 31, 17));
-        path.addRect(QRectF(101, 36, 25, 14));
-        break;
-    case 5:
-        path.addRect(QRectF(70, 25, 36, 17));
-        path.addRect(QRectF(98, 42, 25, 14));
-        break;
-    case 6:
-        path.addRect(QRectF(64, 34, 42, 17));
-        path.addRect(QRectF(106, 48, 22, 14));
-        break;
-    case 7:
-        path.addRect(QRectF(62, 42, 48, 17));
-        path.addRect(QRectF(112, 53, 20, 14));
-        break;
-    case 8:
-        path.addRect(QRectF(59, 50, 53, 17));
-        path.addRect(QRectF(115, 62, 17, 14));
-        break;
-    case 9:
-        path.addRect(QRectF(56, 59, 59, 17));
-        path.addRect(QRectF(118, 70, 17, 14));
-        break;
-    case 10:
-        path.addRect(QRectF(53, 73, 64, 17));
-        path.addRect(QRectF(118, 84, 20, 14));
-        break;
-    case 11:
-        path.addRect(QRectF(50, 78, 70, 17));
-        path.addRect(QRectF(120, 90, 17, 14));
-        break;
-    case 12:
-        path.addRect(QRectF(48, 81, 76, 17));
-        path.addRect(QRectF(123, 92, 14, 14));
-        break;
-    default:
-        break;
+QList<QRectF> WaddleDoo::getBeamRects(int frame) const {
+    QList<QRectF> rects;
+    
+    // 每一顆星星的大小固定為 24x24 像素
+    qreal w = 24;
+    qreal h = 24;
+
+    switch(frame) {
+        case 3: // 第 3 幀：2顆星星，甩在右上方
+            rects.append(QRectF(75, 20, w, h));
+            rects.append(QRectF(65, -20, w, h));
+            break;
+            
+        case 4: // 第 4 幀：3顆星星，垂直弧線
+            rects.append(QRectF(80, 25, w, h));
+            rects.append(QRectF(85, -15, w, h));
+            rects.append(QRectF(70, -50, w, h));
+            break;
+            
+        case 5:
+            rects.append(QRectF(85, 30, w, h));
+            rects.append(QRectF(100, -5, w, h));
+            rects.append(QRectF(90, -40, w, h));
+            break;
+            
+        case 6:
+            rects.append(QRectF(90, 35, w, h));
+            rects.append(QRectF(115, 5, w, h));
+            rects.append(QRectF(110, -25, w, h));
+            break;
+            
+        case 7: // 鞭子逐漸往前延伸
+            rects.append(QRectF(95, 40, w, h));
+            rects.append(QRectF(125, 20, w, h));
+            rects.append(QRectF(130, -5, w, h));
+            break;
+            
+        case 8:
+            rects.append(QRectF(100, 45, w, h));
+            rects.append(QRectF(135, 35, w, h));
+            rects.append(QRectF(145, 15, w, h));
+            break;
+            
+        case 9:
+            rects.append(QRectF(100, 50, w, h));
+            rects.append(QRectF(140, 50, w, h));
+            rects.append(QRectF(155, 30, w, h));
+            break;
+            
+        case 10:
+            rects.append(QRectF(95, 55, w, h));
+            rects.append(QRectF(135, 65, w, h));
+            rects.append(QRectF(160, 50, w, h));
+            break;
+            
+        case 11: // 鞭子甩到下方
+            rects.append(QRectF(90, 60, w, h));
+            rects.append(QRectF(125, 75, w, h));
+            rects.append(QRectF(155, 70, w, h));
+            break;
+            
+        case 12: // 第 12 幀：最後的收尾
+            rects.append(QRectF(85, 65, w, h));
+            rects.append(QRectF(115, 80, w, h));
+            rects.append(QRectF(145, 80, w, h));
+            break;
+            
+        default:
+            break;
     }
+    
+    return rects;
 }
+
 
 // =========================================================
 // 6. 圖片載入
@@ -269,49 +328,25 @@ void WaddleDoo::loadWalkFrames() {
 }
 
 void WaddleDoo::loadAttackFrames() {
-    static const qreal frameScaleX[ATTACK_FRAME_END + 1] = {
-        1.0, // placeholder for index 0
-        1.0, // placeholder for index 1
-        1.0, // placeholder for index 2
-        1.0, // frame 3: high beam start
-        1.222,
-        1.444,
-        1.667,
-        1.889,
-        2.111,
-        2.333,
-        2.556,
-        2.778,
-        3.0  // frame 12: widest reach
-    };
-    static const qreal frameScaleY[ATTACK_FRAME_END + 1] = {
-        1.0, // placeholder for index 0
-        1.0, // placeholder for index 1
-        1.0, // placeholder for index 2
-        3.0, // frame 3: starting tallest
-        2.778,
-        2.556,
-        2.333,
-        2.111,
-        1.889,
-        1.667,
-        1.444,
-        1.222,
-        1.0  // frame 12: normal height
-    };
+    prepareGeometryChange(); // 通知幾何改變
 
-    for (int frame = ATTACK_FRAME_START; frame <= ATTACK_FRAME_END; ++frame) {
-        QString path = QString(":/Project2_Dataset/Image/Waddle Doo/attack_%1.png").arg(frame);
-        QPixmap pix(path);
-        if (pix.isNull()) {
-            qDebug() << "WaddleDoo: 無法載入" << path;
-            pix = QPixmap(100, 100);
-            pix.fill(Qt::transparent);
-        } else {
-            qDebug() << "WaddleDoo: 成功載入" << path;
-        }
-        attackFrames[frame] = pix.scaled(100, 100, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
-        attackScaleX[frame] = frameScaleX[frame];
-        attackScaleY[frame] = frameScaleY[frame];
+    // 1. 載入偶數幀身體 (image_11)
+    attackWaddleDooWalkPixmap = QPixmap(":/Project2_Dataset/Image/Waddle Doo/attack_WaddleDoo.1.png");
+    if (!attackWaddleDooWalkPixmap.isNull()) {
+        attackWaddleDooWalkPixmap = attackWaddleDooWalkPixmap.scaled(100, 100, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    }
+
+    // 2. 載入奇數幀身體 (image_12)
+    attackWaddleDooChargePixmap = QPixmap(":/Project2_Dataset/Image/Waddle Doo/attack_WaddleDoo.2.png");
+    if (!attackWaddleDooChargePixmap.isNull()) {
+        attackWaddleDooChargePixmap = attackWaddleDooChargePixmap.scaled(100, 100, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    }
+
+    // 3. 載入星星特效 (image_10)
+    attackStarPixmap = QPixmap(":/Project2_Dataset/Image/Waddle Doo/attack_star.png");
+    if (attackStarPixmap.isNull()) {
+        // 防閃退備用方案
+        attackStarPixmap = QPixmap(20, 20);
+        attackStarPixmap.fill(Qt::yellow);
     }
 }
