@@ -28,6 +28,8 @@
 #include "StarBullet.h"
 #include "HUD.h"
 #include "Boss.h"
+#include "Bomb.h"
+#include "BombStar.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; } //後面就不打 "mainwindow::"
@@ -108,6 +110,11 @@ private:
      * 這樣陣列裡就可以同時存放 WaddleDee 或未來新增的各種敵人。
      */
     Boss *boss = nullptr;
+    QList<Bomb*> bombList;
+    QList<BombStar*> bombStarList;
+    const double bossArenaLeft = 3200.0;
+    const double bossArenaRight = 4030.0;
+    const double bossGroundY = 890.0;
 
     QList<Enemy*> enemyList;
 

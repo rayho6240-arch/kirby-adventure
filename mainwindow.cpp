@@ -143,6 +143,60 @@ void MainWindow::gameLoop() {
 
     if (boss && !boss->isDead()) {
         boss->update();
+        QPointF bombPos;
+        double bombVx = 0.0;
+        double bombVy = 0.0;
+        if (boss->consumeBombSpawnRequest(bombPos, bombVx, bombVy)) {
+            Bomb *bomb = new Bomb(bombPos.x(), bombPos.y(), bombVx, bombVy, bossGroundY, player);
+            scene->addItem(bomb);
+            bombList.append(bomb);
+            qDebug() << "Bomb spawned at" << bombPos << "vx =" << bombVx << "vy =" << bombVy;
+        }
+    }
+
+    if (player) {
+        for (int i = 0; i < bombList.size(); ++i) {
+            Bomb *bomb = bombList[i];
+            if (!bomb->isDead() && !bomb->isExploding() && player->canInhaleBomb(bomb)) {
+                qDebug() << "Bomb inhaled by Kirby";
+                player->inhaleBomb();
+                bomb->markInhaled();
+                scene->removeItem(bomb);
+                bombList.removeAt(i);
+                delete bomb;
+                i--;
+            }
+        }
+    }
+
+    for (int i = 0; i < bombList.size(); ++i) {
+        Bomb *bomb = bombList[i];
+        bomb->update();
+
+        if (bomb->isDead()) {
+            scene->removeItem(bomb);
+            bombList.removeAt(i);
+            delete bomb;
+            i--;
+        }
+    }
+
+    for (int i = 0; i < bombStarList.size(); ++i) {
+        BombStar *bombStar = bombStarList[i];
+        bombStar->update();
+
+        if (boss && !boss->isDead() && bombStar->collidesWithItem(boss)) {
+            qDebug() << "BombStar hit Boss";
+            boss->takeDamage(1);
+            bombStar->setDead();
+        }
+
+        if (bombStar->isDead()) {
+            scene->removeItem(bombStar);
+            bombStarList.removeAt(i);
+            delete bombStar;
+            i--;
+        }
     }
 
 
@@ -467,6 +521,8 @@ void MainWindow::loadStartMenu(){
     currentState = STATE_MENU; // 設定現在為初始場景
     scene->clear();
     bulletList.clear(); 
+    bombList.clear();
+    bombStarList.clear();
     enemyList.clear();
     boss = nullptr;
     scene->setSceneRect(0, 0, 1620, 1080);
@@ -491,6 +547,8 @@ void MainWindow::loadStage1(){
     // 注意：scene->clear() 會自動 delete 裡面的指標，避免記憶體外洩
     scene->clear(); 
     bulletList.clear(); 
+    bombList.clear();
+    bombStarList.clear();
     enemyList.clear();
     boss = nullptr;
     scene->setSceneRect(0, 0, 4860, 1080);
@@ -605,6 +663,9 @@ void MainWindow::loadStage1(){
         bulletList.append(star); // 只要卡比一噴，就加進清單
         qDebug() << "Captured a star! Total stars in list:" << bulletList.size();
     });
+    connect(player, &Kirby::bombStarFired, this, [=](BombStar* bombStar){
+        bombStarList.append(bombStar);
+    });
     timer->start(16);
 }
 
@@ -620,6 +681,8 @@ void MainWindow::loadStage2(){
 
     scene->clear(); 
     bulletList.clear(); 
+    bombList.clear();
+    bombStarList.clear();
     enemyList.clear();
     boss = nullptr;
     
@@ -788,9 +851,6 @@ void MainWindow::loadStage2(){
 
     scene->addItem(player);
 
-    const double bossArenaLeft = 6900.0;
-    const double bossArenaRight = 7700.0;
-    const double bossGroundY = 890.0;
     boss = new Boss(bossArenaLeft, bossArenaRight, bossGroundY, player);
     scene->addItem(boss);
 
@@ -824,6 +884,9 @@ void MainWindow::loadStage2(){
         bulletList.append(star); // 只要卡比一噴，就加進清單
         qDebug() << "Captured a star! Total stars in list:" << bulletList.size();
     });
+    connect(player, &Kirby::bombStarFired, this, [=](BombStar* bombStar){
+        bombStarList.append(bombStar);
+    });
     
     timer->start(16);
 }
@@ -837,6 +900,8 @@ void MainWindow::loadGameOver(){
     currentState = GAMEOVER;
     scene->clear(); 
     bulletList.clear(); 
+    bombList.clear();
+    bombStarList.clear();
     enemyList.clear();
     boss = nullptr;
     scene->setSceneRect(0,0,1620,1080);
@@ -856,6 +921,8 @@ void MainWindow::loadFinish(){
     // 2. 徹底清空場景
     scene->clear(); 
     bulletList.clear(); 
+    bombList.clear();
+    bombStarList.clear();
     enemyList.clear();
     boss = nullptr;
 
@@ -939,6 +1006,8 @@ void MainWindow::loadStage3(){
 
     scene->clear(); 
     bulletList.clear(); 
+    bombList.clear();
+    bombStarList.clear();
     enemyList.clear();
     boss = nullptr;
     

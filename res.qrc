@@ -158,5 +158,9 @@
         <file>Project2_Dataset/Image/Waddle Doo/attack_WaddleDoo.1.png</file>
         <file>Project2_Dataset/Image/Waddle Doo/attack_WaddleDoo.2.png</file>
         <file>Project2_Dataset/Image/boss/boss_jump(1).png</file>
+        <file>Project2_Dataset/Image/bomb/bomb(1).png</file>
+        <file>Project2_Dataset/Image/bomb/explore_(1).png</file>
+        <file>Project2_Dataset/Image/bomb/bombStar_L.png</file>
+        <file>Project2_Dataset/Image/bomb/bombStar_R.png</file>
     </qresource>
 </RCC>

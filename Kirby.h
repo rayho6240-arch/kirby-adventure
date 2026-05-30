@@ -17,6 +17,7 @@
 // ==========================================
 #include "Enemy.h"
 #include "StarBullet.h"
+#include "BombStar.h"
 #include "Effect.h"
 
 /**
@@ -39,6 +40,7 @@ signals:
      * 讓 MainWindow 透過 Slot 把它撿起來放進更新與渲染清單，達成解耦。
      */
     void starFired(StarBullet* star);
+    void bombStarFired(BombStar* bombStar);
 
 public:
 
@@ -112,6 +114,9 @@ public:
      * @details 會在卡比面前畫一個「看不見的長方形Hitbox」，只要敵人在裡面，就會受到吸引力並被吃掉。
      */
     void processInhale(QList<Enemy*> &enemies);
+    void spitBombStar();
+    bool canInhaleBomb(QGraphicsItem *bomb) const;
+    void inhaleBomb();
     void discardAbility();                  ///< 棄置目前能力，恢復 Normal 形態
 
     //[新增]生命機制
@@ -137,6 +142,7 @@ public:
     bool getInhaling();          //讓外面得到資訊(傷害判定)
     bool getSpitting();
     bool getHasObjectInMouth() const { return hasObjectInMouth; } // 讓外部知道卡比嘴裡有沒有東西
+    bool getHasBombInMouth() const { return hasBombInMouth; }
     bool isSparkyElectricAttack() const { return currentForm == Form::Sparky && isInhaling; }
     bool isNormal() const { return currentForm == Form::Normal; }
     
@@ -150,6 +156,7 @@ public:
 
 
 private:
+    bool hasBombInMouth = false;
 
     Form currentForm = Form::Normal; // 預設是普通型態
 

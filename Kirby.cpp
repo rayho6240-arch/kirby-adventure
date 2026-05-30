@@ -110,7 +110,7 @@ void Kirby::startInhaling() {
 // [修改] 將Mouthful狀態判斷加到jump、fly的動作判斷
 void Kirby::jump() {
     // @note 以前是判斷 y() >= 800，現在完全交給 isOnGround 判斷，地形適應力更強！
-    if (isOnGround && !isInhaling && !hasObjectInMouth) {
+    if (isOnGround && !isInhaling && !hasObjectInMouth && !hasBombInMouth) {
         vy = -15;           // 給予向上的初速度
         isOnGround = false; // 跳起的一瞬間，立刻解除踩地狀態
         isFlying = false;
@@ -118,11 +118,33 @@ void Kirby::jump() {
 }
 
 void Kirby::fly() {
-    if (!isInhaling && !hasObjectInMouth) {
+    if (!isInhaling && !hasObjectInMouth && !hasBombInMouth) {
         isFlying = true;
         vy = -8;            // 拍打翅膀給予向上升力
         flapCounter = 8;    // 設定拍動動畫持續幀數
     }
+}
+
+void Kirby::spitBombStar()
+{
+    qDebug() << "BombStar spawned";
+
+    const qreal starWidth = 80.0;
+    const qreal spawnOffset = 20.0;
+    const QRectF kirbyRect = sceneBoundingRect();
+    const qreal starX = isFacingRight
+                            ? kirbyRect.right() + spawnOffset
+                            : kirbyRect.left() - starWidth - spawnOffset;
+    const qreal starY = kirbyRect.center().y() - 40.0;
+
+    BombStar *bombStar = new BombStar(starX, starY, isFacingRight);
+    if (scene()) {
+        scene()->addItem(bombStar);
+        emit bombStarFired(bombStar);
+    }
+
+    hasBombInMouth = false;
+    isInhaling = false;
 }
 
 // =========================================================
@@ -532,11 +554,41 @@ bool Kirby::checkSlopeContact() {
  * @brief 處理按下攻擊鍵(X)的總體邏輯
  */
 void Kirby::handleAttack() {
-    if (hasObjectInMouth) {
+    if (hasBombInMouth) {
+        spitBombStar();
+    } else if (hasObjectInMouth) {
         spit();                             // [狀態 A]：嘴裡有東西 -> 噴射星星
     } else {
         startInhaling();                    // [狀態 B]：嘴裡沒東西 -> 開始吸氣
     }
+}
+
+bool Kirby::canInhaleBomb(QGraphicsItem *bomb) const
+{
+    if (!bomb) return false;
+    if (!isInhaling || hasObjectInMouth || hasBombInMouth) return false;
+    if (currentForm == Form::Sparky || currentForm == Form::FireForm) return false;
+
+    const qreal inhaleRange = 300;
+    const qreal inhaleHeight = 100;
+    QRectF inhaleRect;
+    if (isFacingRight) {
+        inhaleRect = QRectF(x() + 10, y() - 20, inhaleRange, inhaleHeight);
+    } else {
+        inhaleRect = QRectF(x() - inhaleRange + 30, y() - 20, inhaleRange, inhaleHeight);
+    }
+
+    return inhaleRect.contains(bomb->sceneBoundingRect().center());
+}
+
+void Kirby::inhaleBomb()
+{
+    hasBombInMouth = true;
+    hasObjectInMouth = false;
+    isInhaling = false;
+    currentForm = Form::Normal;
+    currentAbility = CurrentAbility::None;
+    qDebug() << "Kirby hasBombInMouth =" << hasBombInMouth;
 }
 
 /**
@@ -546,6 +598,7 @@ void Kirby::handleAttack() {
 void Kirby::processInhale(QList<Enemy*> &enemies) {
     // Sparky 或 FireForm 形態時按 X 只是發動技能，不進行敵人吸引
     if (currentForm == Form::Sparky || currentForm == Form::FireForm) return;
+    if (hasBombInMouth) return;
     if (!isInhaling) return;
 
     qreal inhaleRange = 300;  // 吸氣有效長度

@@ -3,6 +3,7 @@
 
 #include <QGraphicsPixmapItem>
 #include <QGraphicsRectItem>
+#include <QPointF>
 
 class Kirby;
 
@@ -23,6 +24,7 @@ public:
     void update();
     void takeDamage(int amount);
     bool isDead() const;
+    bool consumeBombSpawnRequest(QPointF &pos, double &vx, double &vy);
 
 private:
     void applyPhysics();
@@ -34,6 +36,7 @@ private:
     void handleLanding();
     void setState(BossState newState);
     void updateHealthBar();
+    void requestBombSpawn();
     double standingY() const;
 
     int hp = 3;
@@ -51,6 +54,11 @@ private:
     int stateTimer = 0;
     int smallHopCounter = 0;
     int moveDirection = 1;
+    bool bombDroppedThisCycle = false;
+    bool bombSpawnRequested = false;
+    QPointF requestedBombPos;
+    double requestedBombVx = 0.0;
+    double requestedBombVy = 0.0;
 
     const int maxHp = 3;
     const int smallHopCountBeforeAttack = 3;
@@ -62,6 +70,8 @@ private:
     const double jumpBackVx = 5.5;
     const double jumpBackVy = -13.0;
     const double verticalHopVy = -12.0;
+    const double bombLaunchSpeed = 8.0;
+    const double aimYOffset = 80.0;
 
     QGraphicsRectItem *healthBack = nullptr;
     QGraphicsRectItem *healthFill = nullptr;
