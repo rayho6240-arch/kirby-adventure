@@ -10,6 +10,7 @@ CONFIG += c++11
 
 SOURCES += \
     Bomb.cpp \
+    BombStar.cpp \
     Boss.cpp \
     Block.cpp \
     Effect.cpp \
@@ -32,6 +33,7 @@ SOURCES += \
 
 HEADERS += \
     Bomb.h \
+    BombStar.h \
     Boss.h \
     Block.h \
     Effect.h \

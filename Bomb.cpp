@@ -74,6 +74,11 @@ bool Bomb::isExploding() const
     return exploding;
 }
 
+void Bomb::markInhaled()
+{
+    dead = true;
+}
+
 void Bomb::explode(bool damageKirby)
 {
     if (exploding) return;

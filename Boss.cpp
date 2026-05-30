@@ -64,11 +64,13 @@ void Boss::takeDamage(int amount)
     if (dead || amount <= 0) return;
 
     hp -= amount;
+    qDebug() << "Boss HP =" << hp;
     if (hp <= 0) {
         hp = 0;
         dead = true;
         state = BossState::Dead;
         setVisible(false);
+        qDebug() << "Boss defeated";
     }
 
     updateHealthBar();

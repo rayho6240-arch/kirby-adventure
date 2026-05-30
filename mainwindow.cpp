@@ -154,6 +154,21 @@ void MainWindow::gameLoop() {
         }
     }
 
+    if (player) {
+        for (int i = 0; i < bombList.size(); ++i) {
+            Bomb *bomb = bombList[i];
+            if (!bomb->isDead() && !bomb->isExploding() && player->canInhaleBomb(bomb)) {
+                qDebug() << "Bomb inhaled by Kirby";
+                player->inhaleBomb();
+                bomb->markInhaled();
+                scene->removeItem(bomb);
+                bombList.removeAt(i);
+                delete bomb;
+                i--;
+            }
+        }
+    }
+
     for (int i = 0; i < bombList.size(); ++i) {
         Bomb *bomb = bombList[i];
         bomb->update();
@@ -162,6 +177,24 @@ void MainWindow::gameLoop() {
             scene->removeItem(bomb);
             bombList.removeAt(i);
             delete bomb;
+            i--;
+        }
+    }
+
+    for (int i = 0; i < bombStarList.size(); ++i) {
+        BombStar *bombStar = bombStarList[i];
+        bombStar->update();
+
+        if (boss && !boss->isDead() && bombStar->collidesWithItem(boss)) {
+            qDebug() << "BombStar hit Boss";
+            boss->takeDamage(1);
+            bombStar->setDead();
+        }
+
+        if (bombStar->isDead()) {
+            scene->removeItem(bombStar);
+            bombStarList.removeAt(i);
+            delete bombStar;
             i--;
         }
     }
@@ -360,7 +393,7 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
     // ==========================================
     if (currentState == STATE_STAGE2) {
         if(player->x() < 7900 && player->x() > 7800 && player->getOnGround() && player->y() < 600){
-            if(key == Qt::Key_Up){
+            if(key == Qt::Key_Up && (!boss || boss->isDead())){
                 currentState = STATE_FINISH;
                 // 計算當前剩餘總血量
                 remain_Hp = player->getCurrentHp() + player->getCurrentlives() * 3 - 3;
@@ -489,6 +522,7 @@ void MainWindow::loadStartMenu(){
     scene->clear();
     bulletList.clear(); 
     bombList.clear();
+    bombStarList.clear();
     enemyList.clear();
     boss = nullptr;
     scene->setSceneRect(0, 0, 1620, 1080);
@@ -514,6 +548,7 @@ void MainWindow::loadStage1(){
     scene->clear(); 
     bulletList.clear(); 
     bombList.clear();
+    bombStarList.clear();
     enemyList.clear();
     boss = nullptr;
     scene->setSceneRect(0, 0, 4860, 1080);
@@ -628,6 +663,9 @@ void MainWindow::loadStage1(){
         bulletList.append(star); // 只要卡比一噴，就加進清單
         qDebug() << "Captured a star! Total stars in list:" << bulletList.size();
     });
+    connect(player, &Kirby::bombStarFired, this, [=](BombStar* bombStar){
+        bombStarList.append(bombStar);
+    });
     timer->start(16);
 }
 
@@ -644,6 +682,7 @@ void MainWindow::loadStage2(){
     scene->clear(); 
     bulletList.clear(); 
     bombList.clear();
+    bombStarList.clear();
     enemyList.clear();
     boss = nullptr;
     
@@ -845,6 +884,9 @@ void MainWindow::loadStage2(){
         bulletList.append(star); // 只要卡比一噴，就加進清單
         qDebug() << "Captured a star! Total stars in list:" << bulletList.size();
     });
+    connect(player, &Kirby::bombStarFired, this, [=](BombStar* bombStar){
+        bombStarList.append(bombStar);
+    });
     
     timer->start(16);
 }
@@ -859,6 +901,7 @@ void MainWindow::loadGameOver(){
     scene->clear(); 
     bulletList.clear(); 
     bombList.clear();
+    bombStarList.clear();
     enemyList.clear();
     boss = nullptr;
     scene->setSceneRect(0,0,1620,1080);
@@ -879,6 +922,7 @@ void MainWindow::loadFinish(){
     scene->clear(); 
     bulletList.clear(); 
     bombList.clear();
+    bombStarList.clear();
     enemyList.clear();
     boss = nullptr;
 
@@ -963,6 +1007,7 @@ void MainWindow::loadStage3(){
     scene->clear(); 
     bulletList.clear(); 
     bombList.clear();
+    bombStarList.clear();
     enemyList.clear();
     boss = nullptr;
     

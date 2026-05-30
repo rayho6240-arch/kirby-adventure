@@ -13,6 +13,7 @@ public:
     void update();
     bool isDead() const;
     bool isExploding() const;
+    void markInhaled();
 
 private:
     void explode(bool damageKirby);

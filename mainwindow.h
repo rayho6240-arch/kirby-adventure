@@ -29,6 +29,7 @@
 #include "HUD.h"
 #include "Boss.h"
 #include "Bomb.h"
+#include "BombStar.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; } //後面就不打 "mainwindow::"
@@ -110,8 +111,9 @@ private:
      */
     Boss *boss = nullptr;
     QList<Bomb*> bombList;
-    const double bossArenaLeft = 6900.0;
-    const double bossArenaRight = 7700.0;
+    QList<BombStar*> bombStarList;
+    const double bossArenaLeft = 3200.0;
+    const double bossArenaRight = 4030.0;
     const double bossGroundY = 890.0;
 
     QList<Enemy*> enemyList;
