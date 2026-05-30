@@ -10,10 +10,15 @@ public:
     void update();
     bool isDead() const;
     void setDead();
+    bool isExploding() const;
+    void startExplosion();
 
 private:
     double vx = 0.0;
     bool dead = false;
+    bool exploding = false;
+    int explosionTimer = 0;
+    const int explosionDuration = 20;
 };
 
 #endif // BOMBSTAR_H

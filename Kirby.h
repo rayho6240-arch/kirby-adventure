@@ -11,6 +11,7 @@
 #include <QImage>
 #include <QRectF>
 #include <QObject>
+#include <QPointF>
 
 // ==========================================
 // 2. 自定義遊戲類別引入
@@ -117,6 +118,7 @@ public:
     void spitBombStar();
     bool canInhaleBomb(QGraphicsItem *bomb) const;
     void inhaleBomb();
+    QPointF getMouthScenePos() const;
     void discardAbility();                  ///< 棄置目前能力，恢復 Normal 形態
 
     //[新增]生命機制

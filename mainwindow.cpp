@@ -4,6 +4,7 @@
 // 系統與除錯
 #include <QKeyEvent>
 #include <QDebug>
+#include <cmath>
 
 // 幫助我們得知.exe檔的路徑位置
 #include <QCoreApplication>
@@ -155,16 +156,38 @@ void MainWindow::gameLoop() {
     }
 
     if (player) {
+        const double inhalePullSpeed = 10.0;
+        const double inhaleCompleteDistance = 35.0;
+
         for (int i = 0; i < bombList.size(); ++i) {
             Bomb *bomb = bombList[i];
-            if (!bomb->isDead() && !bomb->isExploding() && player->canInhaleBomb(bomb)) {
-                qDebug() << "Bomb inhaled by Kirby";
-                player->inhaleBomb();
-                bomb->markInhaled();
-                scene->removeItem(bomb);
-                bombList.removeAt(i);
-                delete bomb;
-                i--;
+
+            if (bomb->isDead() || bomb->isExploding()) {
+                continue;
+            }
+
+            if (bomb->isBeingInhaled()) {
+                QPointF mouthPos = player->getMouthScenePos();
+                QPointF delta = mouthPos - bomb->sceneBoundingRect().center();
+                double distance = std::sqrt(delta.x() * delta.x() + delta.y() * delta.y());
+
+                bomb->moveToward(mouthPos, inhalePullSpeed);
+
+                if (distance <= inhaleCompleteDistance) {
+                    qDebug() << "Bomb inhale completed";
+                    player->inhaleBomb();
+                    bomb->markInhaled();
+                    scene->removeItem(bomb);
+                    bombList.removeAt(i);
+                    delete bomb;
+                    i--;
+                }
+                continue;
+            }
+
+            if (player->canInhaleBomb(bomb)) {
+                bomb->startInhale();
+                continue;
             }
         }
     }
@@ -185,10 +208,10 @@ void MainWindow::gameLoop() {
         BombStar *bombStar = bombStarList[i];
         bombStar->update();
 
-        if (boss && !boss->isDead() && bombStar->collidesWithItem(boss)) {
+        if (!bombStar->isExploding() && boss && !boss->isDead() && bombStar->collidesWithItem(boss)) {
             qDebug() << "BombStar hit Boss";
             boss->takeDamage(1);
-            bombStar->setDead();
+            bombStar->startExplosion();
         }
 
         if (bombStar->isDead()) {

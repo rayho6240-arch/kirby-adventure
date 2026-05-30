@@ -26,6 +26,8 @@ void Bomb::update()
 {
     if (dead) return;
 
+    if (beingInhaled) return;
+
     if (exploding) {
         if (player && !hasDamagedKirby && explosionRect().intersects(player->sceneBoundingRect())) {
             player->takeDamage(1);
@@ -77,6 +79,36 @@ bool Bomb::isExploding() const
 void Bomb::markInhaled()
 {
     dead = true;
+    beingInhaled = false;
+}
+
+void Bomb::startInhale()
+{
+    if (dead || exploding) return;
+
+    beingInhaled = true;
+    vx = 0.0;
+    vy = 0.0;
+    qDebug() << "Bomb start being inhaled";
+}
+
+bool Bomb::isBeingInhaled() const
+{
+    return beingInhaled;
+}
+
+void Bomb::moveToward(const QPointF &target, double speed)
+{
+    if (!beingInhaled || dead || exploding) return;
+
+    QPointF center = sceneBoundingRect().center();
+    QPointF delta = target - center;
+    double length = std::sqrt(delta.x() * delta.x() + delta.y() * delta.y());
+
+    if (length <= 1.0) return;
+
+    QPointF step(delta.x() / length * speed, delta.y() / length * speed);
+    setPos(pos() + step);
 }
 
 void Bomb::explode(bool damageKirby)

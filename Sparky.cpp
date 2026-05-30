@@ -35,6 +35,7 @@ Sparky::Sparky(QGraphicsItem *player, QGraphicsItem *parent)
         attackImage2 = attackImage2.scaled(spawnSize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 
 
+
         // 2. 設定初始圖片
         setPixmap(leftImage1);
         setShapeMode(QGraphicsPixmapItem::BoundingRectShape); //關鍵修復，使他不會突然消失。
