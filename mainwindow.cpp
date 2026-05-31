@@ -142,6 +142,13 @@ void MainWindow::gameLoop() {
         e->update();
     }
 
+    for (QGraphicsItem *sceneItem : scene->items()) {
+        Item *item = dynamic_cast<Item *>(sceneItem);
+        if (item && !item->isConsumed()) {
+            item->update();
+        }
+    }
+
     if (boss && !boss->isDead()) {
         boss->update();
         QPointF bombPos;

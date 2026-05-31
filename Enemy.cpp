@@ -1,5 +1,6 @@
 #include "Enemy.h"
 #include "Block.h"
+#include "Slope.h"
 #include <QGraphicsScene>
 #include <QList>
 
@@ -71,6 +72,10 @@ void Enemy::handlePhysics(qreal width, qreal height) {
     // B. 方塊地形碰撞判定 (撞牆反彈邏輯)
     QList<QGraphicsItem *> itemsX = scene()->collidingItems(this);
     for (QGraphicsItem *item : itemsX) {
+        if (dynamic_cast<Slope *>(item)) {
+            continue;
+        }
+
         Block *block = qgraphicsitem_cast<Block *>(item);
         if (block) {
             // 如果撞到方塊，把位置推回方塊邊緣 (多退 1 像素避免黏住)
@@ -95,6 +100,23 @@ void Enemy::handlePhysics(qreal width, qreal height) {
 
     QList<QGraphicsItem *> itemsY = scene()->collidingItems(this);
     for (QGraphicsItem *item : itemsY) {
+        Slope *slope = dynamic_cast<Slope *>(item);
+        if (slope) {
+            const qreal footCenterX = sceneBoundingRect().center().x();
+            const qreal surfaceY = slope->getSurfaceY(footCenterX);
+            const qreal previousBottom = oldY + height;
+            const qreal currentBottom = y() + height;
+
+            if (vy >= 0 && previousBottom <= surfaceY + 30 && currentBottom >= surfaceY - 8) {
+                setY(surfaceY - height);
+                vy = 0;
+                isOnGround = true;
+                break;
+            }
+
+            continue;
+        }
+
         Block *block = qgraphicsitem_cast<Block *>(item);
         if (block) {
             // 下落碰撞判定：如果正在往下掉，且原本腳的位置高於方塊

@@ -35,6 +35,7 @@ public:
      * 然後呼叫 scene()->removeItem(this) 將自己從場景移除。
      */
     virtual void onConsumed(Kirby *kirby) = 0;
+    virtual void update();
 
     /**
      * @brief 取得道具是否已被消費 (防止重複觸發)
@@ -42,6 +43,9 @@ public:
     bool isConsumed() const { return consumed; }
 
 protected:
+    qreal vy = 0.0;
+    qreal gravity = 0.8;
+    bool isOnGround = false;
     bool consumed = false; ///< 標記道具是否已被消費，防止同一幀觸發多次
 };
 
