@@ -34,8 +34,7 @@ void WaddleDoo::update() {
         currentState = STATE_DEAD;
         return;
     }
-/*  實作被吸邏輯：一旦被吸，就強制切換到 BEING_INHALED 狀態，並且完全不受其他狀態影響
-    此部分待修改
+
     if (isInhaled) {
         if (currentState != BEING_INHALED) {
             currentState = BEING_INHALED;
@@ -52,10 +51,10 @@ void WaddleDoo::update() {
             }
         }
         handlePhysics(100, 100);
-        updateSprite();
+        updateAnimation();
         return;
     }
-*/    
+    
     updateStateMachine();
     updateAnimation();
     
