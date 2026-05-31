@@ -11,7 +11,7 @@
 Fireball::Fireball(qreal x, qreal y, int direction, QGraphicsItem *parent)
     : QObject(nullptr), QGraphicsPixmapItem(parent), direction(direction) {
     QPixmap pix(":/Project2_Dataset/Image/Hot Head/Hot_head_fire(1).png");
-    pix = pix.scaled(40, 40, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    pix = pix.scaled(70, 70, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
     setPixmap(pix);
     setShapeMode(QGraphicsPixmapItem::BoundingRectShape);
     setZValue(2);
@@ -56,12 +56,5 @@ void Fireball::onMoveTimer() {
             return;
         }
 
-        Enemy *enemy = dynamic_cast<Enemy *>(item);
-        if (enemy) {
-            // 不對自己的敵人造成傷害，僅避免火球穿透其他敵人
-            setVisible(false);
-            deleteLater();
-            return;
-        }
     }
 }

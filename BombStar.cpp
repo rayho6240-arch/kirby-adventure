@@ -26,6 +26,14 @@ void BombStar::update()
 {
     if (dead) return;
 
+    if (exploding) {
+        explosionTimer--;
+        if (explosionTimer <= 0) {
+            dead = true;
+        }
+        return;
+    }
+
     setX(x() + vx);
 
     if (scene()) {
@@ -54,4 +62,23 @@ bool BombStar::isDead() const
 void BombStar::setDead()
 {
     dead = true;
+}
+
+bool BombStar::isExploding() const
+{
+    return exploding;
+}
+
+void BombStar::startExplosion()
+{
+    if (dead || exploding) return;
+
+    exploding = true;
+    explosionTimer = explosionDuration;
+    vx = 0.0;
+
+    QPixmap explosionPixmap(":/Project2_Dataset/Image/bomb/explore_(1).png");
+    if (!explosionPixmap.isNull()) {
+        setPixmap(explosionPixmap.scaledToHeight(120, Qt::SmoothTransformation));
+    }
 }

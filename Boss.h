@@ -4,6 +4,7 @@
 #include <QGraphicsPixmapItem>
 #include <QGraphicsRectItem>
 #include <QPointF>
+#include <QPixmap>
 
 class Kirby;
 
@@ -37,6 +38,10 @@ private:
     void setState(BossState newState);
     void updateHealthBar();
     void requestBombSpawn();
+    void loadAnimationPixmaps();
+    void updateSprite();
+    void setBossPixmap(const QPixmap &pixmap);
+    const QPixmap &jumpPixmap(bool faceLeft, int frame, bool frameLeft) const;
     double standingY() const;
 
     int hp = 3;
@@ -75,6 +80,20 @@ private:
 
     QGraphicsRectItem *healthBack = nullptr;
     QGraphicsRectItem *healthFill = nullptr;
+
+    QPixmap fallbackPixmap;
+    QPixmap jumpFaceL1L;
+    QPixmap jumpFaceL1R;
+    QPixmap jumpFaceL2L;
+    QPixmap jumpFaceL2R;
+    QPixmap jumpFaceR1L;
+    QPixmap jumpFaceR1R;
+    QPixmap jumpFaceR2L;
+    QPixmap jumpFaceR2R;
+    QPixmap drop1L;
+    QPixmap drop1R;
+    QPixmap drop2L;
+    QPixmap drop2R;
 };
 
 #endif // BOSS_H

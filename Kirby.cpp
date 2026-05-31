@@ -591,6 +591,14 @@ void Kirby::inhaleBomb()
     qDebug() << "Kirby hasBombInMouth =" << hasBombInMouth;
 }
 
+QPointF Kirby::getMouthScenePos() const
+{
+    QRectF kirbyRect = sceneBoundingRect();
+    qreal mouthX = isFacingRight ? kirbyRect.right() - 10.0 : kirbyRect.left() + 10.0;
+    qreal mouthY = kirbyRect.center().y();
+    return QPointF(mouthX, mouthY);
+}
+
 /**
  * @brief 處理吸氣時對敵人的吸引力與吞食判定
  * @note 不使用單純的內建碰撞，而是手動計算距離 (dx)，給予敵人一個指向卡比的加速度 (vx)。

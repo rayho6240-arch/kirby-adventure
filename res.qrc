@@ -162,5 +162,17 @@
         <file>Project2_Dataset/Image/bomb/explore_(1).png</file>
         <file>Project2_Dataset/Image/bomb/bombStar_L.png</file>
         <file>Project2_Dataset/Image/bomb/bombStar_R.png</file>
+        <file alias="Project2_Dataset/Image/boss/faceL/jump_faceL_(2)_L.png">Project2_Dataset/Image/boss/faceL/jump_faceL(2)_L.png</file>
+        <file>Project2_Dataset/Image/boss/faceL/jump_faceL_(1)_L.png</file>
+        <file alias="Project2_Dataset/Image/boss/faceL/jump_faceL_(1)_R.png">Project2_Dataset/Image/boss/faceL/jump_faceL_(1)_R.png.png</file>
+        <file>Project2_Dataset/Image/boss/faceL/jump_faceL_(2)_R.png</file>
+        <file>Project2_Dataset/Image/boss/faceR/jump_faceR_(1)_L.png</file>
+        <file alias="Project2_Dataset/Image/boss/faceR/jump_faceR_(1)_R.png">Project2_Dataset/Image/boss/faceR/jump_faceR_(1)_R.png.png</file>
+        <file>Project2_Dataset/Image/boss/faceR/jump_faceR_(2)_L.png</file>
+        <file alias="Project2_Dataset/Image/boss/faceR/jump_faceR_(2)_R.png">Project2_Dataset/Image/boss/faceR/jump_faceR_(2)_R.png.png</file>
+        <file>Project2_Dataset/Image/boss/drop_(1)_L.png</file>
+        <file>Project2_Dataset/Image/boss/drop_(1)_R.png</file>
+        <file>Project2_Dataset/Image/boss/drop_(2)_L.png</file>
+        <file>Project2_Dataset/Image/boss/drop_(2)_R.png</file>
     </qresource>
 </RCC>

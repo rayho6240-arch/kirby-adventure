@@ -14,10 +14,11 @@ Effect::Effect(EffectType type, QGraphicsItem *parent)
         setEffect(":/Project2_Dataset/Image/inhalingBubble/inhale_smoke(%1).png", 5, 8, 160);
         setLoop(true);
     } else if (type == EffectType::Fire) {
-        setEffect(":/Project2_Dataset/Image/Kirby_fire/kirbyfire_fire(%1)_R.png", 3, 4, 140);
+        setEffect(":/Project2_Dataset/Image/Kirby_fire/kirbyfire_fire(%1)_R.png", 3, 4, 200);
+
         setLoop(true);
     } else if (type == EffectType::Spark) {
-        setEffect(":/Project2_Dataset/Image/Kirby_spark/Kirby_spark_attack(%1).png", 3, 4, 140);
+        setEffect(":/Project2_Dataset/Image/Kirby_spark/Kirby_spark_attack(%1).png", 3, 4, 250);
         setLoop(true);
     }
 }

@@ -2,6 +2,7 @@
 #define BOMB_H
 
 #include <QGraphicsPixmapItem>
+#include <QPointF>
 #include <QRectF>
 
 class Kirby;
@@ -14,6 +15,9 @@ public:
     bool isDead() const;
     bool isExploding() const;
     void markInhaled();
+    void startInhale();
+    bool isBeingInhaled() const;
+    void moveToward(const QPointF &target, double speed);
 
 private:
     void explode(bool damageKirby);
@@ -33,6 +37,7 @@ private:
     bool exploding = false;
     bool dead = false;
     bool hasDamagedKirby = false;
+    bool beingInhaled = false;
 
     Kirby *player = nullptr;
 };
