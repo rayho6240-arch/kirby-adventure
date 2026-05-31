@@ -5,6 +5,7 @@
 #include <QList>
 #include <QPixmap>
 #include <QString>
+#include <QPainterPath> // 👈 處理精確碰撞箱必備
 
 /**
  * @brief Effect 短暫出現的動畫特效類別
@@ -15,7 +16,8 @@ public:
     enum class EffectType {
         Inhale,
         Fire,
-        Spark
+        Spark,
+        Beam
     };
 
     /**
@@ -72,11 +74,18 @@ public:
      */
     bool isFinished() const;
 
+    // 👈 複寫碰撞箱：雖然圖片裡有卡比身體，但我們讓碰撞箱「只有星星」會造成傷害！
+    QPainterPath shape() const override;
+
 private:
     /**
      * @brief 根據當前影格與鏡像狀態更新顯示的圖片
      */
     void updatePixmap();
+
+    // 👈 3. 新增：雷射專用的圖層動態合成與座標資料庫函式
+    void buildBeamEffect(); 
+    QList<QRectF> getBeamStarRects(int frameIndex) const;
 
     QList<QPixmap> frames;          ///< 原始影格列表 (影格緩存)
     QList<QPixmap> mirroredFrames;  ///< 鏡像影格列表
@@ -87,6 +96,8 @@ private:
     bool isLoop;                    ///< 是否循環播放
     bool isMirrored;                ///< 是否鏡像顯示
     bool finished;                  ///< 非循環動畫是否播放結束的標記
+
+    EffectType currentType; // 👈 紀錄當前的特效類型
 };
 
 #endif // EFFECT_H

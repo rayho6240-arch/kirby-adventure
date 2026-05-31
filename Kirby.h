@@ -183,6 +183,8 @@ private:
     bool checkSlopeContact();
     bool isFireBreathAttack() const { return currentForm == Form::FireForm && isInhaling; }
 
+    void applyBeamDamage();
+
     // ==========================================
     // 物理屬性參數 (Physics Parameters)
     // ==========================================
@@ -236,10 +238,13 @@ private:
     Effect *fireEffect = nullptr;
     Effect *sparkEffect = nullptr;
     Effect *inhaleEffect = nullptr; ///< 動態產生的吸氣特效（parent 設為 Kirby）
+    Effect* beamEffect = nullptr;
 
     // [新增] 單向平台狀態與穿過旗標
     bool onFloatingPlatform = false;
     bool passThroughPlatform = false;
+
+    bool isBeamAttacking = false;
 
 };
 
