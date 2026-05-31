@@ -174,5 +174,28 @@
         <file>Project2_Dataset/Image/boss/drop_(1)_R.png</file>
         <file>Project2_Dataset/Image/boss/drop_(2)_L.png</file>
         <file>Project2_Dataset/Image/boss/drop_(2)_R.png</file>
+        <file>Project2_Dataset/Image/Kirby_Beam/beam_star.png</file>
+        <file>Project2_Dataset/Image/Kirby_Beam/kirby_beam_attack1_L.png</file>
+        <file>Project2_Dataset/Image/Kirby_Beam/kirby_beam_attack1_R.png</file>
+        <file>Project2_Dataset/Image/Kirby_Beam/kirby_beam_attack2_L.png</file>
+        <file>Project2_Dataset/Image/Kirby_Beam/kirby_beam_attack2_R.png</file>
+        <file>Project2_Dataset/Image/Kirby_Beam/kirby_beam_down_L.png</file>
+        <file>Project2_Dataset/Image/Kirby_Beam/kirby_beam_down_R.png</file>
+        <file>Project2_Dataset/Image/Kirby_Beam/kirby_beam_fly_L_1.png</file>
+        <file>Project2_Dataset/Image/Kirby_Beam/kirby_beam_fly_L_2.png</file>
+        <file>Project2_Dataset/Image/Kirby_Beam/kirby_beam_fly_R_1.png</file>
+        <file>Project2_Dataset/Image/Kirby_Beam/kirby_beam_fly_R_2.png</file>
+        <file>Project2_Dataset/Image/Kirby_Beam/kirby_beam_run_L_1.png</file>
+        <file>Project2_Dataset/Image/Kirby_Beam/kirby_beam_run_L_2.png</file>
+        <file>Project2_Dataset/Image/Kirby_Beam/kirby_beam_run_L_3.png</file>
+        <file>Project2_Dataset/Image/Kirby_Beam/kirby_beam_run_L_4.png</file>
+        <file>Project2_Dataset/Image/Kirby_Beam/kirby_beam_run_L_5.png</file>
+        <file>Project2_Dataset/Image/Kirby_Beam/kirby_beam_run_R_1.png</file>
+        <file>Project2_Dataset/Image/Kirby_Beam/kirby_beam_run_R_2.png</file>
+        <file>Project2_Dataset/Image/Kirby_Beam/kirby_beam_run_R_3.png</file>
+        <file>Project2_Dataset/Image/Kirby_Beam/kirby_beam_run_R_4.png</file>
+        <file>Project2_Dataset/Image/Kirby_Beam/kirby_beam_run_R_5.png</file>
+        <file>Project2_Dataset/Image/Kirby_Beam/kirby_beam_stop_L.png</file>
+        <file>Project2_Dataset/Image/Kirby_Beam/kirby_beam_stop_R.png</file>
     </qresource>
 </RCC>

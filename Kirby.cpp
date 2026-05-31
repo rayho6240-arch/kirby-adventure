@@ -45,6 +45,10 @@ Kirby::Kirby() {
     sparkEffect->setVisible(false);
     sparkEffect->setZValue(1);
 
+    beamEffect = new Effect(Effect::EffectType::Beam, this);
+    beamEffect->setVisible(false);
+    beamEffect->setZValue(1);
+
     // 初始化吸氣特效相關欄位
     inhaleEffect = nullptr;
 }
@@ -72,6 +76,12 @@ void Kirby::setDown(bool down) {
         hasObjectInMouth = false;        // 東西吞下去了，嘴巴空了
         this->setScale(1.0);
         qDebug() << "Kirby evolved to Fire Form!";
+    }
+    else if (isDown && currentForm == Form::BeamFat) {
+        currentForm = Form::BeamForm;    // 正式變身為 BeamForm
+        hasObjectInMouth = false;        // 東西吞下去了，嘴巴空了
+        this->setScale(1.0);
+        qDebug() << "Kirby evolved to Beam Form!";
     }
 }
 
@@ -168,7 +178,7 @@ void Kirby::update() {
     qreal currentPhysicalWidth;
     qreal currentPhysicalHeight ;
 
-    if (isFlying || isSpitting || currentForm == Form::SparkyFat || currentForm == Form::FireFat) { // 將胖卡比狀態加入判斷：變胖時使用大尺寸 Hitbox
+    if (isFlying || isSpitting || currentForm == Form::SparkyFat || currentForm == Form::FireFat || currentForm == Form::BeamFat) { // 將胖卡比狀態加入判斷：變胖時使用大尺寸 Hitbox
         currentPhysicalWidth = 180; 
         currentPhysicalHeight = 180; 
     }else {
@@ -498,6 +508,45 @@ void Kirby::update() {
             }
         }
     }
+
+    if (beamEffect) {
+        // 👈 改為只判斷連段旗標。不論玩家有沒有放開 X 鍵，只要它為 true 就會跑完
+        if (isBeamAttacking) {
+            
+            // 1. 強制讓卡比在原地停下來（攻擊時不能走路，這符合原作設定）
+            // 如果你希望攻擊時可以走路，可以把下面這兩行刪除
+            vx = 0; 
+            currentVx = 0; 
+
+            // 2. 設定特效水平鏡像
+            beamEffect->setMirror(!isFacingRight);
+
+            // 3. 驅動雷射特效前往下一幀
+            beamEffect->updateAnimation();
+
+            // 4. 定位雷射發射起點（魔杖頂端）
+            qreal baseHeight = 140.0;
+            qreal effectXOffset = isFacingRight ? 95.0 : 35.0; 
+            qreal effectYOffset = baseHeight - 110.0; 
+            beamEffect->setPos(effectXOffset, effectYOffset);
+
+            // 5. 每影格自動做雷射精確傷害判定
+            applyBeamDamage(); 
+
+            // 6. 核心終點：如果 10 幀的雷射特效播完了！
+            if (beamEffect->isFinished()) {
+                isBeamAttacking = false;       // 👈 結束連段鎖定，把控制權還給玩家
+                beamEffect->setVisible(false); // 隱藏特效
+            }
+
+        } else {
+            // 沒在攻擊時，確保特效是關閉的
+            if (beamEffect->isVisible()) {
+                beamEffect->setVisible(false);
+                beamEffect->reset();
+            }
+        }
+    }
 }
 
 void Kirby::applyFlameDamage() {
@@ -559,7 +608,19 @@ void Kirby::handleAttack() {
     } else if (hasObjectInMouth) {
         spit();                             // [狀態 A]：嘴裡有東西 -> 噴射星星
     } else {
-        startInhaling();                    // [狀態 B]：嘴裡沒東西 -> 開始吸氣
+        if (currentForm == Form::BeamForm) {
+            if (!isBeamAttacking) {
+                isBeamAttacking = true;
+                frameCounter = 0; // 重置卡比本體的計時器
+                if (beamEffect) {
+                    beamEffect->reset();
+                    beamEffect->setVisible(true);
+                }
+            }
+        } else {
+            // 閃電、火焰或普通狀態，維持原本的吸氣/施法邏輯
+            startInhaling();                    
+        }                // [狀態 B]：嘴裡沒東西 -> 開始吸氣
     }
 }
 
@@ -664,6 +725,9 @@ void Kirby::processInhale(QList<Enemy*> &enemies) {
                 } else if (e->getEnemyType() == "HotHead") {
                     currentForm = Form::FireFat;
                     currentAbility = CurrentAbility::Fire;
+                } else if(e->getEnemyType() == "WaddleDoo"){
+                    currentForm = Form::BeamFat;
+                    currentAbility = CurrentAbility::Beam;
                 } else {
                     currentForm = Form::Normal;
                     currentAbility = CurrentAbility::None;
@@ -862,6 +926,11 @@ void Kirby::updateSprite() {
         action = "attack";
         frame = 0;
     }
+    else if (isInhaling && currentForm == Form::BeamForm) {
+        frameCounter++;
+        action = "attack";
+        frame = 0;
+    }
     else if (isInhaling) {
         action = "attack";
         frame = 0;
@@ -939,6 +1008,27 @@ void Kirby::updateSprite() {
                 fireFrame = (frameCounter / 7) % 3 + 1; // run(1) to run(3)
             }
             path = QString("%1kirbyfire_%2(%3)_%4.png").arg(folder).arg(action).arg(fireFrame).arg(dir);
+        }
+    }
+    else if (currentForm == Form::BeamForm) {
+        QString folder = ":/Project2_Dataset/Image/Kirby_Beam/"; 
+        
+        if (action == "jump") {
+            path = QString("%1kirby_beam_stop_%2.png").arg(folder).arg(dir);
+        }
+        // [問題]目前卡比本體圖片無法交替撥放
+        else if (isBeamAttacking) {
+            int effFrame = (frameCounter / 2) % 2 + 1; 
+            path = QString("%1kirby_beam_attack%2_%3.png").arg(folder).arg(effFrame).arg(dir);
+        }
+        else if (frame == 0) {
+            // 待機、蹲下：kirbybeam_stop_R.png / kirbybeam_down_R.png
+            path = QString("%1kirby_beam_%2_%3.png").arg(folder).arg(action).arg(dir);
+        }
+        else {
+            // 走路跑步：kirbybeam_run(1)_R.png (假設做 2 幀循環)
+            int beamRunFrame = (frameCounter / 10) % 5 + 1;
+            path = QString("%1kirby_beam_%2_%4_%3.png").arg(folder).arg(action).arg(beamRunFrame).arg(dir);
         }
     }
     else {
@@ -1023,5 +1113,26 @@ void Kirby::updateSprite() {
     } else {
         // Debug 用：如果路徑出錯，至少知道是哪張圖沒讀到
         // qDebug() << "Failed to load image:" << path;
+    }
+}
+
+void Kirby::applyBeamDamage() {
+    if (!scene() || !beamEffect || !beamEffect->isVisible()) return;
+
+    // 💡 關鍵：直接抓取我們在 Effect.cpp 裡寫好的 shape()
+    // 它會自動把當前影格的「星星方塊組合」轉換成場景上的精準碰撞區
+    QPainterPath beamShape = beamEffect->mapToScene(beamEffect->shape());
+
+    QList<QGraphicsItem*> items = scene()->items();
+    for (QGraphicsItem *item : items) {
+        Enemy *enemy = dynamic_cast<Enemy*>(item);
+        if (!enemy || enemy->getIsDead() || !enemy->isVisible()) continue;
+
+        // 判定敵人的場景外框是否有跟我們的「雷射星星形狀」切實交集
+        if (beamShape.intersects(enemy->sceneBoundingRect())) {
+            enemy->setIsDead(true);
+            enemy->setVisible(false);
+            qDebug() << "Enemy hit by Kirby's Beam Star!";
+        }
     }
 }
