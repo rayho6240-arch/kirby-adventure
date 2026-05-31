@@ -4,6 +4,7 @@
 #include <QBrush>
 #include <QPen>
 #include <QPixmap>
+#include <QString>
 #include <QtGlobal>
 #include <QDebug>
 #include <cmath>
@@ -14,9 +15,9 @@ Boss::Boss(double leftBound, double rightBound, double groundY, Kirby *player)
       groundY(groundY),
       player(player)
 {
-    QPixmap bossPixmap(":/Project2_Dataset/Image/boss/boss_jump(1).png");
-    if (!bossPixmap.isNull()) {
-        setPixmap(bossPixmap.scaledToHeight(180, Qt::SmoothTransformation));
+    loadAnimationPixmaps();
+    if (!fallbackPixmap.isNull()) {
+        setPixmap(fallbackPixmap);
     }
 
     setShapeMode(QGraphicsPixmapItem::MaskShape);
@@ -56,6 +57,7 @@ void Boss::update()
     }
 
     applyPhysics();
+    updateSprite();
     updateHealthBar();
 }
 
@@ -244,6 +246,102 @@ void Boss::requestBombSpawn()
     bombSpawnRequested = true;
 
     qDebug() << "Boss requested bomb spawn";
+}
+
+void Boss::loadAnimationPixmaps()
+{
+    auto loadBossPixmap = [](const QString &path) {
+        QPixmap pixmap(path);
+        if (!pixmap.isNull()) {
+            return pixmap.scaledToHeight(180, Qt::SmoothTransformation);
+        }
+        return pixmap;
+    };
+
+    fallbackPixmap = loadBossPixmap(":/Project2_Dataset/Image/boss/boss_jump(1).png");
+
+    jumpFaceL1L = loadBossPixmap(":/Project2_Dataset/Image/boss/faceL/jump_faceL_(1)_L.png");
+    jumpFaceL1R = loadBossPixmap(":/Project2_Dataset/Image/boss/faceL/jump_faceL_(1)_R.png");
+    jumpFaceL2L = loadBossPixmap(":/Project2_Dataset/Image/boss/faceL/jump_faceL_(2)_L.png");
+    jumpFaceL2R = loadBossPixmap(":/Project2_Dataset/Image/boss/faceL/jump_faceL_(2)_R.png");
+
+    jumpFaceR1L = loadBossPixmap(":/Project2_Dataset/Image/boss/faceR/jump_faceR_(1)_L.png");
+    jumpFaceR1R = loadBossPixmap(":/Project2_Dataset/Image/boss/faceR/jump_faceR_(1)_R.png");
+    jumpFaceR2L = loadBossPixmap(":/Project2_Dataset/Image/boss/faceR/jump_faceR_(2)_L.png");
+    jumpFaceR2R = loadBossPixmap(":/Project2_Dataset/Image/boss/faceR/jump_faceR_(2)_R.png");
+
+    drop1L = loadBossPixmap(":/Project2_Dataset/Image/boss/drop_(1)_L.png");
+    drop1R = loadBossPixmap(":/Project2_Dataset/Image/boss/drop_(1)_R.png");
+    drop2L = loadBossPixmap(":/Project2_Dataset/Image/boss/drop_(2)_L.png");
+    drop2R = loadBossPixmap(":/Project2_Dataset/Image/boss/drop_(2)_R.png");
+}
+
+void Boss::updateSprite()
+{
+    if (dead) return;
+
+    const qreal bossCenterX = sceneBoundingRect().center().x();
+    const qreal playerCenterX = player ? player->sceneBoundingRect().center().x() : bossCenterX + moveDirection;
+    const bool faceLeft = playerCenterX < bossCenterX;
+
+    if (state == BossState::VerticalHopPrepare && !onGround) {
+        const double apexVyThreshold = 2.0;
+        const bool useDrop1 = vy < 0.0 && std::abs(vy) > apexVyThreshold;
+        const QPixmap &dropPixmap = useDrop1
+                                        ? (faceLeft ? drop1L : drop1R)
+                                        : (faceLeft ? drop2L : drop2R);
+        setBossPixmap(dropPixmap);
+        return;
+    }
+
+    if (!onGround) {
+        const bool movingRight = vx >= 0.0;
+        const int phase = (stateTimer / 5) % 4;
+        int frame = 1;
+        bool frameLeft = movingRight;
+
+        if (movingRight) {
+            frame = (phase == 0 || phase == 3) ? 1 : 2;
+            frameLeft = (phase == 0 || phase == 1);
+        } else {
+            frame = (phase == 0 || phase == 3) ? 1 : 2;
+            frameLeft = (phase == 2 || phase == 3);
+        }
+
+        setBossPixmap(jumpPixmap(faceLeft, frame, frameLeft));
+        return;
+    }
+
+    setBossPixmap(jumpPixmap(faceLeft, 1, moveDirection >= 0));
+}
+
+void Boss::setBossPixmap(const QPixmap &pixmap)
+{
+    if (pixmap.isNull()) {
+        if (!fallbackPixmap.isNull()) {
+            setBossPixmap(fallbackPixmap);
+        }
+        return;
+    }
+
+    const qreal oldBottom = sceneBoundingRect().bottom();
+    setPixmap(pixmap);
+
+    if (oldBottom != 0.0) {
+        const qreal newBottom = sceneBoundingRect().bottom();
+        setY(y() + (oldBottom - newBottom));
+    }
+}
+
+const QPixmap &Boss::jumpPixmap(bool faceLeft, int frame, bool frameLeft) const
+{
+    if (faceLeft) {
+        if (frame == 1) return frameLeft ? jumpFaceL1L : jumpFaceL1R;
+        return frameLeft ? jumpFaceL2L : jumpFaceL2R;
+    }
+
+    if (frame == 1) return frameLeft ? jumpFaceR1L : jumpFaceR1R;
+    return frameLeft ? jumpFaceR2L : jumpFaceR2R;
 }
 
 double Boss::standingY() const
