@@ -200,5 +200,9 @@
         <file>Project2_Dataset/Image/background/stage3.jpg</file>
         <file>Project2_Dataset/Image/background/stage4.jpg</file>
         <file>Project2_Dataset/Image/background/stage-boss.jpg</file>
+        <file>Project2_Dataset/Image/Kirby_Beam/kirby_beam.png</file>
+        <file>Project2_Dataset/Image/Kirby_fire/kirby_fire.png</file>
+        <file>Project2_Dataset/Image/Kirby_normal/kirby_normal.png</file>
+        <file>Project2_Dataset/Image/Kirby_spark/kirby_spark.png</file>
     </qresource>
 </RCC>

@@ -20,6 +20,7 @@
 #include "StarBullet.h"
 #include "BombStar.h"
 #include "Effect.h"
+#include "AbilityMenu.h"
 
 /**
  * @brief Kirby 玩家主角類別
@@ -69,6 +70,8 @@ public:
     };
 
     CurrentAbility currentAbility = CurrentAbility::None;
+
+    AbilityMenu *abilityMenu;
 
 
 
@@ -247,6 +250,8 @@ private:
     bool passThroughPlatform = false;
 
     bool isBeamAttacking = false;
+
+
 
 };
 

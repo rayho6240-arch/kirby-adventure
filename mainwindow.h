@@ -30,6 +30,7 @@
 #include "Boss.h"
 #include "Bomb.h"
 #include "BombStar.h"
+#include "AbilityMenu.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; } //後面就不打 "mainwindow::"
@@ -154,7 +155,9 @@ private:
     void loadStage3();
     void loadStage4();
     void loadBoss();
+    void loadSelectMenu();
 
+    bool isMenuOpen = false;
 
     QGraphicsPixmapItem* gameover;
 
