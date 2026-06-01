@@ -28,7 +28,7 @@ private:
     double vy = 0.0;
     double gravity = 0.6;
     double groundY = 0.0;
-    double bounceFactor = 0.65;
+    double bounceFactor = 0.7;
     double horizontalDamping = 0.9;
 
     int bounceCount = 0;

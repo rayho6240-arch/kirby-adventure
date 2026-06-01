@@ -45,6 +45,7 @@ enum GameState {
     STATE_FINISH,
     STATE_STAGE3,
     STATE_STAGE4,
+    STATE_STAGE4_TO_BOSS_VIDEO,
     STATE_BOSS
 };
 
@@ -154,6 +155,8 @@ private:
     void finish_animation(); // 負責播放結束動畫
     void loadStage3();
     void loadStage4();
+    void loadStage4ToBossVideo();
+    void stage4ToBossVideo();
     void loadBoss();
     void loadSelectMenu();
 
@@ -164,6 +167,10 @@ private:
     QGraphicsPixmapItem* finish_Item;
     QTimer* finish_timer;
     int finish_frame;
+
+    QGraphicsPixmapItem* stage4ToBossItem;
+    QTimer* stage4ToBossTimer;
+    int stage4ToBossFrame;
 
     // 將血量寫在header file避免重複寫
     int c_Hp = 3;

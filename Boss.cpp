@@ -255,7 +255,7 @@ void Boss::loadAnimationPixmaps()
     auto loadBossPixmap = [](const QString &path) {
         QPixmap pixmap(path);
         if (!pixmap.isNull()) {
-            return pixmap.scaledToHeight(180, Qt::SmoothTransformation);
+            return pixmap.scaledToHeight(250, Qt::SmoothTransformation);
         }
         return pixmap;
     };

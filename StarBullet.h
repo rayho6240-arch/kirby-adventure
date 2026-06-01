@@ -6,6 +6,7 @@
 // ==========================================
 #include <QGraphicsPixmapItem>
 #include <QObject>
+#include <QPainterPath>
 
 /**
  * @brief StarBullet 星星子彈類別
@@ -34,6 +35,7 @@ public:
      * 負責更新子彈座標，並掃描是否撞到牆壁 (Block) 或敵人 (Enemy)。
      */
     void update();
+    QPainterPath shape() const override;
 
 private:
     // ==========================================
