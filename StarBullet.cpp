@@ -1,8 +1,11 @@
 #include "StarBullet.h"
 #include "Block.h"
+#include "Enemy.h"
 
 #include <QGraphicsItem>
 #include <QGraphicsScene>
+#include <QList>
+#include <QPainterPath>
 #include <QPixmap>
 #include <QRectF>
 
@@ -18,10 +21,15 @@ StarBullet::StarBullet(qreal x, qreal y, bool toRight) {
     setPos(x, y);
 }
 
+QPainterPath StarBullet::shape() const {
+    QPainterPath path;
+    const QRectF hitbox = boundingRect().adjusted(45.0, 35.0, -45.0, -35.0);
+    path.addRect(hitbox);
+    return path;
+}
+
 void StarBullet::update() {
     if (!scene() || !isVisible()) return;
-
-    const QRectF previousHitbox = sceneBoundingRect().adjusted(15.0, 15.0, -15.0, -15.0);
 
     setX(x() + vx);
 
@@ -30,13 +38,21 @@ void StarBullet::update() {
         return;
     }
 
-    const QRectF currentHitbox = sceneBoundingRect().adjusted(15.0, 15.0, -15.0, -15.0);
-    const QRectF sweptHitbox = previousHitbox.united(currentHitbox);
+    QList<QGraphicsItem *> hits = scene()->collidingItems(this);
 
-    for (QGraphicsItem *item : scene()->items(sweptHitbox, Qt::IntersectsItemBoundingRect)) {
+    for (QGraphicsItem *item : hits) {
         if (item == this) continue;
 
-        Block *block = qgraphicsitem_cast<Block *>(item);
+        Enemy *enemy = dynamic_cast<Enemy *>(item);
+        if (enemy && !enemy->getIsDead() && enemy->isVisible() && collidesWithItem(enemy)) {
+            return;
+        }
+    }
+
+    for (QGraphicsItem *item : hits) {
+        if (item == this) continue;
+
+        Block *block = dynamic_cast<Block *>(item);
         if (block) {
             setVisible(false);
             return;
