@@ -1,7 +1,10 @@
 #include "Item.h"
+#include "Block.h"
+#include "Slope.h"
 #include "Kirby.h"      // 在 .cpp 中才真正 include，避免循環引用
 
 #include <QGraphicsScene>
+#include <QList>
 
 // =========================================================
 // Item 基底類別
@@ -9,6 +12,45 @@
 
 Item::Item(QGraphicsItem *parent): QObject(nullptr), QGraphicsPixmapItem(parent){
     setShapeMode(QGraphicsPixmapItem::BoundingRectShape);
+}
+
+void Item::update()
+{
+    if (consumed || !scene()) return;
+
+    const qreal oldY = y();
+    const qreal itemHeight = boundingRect().height();
+    vy += gravity;
+    setY(y() + vy);
+    isOnGround = false;
+
+    QList<QGraphicsItem *> itemsY = scene()->collidingItems(this, Qt::IntersectsItemShape);
+    for (QGraphicsItem *sceneItem : itemsY) {
+        Slope *slope = dynamic_cast<Slope *>(sceneItem);
+        if (slope) {
+            const qreal footCenterX = sceneBoundingRect().center().x();
+            const qreal surfaceY = slope->getSurfaceY(footCenterX);
+            const qreal previousBottom = oldY + itemHeight;
+            const qreal currentBottom = y() + itemHeight;
+
+            if (vy >= 0 && previousBottom <= surfaceY + 30 && currentBottom >= surfaceY - 8) {
+                setY(surfaceY - itemHeight);
+                vy = 0;
+                isOnGround = true;
+                return;
+            }
+
+            continue;
+        }
+
+        Block *block = qgraphicsitem_cast<Block *>(sceneItem);
+        if (block && vy >= 0 && oldY + itemHeight <= block->y() + 30) {
+            setY(block->y() - itemHeight);
+            vy = 0;
+            isOnGround = true;
+            return;
+        }
+    }
 }
 
 // =========================================================

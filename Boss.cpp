@@ -1,7 +1,9 @@
 #include "Boss.h"
 #include "Kirby.h"
+#include "Slope.h"
 
 #include <QBrush>
+#include <QGraphicsScene>
 #include <QPen>
 #include <QPixmap>
 #include <QString>
@@ -346,5 +348,25 @@ const QPixmap &Boss::jumpPixmap(bool faceLeft, int frame, bool frameLeft) const
 
 double Boss::standingY() const
 {
-    return groundY - boundingRect().height();
+    qreal surfaceY = groundY;
+
+    if (scene()) {
+        const qreal footCenterX = sceneBoundingRect().center().x();
+        for (QGraphicsItem *item : scene()->items()) {
+            Slope *slope = dynamic_cast<Slope *>(item);
+            if (!slope) continue;
+
+            const QRectF slopeRect = slope->sceneBoundingRect();
+            if (footCenterX < slopeRect.left() || footCenterX > slopeRect.right()) {
+                continue;
+            }
+
+            const qreal candidateY = slope->getSurfaceY(footCenterX);
+            if (candidateY < surfaceY) {
+                surfaceY = candidateY;
+            }
+        }
+    }
+
+    return surfaceY - boundingRect().height();
 }
