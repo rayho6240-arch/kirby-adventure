@@ -155,6 +155,8 @@ public:
     void setPassThroughPlatform(bool pass) { passThroughPlatform = pass; }
     // [新增] 改變卡比邊界檢查的範圍
     void changeWidth(int width);
+    Form getCurrentForm() const { return currentForm; }
+    void setCurrentForm(Form form) { currentForm = form; }
 
 
 private:

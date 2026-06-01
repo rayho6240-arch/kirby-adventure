@@ -700,6 +700,7 @@ void MainWindow::loadStage2(){
     //繼承stage1的血量
     c_Hp = player->getCurrentHp();
     c_lives = player->getCurrentlives();
+    currentform = player->getCurrentForm();
 
 
     scene->clear(); 
@@ -871,6 +872,7 @@ void MainWindow::loadStage2(){
     // 繼承stage1的血量
     player->setCurrentHp(c_Hp);
     player->setCurrentlives(c_lives);
+    player->setCurrentForm(currentform);
 
     scene->addItem(player);
 
