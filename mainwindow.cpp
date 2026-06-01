@@ -130,7 +130,12 @@ void MainWindow::gameLoop() {
 
         if ((currentState == STATE_STAGE1 || currentState == STATE_STAGE2) && player->y() > 1400) {
             qDebug() << "Kirby fell into abyss";
-            player->setCurrentHp(0);
+            if(player->getCurrentlives() > 1){
+                player->minusCurrentlives(); // 直接扣光血量
+            } else {
+                player->setCurrentHp(0); // 扣最後一滴血，觸發死亡
+            }
+            player->setCurrentForm(Kirby::Form::Normal);
             if (!(player->getCurrentHp() <= 0 && player->getCurrentlives() <= 1)) {
                 player->respawnAt(400, 100);
             }
@@ -423,11 +428,36 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
     // ==========================================
     if (currentState == STATE_STAGE2) {
         if(player->x() < 7900 && player->x() > 7800 && player->getOnGround() && player->y() < 600){
-            if(key == Qt::Key_Up && (!boss || boss->isDead())){
-                currentState = STATE_FINISH;
+            if(key == Qt::Key_Up){
+                currentState = STATE_STAGE3;
+                loadStage3();
+                return;
+                
+                /*currentState = STATE_FINISH;
                 // 計算當前剩餘總血量
                 remain_Hp = player->getCurrentHp() + player->getCurrentlives() * 3 - 3;
                 loadFinish();
+                return;
+                */
+            }
+        }
+    }
+
+    if (currentState == STATE_STAGE3) {
+        if(player->x() < 7800 && player->x() > 7600 && player->getOnGround()){
+            if(key == Qt::Key_Up){
+                currentState = STATE_STAGE4;
+                loadStage4();
+                return;
+            }
+        }
+    }
+
+    if (currentState == STATE_STAGE4) {
+        if(player->x() < 7300 && player->x() > 7000 && player->getOnGround()){
+            if(key == Qt::Key_Up){
+                currentState = STATE_BOSS;
+                loadBoss();
                 return;
             }
         }
@@ -437,7 +467,7 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
     // ==========================================
     // [新增包裝] 狀態 3：只有在遊戲關卡中，才執行卡比的動作按鍵
     // ==========================================
-    if (currentState == STATE_STAGE1 || currentState == STATE_STAGE2) {
+    if (currentState == STATE_STAGE1 || currentState == STATE_STAGE2 || currentState == STATE_STAGE3 || currentState == STATE_STAGE4 || currentState == STATE_BOSS) {
         if (!player) return; // 安全檢查：確保卡比存在才執行動作
 
         // 1. 蹲下
@@ -519,7 +549,7 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event) {
     // ==========================================
     // [新增包裝] 只有在遊戲關卡中，才處理放開按鍵的邏輯
     // ==========================================
-    if (currentState == STATE_STAGE1 || currentState == STATE_STAGE2) {
+    if (currentState == STATE_STAGE1 || currentState == STATE_STAGE2 || currentState == STATE_STAGE3 || currentState == STATE_STAGE4 || currentState == STATE_BOSS) {
         if (!player) return; // 安全檢查
 
         // 解除蹲下
@@ -1034,6 +1064,7 @@ void MainWindow::loadStage3(){
     //繼承stage1的血量
     c_Hp = player->getCurrentHp();
     c_lives = player->getCurrentlives();
+    currentform = player->getCurrentForm();
 
 
     scene->clear(); 
@@ -1044,4 +1075,238 @@ void MainWindow::loadStage3(){
     boss = nullptr;
     
     scene->setSceneRect(0, 0, 8100, 1080);
+
+    QPixmap backg(":/Project2_Dataset/Image/background/stage3.jpg");
+    QGraphicsPixmapItem* bg2 = new QGraphicsPixmapItem(backg);
+    qreal scaleFactor = 8100.0 / backg.width();
+    bg2->setScale(scaleFactor);
+    bg2->setPos(0, 0);
+    scene->addItem(bg2);
+
+    bg2->setZValue(-10);
+
+    Block* ground1 = new Block(0, 890, 8100, 400);
+    scene->addItem(ground1);
+
+    Block* ground2 = new Block(7000, 420, 1100, 320);
+    scene->addItem(ground2);
+
+    player = new Kirby(); //呼叫 Kirby.h 中的 ctor
+    player->setPos(400, 100);
+    player->changeWidth(8100);
+
+    // 繼承stage2的血量
+    player->setCurrentHp(c_Hp);
+    player->setCurrentlives(c_lives);
+    player->setCurrentForm(currentform);
+
+    scene->addItem(player);
+
+    boss = new Boss(bossArenaLeft, bossArenaRight, bossGroundY, player);
+    scene->addItem(boss);
+
+    //新增敵人sparky
+    for (int i = 0; i < 3; ++i) {
+        Sparky *spark = new Sparky(player);
+        spark->setPos(800 + (i * 500), 100);
+        scene->addItem(spark);
+        enemyList.append(spark);
+    }
+
+    // --- [新增] Stage2 道具生成 (只生成一次) ---
+    if (!maximTomatoSpawned) {
+        MaximTomato *tomato = new MaximTomato();
+        tomato->setPos(1600, 100);
+        scene->addItem(tomato);
+        maximTomatoSpawned = true;
+    }
+    if (!oneUpSpawned) {
+        OneUp *oneup = new OneUp();
+        oneup->setPos(1700, 100);
+        scene->addItem(oneup);
+        oneUpSpawned = true;
+    }
+    
+    // --- [5. 誕生 HUD 並加入場景][新增] ---
+    gameHUD = new HUD();
+    scene->addItem(gameHUD);
+
+    connect(player, &Kirby::starFired, this, [=](StarBullet* star){
+        bulletList.append(star); // 只要卡比一噴，就加進清單
+        qDebug() << "Captured a star! Total stars in list:" << bulletList.size();
+    });
+    connect(player, &Kirby::bombStarFired, this, [=](BombStar* bombStar){
+        bombStarList.append(bombStar);
+    });
+    
+    timer->start(16);
+}
+
+void MainWindow::loadStage4(){
+    timer->stop();
+    
+    //繼承stage1的血量
+    c_Hp = player->getCurrentHp();
+    c_lives = player->getCurrentlives();
+    currentform = player->getCurrentForm();
+
+
+    scene->clear(); 
+    bulletList.clear(); 
+    bombList.clear();
+    bombStarList.clear();
+    enemyList.clear();
+    boss = nullptr;
+    
+    scene->setSceneRect(0, 0, 8100, 1080);
+
+    QPixmap backg(":/Project2_Dataset/Image/background/stage4.jpg");
+    QGraphicsPixmapItem* bg2 = new QGraphicsPixmapItem(backg);
+    qreal scaleFactor = 8100.0 / backg.width();
+    bg2->setScale(scaleFactor);
+    bg2->setPos(0, -100);
+    scene->addItem(bg2);
+
+    bg2->setZValue(-10);
+
+    Block* ground1 = new Block(0, 890, 8100, 400);
+    scene->addItem(ground1);
+
+    player = new Kirby(); //呼叫 Kirby.h 中的 ctor
+    player->setPos(400, 100);
+    player->changeWidth(8100);
+
+    // 繼承stage2的血量
+    player->setCurrentHp(c_Hp);
+    player->setCurrentlives(c_lives);
+    player->setCurrentForm(currentform);
+
+    scene->addItem(player);
+
+    boss = new Boss(bossArenaLeft, bossArenaRight, bossGroundY, player);
+    scene->addItem(boss);
+
+    //新增敵人sparky
+    for (int i = 0; i < 3; ++i) {
+        Sparky *spark = new Sparky(player);
+        spark->setPos(800 + (i * 500), 100);
+        scene->addItem(spark);
+        enemyList.append(spark);
+    }
+
+    // --- [新增] Stage2 道具生成 (只生成一次) ---
+    if (!maximTomatoSpawned) {
+        MaximTomato *tomato = new MaximTomato();
+        tomato->setPos(1600, 100);
+        scene->addItem(tomato);
+        maximTomatoSpawned = true;
+    }
+    if (!oneUpSpawned) {
+        OneUp *oneup = new OneUp();
+        oneup->setPos(1700, 100);
+        scene->addItem(oneup);
+        oneUpSpawned = true;
+    }
+    
+    // --- [5. 誕生 HUD 並加入場景][新增] ---
+    gameHUD = new HUD();
+    scene->addItem(gameHUD);
+
+    connect(player, &Kirby::starFired, this, [=](StarBullet* star){
+        bulletList.append(star); // 只要卡比一噴，就加進清單
+        qDebug() << "Captured a star! Total stars in list:" << bulletList.size();
+    });
+    connect(player, &Kirby::bombStarFired, this, [=](BombStar* bombStar){
+        bombStarList.append(bombStar);
+    });
+    
+    timer->start(16);
+}
+
+void MainWindow::loadBoss(){
+    timer->stop();
+    
+    //繼承stage1的血量
+    c_Hp = player->getCurrentHp();
+    c_lives = player->getCurrentlives();
+    currentform = player->getCurrentForm();
+
+
+    scene->clear(); 
+    bulletList.clear(); 
+    bombList.clear();
+    bombStarList.clear();
+    enemyList.clear();
+    boss = nullptr;
+    
+    scene->setSceneRect(0, 0, 4860, 1080);
+
+    QPixmap backg(":/Project2_Dataset/Image/background/stage-boss.jpg");
+    QGraphicsPixmapItem* bg2 = new QGraphicsPixmapItem(backg);
+    qreal scaleFactor = 4860.0 / backg.width();
+    bg2->setScale(scaleFactor);
+    bg2->setPos(0, 100);
+    scene->addItem(bg2);
+    QPixmap Bg(":/Project2_Dataset/Image/background/stage-1-bg.jpg");
+    QGraphicsPixmapItem* Bg2 = new QGraphicsPixmapItem(Bg);
+    qreal ScaleFactor = 4860.0 / Bg.width();
+    Bg2->setScale(ScaleFactor);
+    Bg2->setPos(0, 0);
+    scene->addItem(Bg2);
+
+    bg2->setZValue(-10);
+    Bg2->setZValue(-20);
+
+    Block* ground1 = new Block(0, 890, 4860, 400);
+    scene->addItem(ground1);
+
+    player = new Kirby(); //呼叫 Kirby.h 中的 ctor
+    player->setPos(400, 100);
+    player->changeWidth(4860);
+
+    // 繼承stage2的血量
+    player->setCurrentHp(c_Hp);
+    player->setCurrentlives(c_lives);
+    player->setCurrentForm(currentform);
+
+    scene->addItem(player);
+
+    boss = new Boss(bossArenaLeft, bossArenaRight, bossGroundY, player);
+    scene->addItem(boss);
+
+    //新增敵人sparky
+    for (int i = 0; i < 3; ++i) {
+        Sparky *spark = new Sparky(player);
+        spark->setPos(800 + (i * 500), 100);
+        scene->addItem(spark);
+        enemyList.append(spark);
+    }
+
+    // --- [新增] Stage2 道具生成 (只生成一次) ---
+    if (!maximTomatoSpawned) {
+        MaximTomato *tomato = new MaximTomato();
+        tomato->setPos(1600, 100);
+        scene->addItem(tomato);
+        maximTomatoSpawned = true;
+    }
+    if (!oneUpSpawned) {
+        OneUp *oneup = new OneUp();
+        oneup->setPos(1700, 100);
+        scene->addItem(oneup);
+        oneUpSpawned = true;
+    }
+    
+    // --- [5. 誕生 HUD 並加入場景][新增] ---
+    gameHUD = new HUD();
+    scene->addItem(gameHUD);
+
+    connect(player, &Kirby::starFired, this, [=](StarBullet* star){
+        bulletList.append(star); // 只要卡比一噴，就加進清單
+        qDebug() << "Captured a star! Total stars in list:" << bulletList.size();
+    });
+    connect(player, &Kirby::bombStarFired, this, [=](BombStar* bombStar){
+        bombStarList.append(bombStar);
+    });
+    
+    timer->start(16);
 }

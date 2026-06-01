@@ -197,5 +197,8 @@
         <file>Project2_Dataset/Image/Kirby_Beam/kirby_beam_run_R_5.png</file>
         <file>Project2_Dataset/Image/Kirby_Beam/kirby_beam_stop_L.png</file>
         <file>Project2_Dataset/Image/Kirby_Beam/kirby_beam_stop_R.png</file>
+        <file>Project2_Dataset/Image/background/stage3.jpg</file>
+        <file>Project2_Dataset/Image/background/stage4.jpg</file>
+        <file>Project2_Dataset/Image/background/stage-boss.jpg</file>
     </qresource>
 </RCC>
