@@ -14,7 +14,7 @@ Bomb::Bomb(double x, double y, double vx, double vy, double groundY, Kirby *play
 {
     QPixmap bombPixmap(":/Project2_Dataset/Image/bomb/bomb(1).png");
     if (!bombPixmap.isNull()) {
-        setPixmap(bombPixmap.scaledToHeight(48, Qt::SmoothTransformation));
+        setPixmap(bombPixmap.scaledToHeight(150, Qt::SmoothTransformation));
     }
 
     setShapeMode(QGraphicsPixmapItem::MaskShape);
@@ -122,7 +122,7 @@ void Bomb::explode(bool damageKirby)
 
     QPixmap explosionPixmap(":/Project2_Dataset/Image/bomb/explore_(1).png");
     if (!explosionPixmap.isNull()) {
-        setPixmap(explosionPixmap.scaledToHeight(120, Qt::SmoothTransformation));
+        setPixmap(explosionPixmap.scaledToHeight(200, Qt::SmoothTransformation));
     }
 
     if (damageKirby && player && explosionRect().intersects(player->sceneBoundingRect())) {
