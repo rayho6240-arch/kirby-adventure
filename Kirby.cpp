@@ -68,7 +68,7 @@ void Kirby::setDown(bool down) {
         hasObjectInMouth = false;        // 東西吞下去了，嘴巴空了
         this->setScale(1.0);
         qDebug() << "Kirby evolved to Sparky Form!";
-        abilityMenu->setSparkUnlocked(true); // 變身成功後解鎖選單的 Spark 能力
+        abilityMenu->setUnlocked(3, true); // 變身成功後解鎖選單的 Spark 能力
         
         // 這裡可以播放一個「變身成功」的小特效
     }
@@ -77,14 +77,14 @@ void Kirby::setDown(bool down) {
         hasObjectInMouth = false;        // 東西吞下去了，嘴巴空了
         this->setScale(1.0);
         qDebug() << "Kirby evolved to Fire Form!";
-        abilityMenu->setFireUnlocked(true); // 變身成功後解鎖選單的 Fire 能力
+        abilityMenu->setUnlocked(2, true); // 變身成功後解鎖選單的 Fire 能力
     }
     else if (isDown && currentForm == Form::BeamFat) {
         currentForm = Form::BeamForm;    // 正式變身為 BeamForm
         hasObjectInMouth = false;        // 東西吞下去了，嘴巴空了
         this->setScale(1.0);
         qDebug() << "Kirby evolved to Beam Form!";
-        abilityMenu->setBeamUnlocked(true); // 變身成功後解鎖選單的 Beam 能力
+        abilityMenu->setUnlocked(1, true); // 變身成功後解鎖選單的 Beam 能力
     }
 }
 

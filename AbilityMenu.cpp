@@ -71,6 +71,20 @@ void AbilityMenu::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
                                                  Qt::SmoothTransformation);
             
             painter->drawPixmap(x, y, scaledIcon);
+            if (!unlocked[i]) {
+                painter->save(); // 1. 備份當前 painter 的設定（如畫筆、顏色）
+                
+                // 2. 設定刷子顏色為半透明黑 
+                // QColor(紅色, 綠色, 藍色, 透明度) -> 0, 0, 0 是黑色
+                // 180 是透明度（範圍 0~255），數字越大，圖示越暗；數字越小，圖示越亮
+                painter->setBrush(QBrush(QColor(0, 0, 0, 180))); 
+                painter->setPen(Qt::NoPen); // 關閉邊框，不需要框線
+                
+                // 3. 在圖示的 (x, y) 座標，畫一個一樣大 (targetW, targetH) 的黑色長方形
+                painter->drawRect(x, y, targetW, targetH); 
+                
+                painter->restore(); // 4. 還原 painter 的設定，避免影響下一個圖示
+            }
         } else {
             // 圖片讀取失敗時的暫代灰色方塊
             painter->setBrush(Qt::gray);

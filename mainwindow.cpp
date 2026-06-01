@@ -487,18 +487,18 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
                         AbilityType chosen = player->abilityMenu->getSelectedAbility();
                         
                         // 🔍 關鍵攔截：如果選到「未解鎖」的能力，直接無視這次 Enter
-                        //if (chosen == AbilityType::Beam && !kirby->isBeamUnlocked) break;
-                        //if (chosen == AbilityType::Fire && !kirby->isFireUnlocked) break;
-                        //if (chosen == AbilityType::Spark && !kirby->isSparkUnlocked) break;
+                        if (chosen == AbilityType::Beam && !player->abilityMenu->getUnlocked(1)) break;
+                        if (chosen == AbilityType::Fire && !player->abilityMenu->getUnlocked(2)) break;
+                        if (chosen == AbilityType::Spark && !player->abilityMenu->getUnlocked(3)) break;
                         
                         // 🟢 通過驗證，開始改變卡比型態（請對照你實際的 Form 變數）
                         if (chosen == AbilityType::Normal) {
                             player->setCurrentForm(Kirby::Form::Normal);
-                        } else if (chosen == AbilityType::Beam) {
+                        } else if (chosen == AbilityType::Beam && player->abilityMenu->getUnlocked(1)) {
                             player->setCurrentForm(Kirby::Form::BeamForm);
-                        } else if (chosen == AbilityType::Fire) {
+                        } else if (chosen == AbilityType::Fire && player->abilityMenu->getUnlocked(2)) {
                             player->setCurrentForm(Kirby::Form::FireForm);
-                        } else if (chosen == AbilityType::Spark) {
+                        } else if (chosen == AbilityType::Spark && player->abilityMenu->getUnlocked(3)) {
                             player->setCurrentForm(Kirby::Form::Sparky);
                         }
                         
@@ -508,7 +508,21 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
                         timer->start(); // 🟢 遊戲物理恢復運作
                     }
                     break;
-                    
+                case Qt::Key_V:
+                    {
+                        AbilityType chosen = player->abilityMenu->getSelectedAbility();
+                        if (chosen == AbilityType::Normal) {
+                            break;
+                        } else if (chosen == AbilityType::Beam && player->abilityMenu->getUnlocked(1)) {
+                            player->abilityMenu->setUnlocked(1, false); // 取消解鎖，讓它變成灰色
+                        } else if (chosen == AbilityType::Fire && player->abilityMenu->getUnlocked(2)) {
+                            player->abilityMenu->setUnlocked(2, false); // 取消解鎖，讓它變成灰色
+                        } else if (chosen == AbilityType::Spark && player->abilityMenu->getUnlocked(3)) {
+                            player->abilityMenu->setUnlocked(3, false); // 取消解鎖，讓它變成灰色
+                        }
+                    }    
+                    break;
+
                 case Qt::Key_Q: // 選單開啟時再按一次 Q，代表直接取消
                     isMenuOpen = false;
                     player->abilityMenu->setVisible(false);
@@ -745,9 +759,13 @@ void MainWindow::loadStage1(){
     
     // --- [5. 實體物件生成：玩家與敵人 (Entities)] ---
     // 玩家 (卡比)
+
     player = new Kirby(); //呼叫 Kirby.h 中的 ctor
+    AbilityMenu *menu = new AbilityMenu();
+    player->abilityMenu = menu;
     player->setPos(400, 100);
     scene->addItem(player);
+    scene->addItem(player->abilityMenu);
 
     // 敵人 (Waddle Dee 軍隊)
     // @note 用迴圈批次生成敵人，並加入 enemyList 統一管理
@@ -793,11 +811,8 @@ void MainWindow::loadStage1(){
     playlist->setCurrentIndex(1); 
     bgmPlayer->play(); // 切換後確保有在播放
 
-    player->abilityMenu = new AbilityMenu();
-    scene->addItem(player->abilityMenu);
 
-    // 將選單定位在畫面正中央
-    //player->abilityMenu->setPos(230, 340);
+
 
 
     // --- [7. 訊號與槽連線 (Signals & Slots)] ---
@@ -821,6 +836,7 @@ void MainWindow::loadStage2(){
     c_Hp = player->getCurrentHp();
     c_lives = player->getCurrentlives();
     currentform = player->getCurrentForm();
+    currentUnlocked = player->abilityMenu->getUnlockedStatus();
 
 
     scene->clear(); 
@@ -986,13 +1002,17 @@ void MainWindow::loadStage2(){
 
 
     player = new Kirby(); //呼叫 Kirby.h 中的 ctor
+    AbilityMenu *menu = new AbilityMenu();
+    player->abilityMenu = menu;
     player->setPos(400, 100);
     player->changeWidth(8100);
+    scene->addItem(player->abilityMenu);
 
     // 繼承stage1的血量
     player->setCurrentHp(c_Hp);
     player->setCurrentlives(c_lives);
     player->setCurrentForm(currentform);
+    player->abilityMenu->setUnlockedStatus(currentUnlocked);
 
     scene->addItem(player);
 
@@ -1024,9 +1044,6 @@ void MainWindow::loadStage2(){
     // --- [5. 誕生 HUD 並加入場景][新增] ---
     gameHUD = new HUD();
     scene->addItem(gameHUD);
-
-    player->abilityMenu = new AbilityMenu();
-    scene->addItem(player->abilityMenu);
 
     connect(player, &Kirby::starFired, this, [=](StarBullet* star){
         bulletList.append(star); // 只要卡比一噴，就加進清單
@@ -1151,6 +1168,7 @@ void MainWindow::loadStage3(){
     c_Hp = player->getCurrentHp();
     c_lives = player->getCurrentlives();
     currentform = player->getCurrentForm();
+    currentUnlocked = player->abilityMenu->getUnlockedStatus();
 
 
     scene->clear(); 
@@ -1178,13 +1196,17 @@ void MainWindow::loadStage3(){
     scene->addItem(ground2);
 
     player = new Kirby(); //呼叫 Kirby.h 中的 ctor
+    AbilityMenu *menu = new AbilityMenu();
+    player->abilityMenu = menu;
     player->setPos(400, 100);
     player->changeWidth(8100);
+    scene->addItem(player->abilityMenu);
 
     // 繼承stage2的血量
     player->setCurrentHp(c_Hp);
     player->setCurrentlives(c_lives);
     player->setCurrentForm(currentform);
+    player->abilityMenu->setUnlockedStatus(currentUnlocked);
 
     scene->addItem(player);
 
@@ -1235,7 +1257,7 @@ void MainWindow::loadStage4(){
     c_Hp = player->getCurrentHp();
     c_lives = player->getCurrentlives();
     currentform = player->getCurrentForm();
-
+    currentUnlocked = player->abilityMenu->getUnlockedStatus();
 
     scene->clear(); 
     bulletList.clear(); 
@@ -1259,13 +1281,17 @@ void MainWindow::loadStage4(){
     scene->addItem(ground1);
 
     player = new Kirby(); //呼叫 Kirby.h 中的 ctor
+    AbilityMenu *menu = new AbilityMenu();
+    player->abilityMenu = menu;
     player->setPos(400, 100);
     player->changeWidth(8100);
+    scene->addItem(player->abilityMenu);
 
-    // 繼承stage2的血量
+    // 繼承stage3的血量
     player->setCurrentHp(c_Hp);
     player->setCurrentlives(c_lives);
     player->setCurrentForm(currentform);
+    player->abilityMenu->setUnlockedStatus(currentUnlocked);
 
     scene->addItem(player);
 
@@ -1316,7 +1342,7 @@ void MainWindow::loadBoss(){
     c_Hp = player->getCurrentHp();
     c_lives = player->getCurrentlives();
     currentform = player->getCurrentForm();
-
+    currentUnlocked = player->abilityMenu->getUnlockedStatus();
 
     scene->clear(); 
     bulletList.clear(); 
@@ -1347,16 +1373,19 @@ void MainWindow::loadBoss(){
     scene->addItem(ground1);
 
     player = new Kirby(); //呼叫 Kirby.h 中的 ctor
+    AbilityMenu *menu = new AbilityMenu();
+    player->abilityMenu = menu;
     player->setPos(400, 100);
     player->changeWidth(4860);
+    scene->addItem(player->abilityMenu);
 
-    // 繼承stage2的血量
+    // 繼承stage4的血量
     player->setCurrentHp(c_Hp);
     player->setCurrentlives(c_lives);
     player->setCurrentForm(currentform);
+    player->abilityMenu->setUnlockedStatus(currentUnlocked);
 
     scene->addItem(player);
-
     boss = new Boss(bossArenaLeft, bossArenaRight, bossGroundY, player);
     scene->addItem(boss);
 

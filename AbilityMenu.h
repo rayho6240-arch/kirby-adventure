@@ -23,9 +23,10 @@ public:
     void moveRight();
     AbilityType getSelectedAbility() const;
     void resetSelection();
-    void setBeamUnlocked(bool unlocked) { isBeamUnlocked = unlocked; }
-    void setFireUnlocked(bool unlocked) { isFireUnlocked = unlocked; }
-    void setSparkUnlocked(bool unlocked) { isSparkUnlocked = unlocked; }
+    void setUnlocked(int index, bool value) {unlocked[index] = value;} // 用來解鎖能力的簡單函式
+    bool getUnlocked(int index) const { return unlocked[index]; } // 檢查能力是否解鎖
+    QVector<bool> getUnlockedStatus() const { return unlocked; } // 取得所有能力的解鎖狀態
+    void setUnlockedStatus(const QVector<bool>& status) { unlocked = status; } // 設定所有能力的解鎖狀態
 
 protected:
     // 🛑 核心：複寫 paint，用來畫出長方形背景、圖示和選取框
@@ -35,10 +36,7 @@ private:
     int selectedIndex;
     QVector<AbilityType> abilities;
     QVector<QPixmap> icons; // 儲存能力的圖示
-
-    bool isBeamUnlocked = false;
-    bool isFireUnlocked = false;
-    bool isSparkUnlocked = false;
+    QVector<bool> unlocked = {true, false, false, false}; // 儲存能力是否解鎖的狀態
 };
 
 #endif // ABILITYMENU_H
