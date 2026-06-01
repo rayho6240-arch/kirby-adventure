@@ -29,7 +29,8 @@ SOURCES += \
     WaddleDoo.cpp \
     main.cpp \
     mainwindow.cpp \
-    Slope.cpp
+    Slope.cpp \
+    AbilityMenu.cpp
 
 HEADERS += \
     Bomb.h \
@@ -51,7 +52,8 @@ HEADERS += \
     WaddleDee.h \
     WaddleDoo.h \
     mainwindow.h \
-    Slope.h
+    Slope.h \
+    AbilityMenu.h
 
 FORMS += \
     mainwindow.ui

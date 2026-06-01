@@ -470,6 +470,83 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
     if (currentState == STATE_STAGE1 || currentState == STATE_STAGE2 || currentState == STATE_STAGE3 || currentState == STATE_STAGE4 || currentState == STATE_BOSS) {
         if (!player) return; // 安全檢查：確保卡比存在才執行動作
 
+        // 💡 情況 A：選單目前是開啟狀態 -> 鍵盤全權控制選單操作
+        if (isMenuOpen) {
+            switch (key) {
+                case Qt::Key_Left:
+                    player->abilityMenu->moveLeft();
+                    break;
+                    
+                case Qt::Key_Right:
+                    player->abilityMenu->moveRight();
+                    break;
+                    
+                case Qt::Key_Return: // 大鍵盤 Enter
+                case Qt::Key_Enter:  // 數字鍵盤 Enter
+                    {
+                        AbilityType chosen = player->abilityMenu->getSelectedAbility();
+                        
+                        // 🔍 關鍵攔截：如果選到「未解鎖」的能力，直接無視這次 Enter
+                        //if (chosen == AbilityType::Beam && !kirby->isBeamUnlocked) break;
+                        //if (chosen == AbilityType::Fire && !kirby->isFireUnlocked) break;
+                        //if (chosen == AbilityType::Spark && !kirby->isSparkUnlocked) break;
+                        
+                        // 🟢 通過驗證，開始改變卡比型態（請對照你實際的 Form 變數）
+                        if (chosen == AbilityType::Normal) {
+                            player->setCurrentForm(Kirby::Form::Normal);
+                        } else if (chosen == AbilityType::Beam) {
+                            player->setCurrentForm(Kirby::Form::BeamForm);
+                        } else if (chosen == AbilityType::Fire) {
+                            player->setCurrentForm(Kirby::Form::FireForm);
+                        } else if (chosen == AbilityType::Spark) {
+                            player->setCurrentForm(Kirby::Form::Sparky);
+                        }
+                        
+                        // 關閉選單，解凍遊戲
+                        isMenuOpen = false;
+                        player->abilityMenu->setVisible(false);
+                        timer->start(); // 🟢 遊戲物理恢復運作
+                    }
+                    break;
+                    
+                case Qt::Key_Q: // 選單開啟時再按一次 Q，代表直接取消
+                    isMenuOpen = false;
+                    player->abilityMenu->setVisible(false);
+                    timer->start(); // 🟢 遊戲解凍
+                    break;
+                    
+                default:
+                    // 當選單開啟時，無視其他按鍵（防止卡比在背景偷偷走路或跳躍）
+                    break;
+            }
+            return; // 🛑 核心：直接中斷，不讓事件傳給下方原本的卡比控制
+        }
+
+        // 💡 情況 B：選單目前是關閉狀態 -> 正常遊玩中按下 Q 鍵
+        if (key == Qt::Key_Q) {
+            isMenuOpen = true;
+            timer->stop(); // 🛑 關鍵：主計時器停止，全遊戲畫面與物理凍結！
+
+            if (view) {
+                // 1. 取得 View（視窗）目前的寬高中心點（視窗座標）
+                QPoint viewCenter(view->width() / 2, view->height() / 2);
+                
+                // 2. 將這個視窗中央點，轉換成地圖（Scene）中的實際座標
+                QPointF sceneCenter = view->mapToScene(viewCenter);
+                
+                // 3. 計算選單的左上角位置（扣掉選單自身寬高的一半：500/2=250, 140/2=70）
+                qreal menuX = sceneCenter.x() - (player->abilityMenu->rect().width() / 2);
+                qreal menuY = sceneCenter.y() - (player->abilityMenu->rect().height() / 2);
+                
+                // 4. 移動選單到目前畫面的絕對正中央！
+                player->abilityMenu->setPos(menuX, menuY);
+            }
+            
+            player->abilityMenu->resetSelection(); // 游標重置到第一個項目
+            player->abilityMenu->setVisible(true); // 顯示長方形能力選單
+            return;
+        }
+
         // 1. 蹲下
         if (key == Qt::Key_Down) {
             player->setDown(true);
@@ -716,6 +793,12 @@ void MainWindow::loadStage1(){
     playlist->setCurrentIndex(1); 
     bgmPlayer->play(); // 切換後確保有在播放
 
+    player->abilityMenu = new AbilityMenu();
+    scene->addItem(player->abilityMenu);
+
+    // 將選單定位在畫面正中央
+    //player->abilityMenu->setPos(230, 340);
+
 
     // --- [7. 訊號與槽連線 (Signals & Slots)] ---
     // 監聽卡比吐星星的訊號
@@ -941,6 +1024,9 @@ void MainWindow::loadStage2(){
     // --- [5. 誕生 HUD 並加入場景][新增] ---
     gameHUD = new HUD();
     scene->addItem(gameHUD);
+
+    player->abilityMenu = new AbilityMenu();
+    scene->addItem(player->abilityMenu);
 
     connect(player, &Kirby::starFired, this, [=](StarBullet* star){
         bulletList.append(star); // 只要卡比一噴，就加進清單
