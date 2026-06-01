@@ -31,13 +31,6 @@ void HUD::updateHealth(int currentHp, int maxHp, int currentlives, int maxlives)
     QString hpPath = QString(":/Project2_Dataset/Image/item/Hp-%1.png").arg(hpImageIndex);
     QString livesPath = QString(":/Project2_Dataset/Image/item/lives-%1.png").arg(livesImageIndex);
 
-    QPixmap testPixmap(hpPath);
-    if (testPixmap.isNull()) {
-        qDebug() << "❌ 讀取失敗！Qt 找不到這張圖，請檢查路徑或點擊點選「清除並重新構建」：" << hpPath;
-    } else {
-        qDebug() << "⭕ 讀取成功！圖片大小為：" << testPixmap.size();
-    }
-
     hpPixmap->setPixmap(QPixmap(hpPath));
     livesPixmap->setPixmap(QPixmap(livesPath));
 

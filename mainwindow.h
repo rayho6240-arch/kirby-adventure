@@ -163,6 +163,7 @@ private:
     // 將血量寫在header file避免重複寫
     int c_Hp = 3;
     int c_lives = 3;
+    Kirby::Form currentform = Kirby::Form::Normal; // 繼承stage1的形態
 
     int remain_Hp; // 計算從stage2到finish時剩餘總血量
     int finish_total[7] = {393 , 273 , 261 , 221 , 200 , 204 , 235}; // 每個結算動畫的總圖片數
