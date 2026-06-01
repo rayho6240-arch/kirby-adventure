@@ -456,8 +456,8 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
     if (currentState == STATE_STAGE4) {
         if(player->x() < 7300 && player->x() > 7000 && player->getOnGround()){
             if(key == Qt::Key_Up){
-                currentState = STATE_BOSS;
-                loadBoss();
+                currentState = STATE_STAGE4_TO_BOSS_VIDEO;
+                loadStage4ToBossVideo();
                 return;
             }
         }
@@ -1390,14 +1390,75 @@ void MainWindow::loadStage4(){
     timer->start(16);
 }
 
-void MainWindow::loadBoss(){
+void MainWindow::loadStage4ToBossVideo(){
     timer->stop();
-    
-    //繼承stage1的血量
+
     c_Hp = player->getCurrentHp();
     c_lives = player->getCurrentlives();
     currentform = player->getCurrentForm();
     currentUnlocked = player->abilityMenu->getUnlockedStatus();
+
+    scene->clear();
+    bulletList.clear();
+    bombList.clear();
+    bombStarList.clear();
+    enemyList.clear();
+    player = nullptr;
+    boss = nullptr;
+
+    scene->setSceneRect(0, 0, 1620, 1080);
+
+    stage4ToBossFrame = 3;
+    stage4ToBossItem = new QGraphicsPixmapItem();
+    stage4ToBossItem->setPos(0, 0);
+    scene->addItem(stage4ToBossItem);
+    view->centerOn(810, 540);
+
+    QString videoDir = QCoreApplication::applicationDirPath() + "/4tobossVideo";
+    QString framePath = QDir::cleanPath(videoDir + "/" + QString("frame_%1.jpg").arg(stage4ToBossFrame, 3, 10, QChar('0')));
+    QPixmap firstPic(framePath);
+    if (!firstPic.isNull()) {
+        stage4ToBossItem->setPixmap(firstPic.scaled(1620, 1080, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+    } else {
+        qDebug() << "stage4 to boss frame missing:" << framePath;
+    }
+    stage4ToBossFrame++;
+
+    stage4ToBossTimer = new QTimer(this);
+    connect(stage4ToBossTimer, &QTimer::timeout, this, &MainWindow::stage4ToBossVideo);
+    stage4ToBossTimer->start(30);
+}
+
+void MainWindow::stage4ToBossVideo(){
+    if (stage4ToBossFrame > 94) {
+        stage4ToBossTimer->stop();
+        currentState = STATE_BOSS;
+        loadBoss();
+        return;
+    }
+
+    QString videoDir = QCoreApplication::applicationDirPath() + "/4tobossVideo";
+    QString framePath = QDir::cleanPath(videoDir + "/" + QString("frame_%1.jpg").arg(stage4ToBossFrame, 3, 10, QChar('0')));
+    QPixmap framePic(framePath);
+    if (!framePic.isNull()) {
+        stage4ToBossItem->setPixmap(framePic.scaled(1620, 1080, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+    } else {
+        qDebug() << "stage4 to boss frame missing:" << framePath;
+    }
+
+    stage4ToBossFrame++;
+}
+
+void MainWindow::loadBoss(){
+    timer->stop();
+
+    //繼承stage1的血量
+    if (player) {
+        c_Hp = player->getCurrentHp();
+        c_lives = player->getCurrentlives();
+        currentform = player->getCurrentForm();
+        currentUnlocked = player->abilityMenu->getUnlockedStatus();
+    }
 
     scene->clear(); 
     bulletList.clear(); 
