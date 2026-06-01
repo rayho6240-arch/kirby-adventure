@@ -990,7 +990,7 @@ void Kirby::updateSprite() {
         else {
             // 多幀動作：Kirby_spark_run(1)_R.png / Kirby_spark_fly(1)_R.png
             // 修正幀數：Sparky 的跑跟飛只有 2 幀，要做循環限制防止讀不到圖
-            int sparkFrame = (frameCounter / 10) % 2 + 1; 
+            int sparkFrame = (action == "fly") ? frame : (frameCounter / 10) % 2 + 1;
             path = QString("%1Kirby_spark_%2(%3)_%4.png").arg(folder).arg(action).arg(sparkFrame).arg(dir);
         }
     } 
@@ -1006,7 +1006,7 @@ void Kirby::updateSprite() {
             path = QString("%1kirbyfire_%2_%3.png").arg(folder).arg(action).arg(dir);
         }
         else {
-            int fireFrame = (frameCounter / 10) % 2 + 1;
+            int fireFrame = (action == "fly") ? frame : (frameCounter / 10) % 2 + 1;
             if (action == "run") {
                 fireFrame = (frameCounter / 7) % 3 + 1; // run(1) to run(3)
             }
@@ -1030,7 +1030,7 @@ void Kirby::updateSprite() {
         }
         else {
             // 走路跑步：kirbybeam_run(1)_R.png (假設做 2 幀循環)
-            int beamRunFrame = (frameCounter / 10) % 5 + 1;
+            int beamRunFrame = (action == "fly") ? frame : (frameCounter / 10) % 5 + 1;
             path = QString("%1kirby_beam_%2_%4_%3.png").arg(folder).arg(action).arg(beamRunFrame).arg(dir);
         }
     }
