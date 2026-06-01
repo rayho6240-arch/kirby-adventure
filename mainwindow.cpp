@@ -383,7 +383,7 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
     if (currentState == STATE_MENU) {
         if (key == Qt::Key_Return || key == Qt::Key_Enter) {
             currentState = STATE_STAGE1; // 更新狀態
-            loadStage1();                // 載入第一關
+            loadStage1();                // 載入第一關////~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         }
     }
 
@@ -878,86 +878,69 @@ void MainWindow::loadStage2(){
     slope1 << QPointF(0, 150) << QPointF(150, 150) << QPointF(150, 0); // 三個頂點
     Slope* ramp = new Slope(1100, 750, slope1);
     scene->addItem(ramp);
-
     QPolygonF slope2;
     slope2 << QPointF(0, 150) << QPointF(280, 150) << QPointF(280, 0); // 三個頂點
     Slope* ramp1 = new Slope(1250, 600, slope2);
     scene->addItem(ramp1);
-
     QPolygonF slope3;
     slope3 << QPointF(0, 150) << QPointF(0, 0) << QPointF(280, 150); // 三個頂點
     Slope* ramp2 = new Slope(1530, 600, slope3);
     scene->addItem(ramp2);
-
     QPolygonF slope4;
     slope4 << QPointF(0, 150) << QPointF(0, 0) << QPointF(150, 150); // 三個頂點
     Slope* ramp3 = new Slope(1810, 750, slope4);
     scene->addItem(ramp3);
-
     QPolygonF slope5;
     slope5 << QPointF(0, 140) << QPointF(250, 140) << QPointF(250, 0); // 三個頂點
     Slope* ramp4 = new Slope(2410, 755, slope5);
     scene->addItem(ramp4);
-
     QPolygonF slope6;
     slope6 << QPointF(0, 215) << QPointF(0, 0) << QPointF(400, 215); // 三個頂點
     Slope* ramp5 = new Slope(3230, 680, slope6);
     scene->addItem(ramp5);
-
     QPolygonF slope7;
     slope7 << QPointF(0, 75) << QPointF(130, 75) << QPointF(130, 0); // 三個頂點
     Slope* ramp6 = new Slope(4850, 815, slope7);
     scene->addItem(ramp6);
-
     QPolygonF slope8;
     slope8 << QPointF(0, 65) << QPointF(140, 65) << QPointF(140, 0); // 三個頂點
     Slope* ramp7 = new Slope(5240, 750, slope8);
     scene->addItem(ramp7);
-
     QPolygonF slope9;
     slope9 << QPointF(0, 65) << QPointF(120, 65) << QPointF(120, 0); // 三個頂點
     Slope* ramp8 = new Slope(5640, 685, slope9);
     scene->addItem(ramp8);
-
     QPolygonF slope10;
     slope10 << QPointF(0, 0) << QPointF(0, 75) << QPointF(130, 75); // 三個頂點
     Slope* ramp9 = new Slope(6500, 685, slope10);
     scene->addItem(ramp9);
-
     QPolygonF slope11;
     slope11 << QPointF(0, 0) << QPointF(0, 130) << QPointF(260, 130); // 三個頂點
     Slope* ramp10 = new Slope(7020, 760, slope11);
     scene->addItem(ramp10);
 
+
     Block* wall1 = new Block(2660, 755, 60, 140);
     scene->addItem(wall1);
-
     Block* wall2 = new Block(3180, 680, 50, 215);
     scene->addItem(wall2);
-
     Block* wall3 = new Block(4980, 815, 885, 75);
     scene->addItem(wall3);
-
     Block* wall4 = new Block(5380, 750, 495, 65);
     scene->addItem(wall4);   
-
     Block* wall5 = new Block(5760, 685, 115, 65);
     scene->addItem(wall5); 
-
     Block* wall6 = new Block(5875, 840, 515, 50);
     scene->addItem(wall6); 
-
     Block* wall7 = new Block(6390, 685, 110, 75);
     scene->addItem(wall7); 
-
     Block* wall8 = new Block(6390, 760, 630, 130);
     scene->addItem(wall8); 
-    
     Block* block1 = new Block(2720, 950, 60, 60);
     scene->addItem(block1);
-
     Block* block2 = new Block(3120, 950, 60, 60);
     scene->addItem(block2);
+
 
     // {新增} 範例 C：單向藍色平台（測試用）
     FloatingPlatform *Plat1 = new FloatingPlatform(355, 750, 190, 30);
@@ -1171,15 +1154,55 @@ void MainWindow::loadStage3(){
 
     bg2->setZValue(-10);
 
-    Block* ground1 = new Block(0, 890, 8100, 400);
+    Block* ground1 = new Block(0, 450, 2358, 400);
     scene->addItem(ground1);
 
-    Block* ground2 = new Block(7000, 420, 1100, 320);
+    Block* ground2 = new Block(2351, 700, 1200, 320);
     scene->addItem(ground2);
+    Block* ground3 = new Block(3550, 460, 770, 320);
+    scene->addItem(ground3);
+    Block* ground4 = new Block(4809, 960, 865, 320);
+    scene->addItem(ground4);
+    Block* ground5 = new Block(6630, 460, 1290, 230);
+    scene->addItem(ground5);
+
+    Block* top1 = new Block(137, -40, 40, 550);
+    scene->addItem(top1);
+    Block* top2 = new Block(150, 0, 150, 60);
+    scene->addItem(top2);
+    Block* top3 = new Block(457, 0, 150, 60);
+    scene->addItem(top3);
+    Block* top4 = new Block(600, 40 , 460, 150);
+    scene->addItem(top4);
+    Block* top5 = new Block(600, 40 , 460, 150);
+    scene->addItem(top5);
+    Block* top6 = new Block(1220, 40 , 200, 150);
+    scene->addItem(top6);
+
+    Block* lastground = new Block(7500, 700 , 240, 270);
+    scene->addItem(lastground);
+
+    FloatingPlatform *Plat1 = new FloatingPlatform(5848, 830, 255, 52);
+    scene->addItem(Plat1);
+    FloatingPlatform *Plat2 = new FloatingPlatform(6240, 580, 255, 52);
+    scene->addItem(Plat2);
+
+    QPolygonF slope1;
+    slope1 << QPointF(0, 300) << QPointF(0, 0) << QPointF(280, 300); // 三個頂點
+    Slope* ramp1 = new Slope(4300, 440, slope1);
+    scene->addItem(ramp1);
+    QPolygonF slope2;
+    slope2 << QPointF(0, 120) << QPointF(0, 0) << QPointF(270, 120); // 三個頂點
+    Slope* ramp2 = new Slope(4560, 720, slope2);
+    scene->addItem(ramp2);
+    Block* ground2_1 = new Block(4780, 840, 40, 600);
+    scene->addItem(ground2_1);
+
 
     player = new Kirby(); //呼叫 Kirby.h 中的 ctor
     player->setPos(400, 100);
     player->changeWidth(8100);
+
 
     // 繼承stage2的血量
     player->setCurrentHp(c_Hp);
@@ -1245,6 +1268,7 @@ void MainWindow::loadStage4(){
     boss = nullptr;
     
     scene->setSceneRect(0, 0, 8100, 1080);
+    
 
     QPixmap backg(":/Project2_Dataset/Image/background/stage4.jpg");
     QGraphicsPixmapItem* bg2 = new QGraphicsPixmapItem(backg);
@@ -1255,8 +1279,37 @@ void MainWindow::loadStage4(){
 
     bg2->setZValue(-10);
 
-    Block* ground1 = new Block(0, 890, 8100, 400);
+    Block* ground0_1 = new Block(0, 890, 1069, 400);
+    scene->addItem(ground0_1);
+    Block* ground0_2 = new Block(2158, 890, 2722, 400);
+    scene->addItem(ground0_2);
+    Block* ground0_3 = new Block(5569, 890, 2531, 400);
+    scene->addItem(ground0_3);
+    Block* ground0_1_1 = new Block(1503, 990, 660, 60);
+    scene->addItem(ground0_1_1);
+    Block* ground0_2_1 = new Block(4830, 990, 721, 60);
+    scene->addItem(ground0_2_1);
+
+    Block* ground1 = new Block(1281, 620, 250, 350);
     scene->addItem(ground1);
+    Block* ground2 = new Block(1129, 730, 160, 160);//左
+    scene->addItem(ground2);
+    Block* ground3 = new Block(2557, 730, 500, 160);//右
+    scene->addItem(ground3);
+    Block* ground4 = new Block(4551, 620, 220, 300);//右
+    scene->addItem(ground4);
+    Block* ground5 = new Block(4243, 760, 250, 240);//左
+    scene->addItem(ground5);
+    Block* ground6 = new Block(5050, 610, 350, 140);//福
+    scene->addItem(ground6);
+    Block* ground7 = new Block(5714, 610, 290, 270);//左
+    scene->addItem(ground7);
+    Block* ground8 = new Block(6000, 465, 205, 485);//右
+    scene->addItem(ground8);
+    Block* ground9 = new Block(7030, 620, 350, 310);
+    scene->addItem(ground9);
+
+
 
     player = new Kirby(); //呼叫 Kirby.h 中的 ctor
     player->setPos(400, 100);
@@ -1343,8 +1396,33 @@ void MainWindow::loadBoss(){
     bg2->setZValue(-10);
     Bg2->setZValue(-20);
 
-    Block* ground1 = new Block(0, 890, 4860, 400);
+    Block* ground1 = new Block(0, 990, 4860, 100);
     scene->addItem(ground1);
+    Block* ground2 = new Block(1718, 780, 202, 330);
+    scene->addItem(ground2);
+    Block* ground3 = new Block(3690, 780, 202, 330);
+    scene->addItem(ground3);
+
+    Block* last1 = new Block(4416, 380, 272, 300);
+    scene->addItem(last1);
+    Block* last2 = new Block(4730, -10, 60, 1000);
+    scene->addItem(last2);
+
+    QPolygonF slope1;
+    slope1 << QPointF(0, 232) << QPointF(0, 0) << QPointF(-350, 232); // 三個頂點
+    Slope* ramp1 = new Slope(1710, 790, slope1);
+    scene->addItem(ramp1);
+    QPolygonF slope2;
+    slope2 << QPointF(0, 282) << QPointF(0, 0) << QPointF(400, 282); // 三個頂點
+    Slope* ramp2 = new Slope(3890, 790, slope2);
+    scene->addItem(ramp2);
+    QPolygonF slope3;
+    slope3 << QPointF(0, 150) << QPointF(0, 0) << QPointF(-272, 150); // 三個頂點
+    Slope* ramp3 = new Slope(4716, 230, slope3);
+    scene->addItem(ramp3);
+
+
+
 
     player = new Kirby(); //呼叫 Kirby.h 中的 ctor
     player->setPos(400, 100);
