@@ -574,10 +574,12 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
         else if (key == Qt::Key_Up) {
             // 注意：這裡如果你要實作碰到傳送門按上鍵進入 Stage 2，
             // 可以在這裡呼叫一個 player->checkPortal() 或是將邏輯寫在 player->fly() 裡判斷
-            if (player->isNormal()) {
+            if (player->canAutoFlap()) {
                 player->setUpPressed(true);
                 if (player->getOnGround()) {
                     player->jump();
+                } else if (!player->isNormal()) {
+                    player->fly();
                 }
             } else {
                 player->fly();

@@ -95,6 +95,13 @@ void Kirby::setUpPressed(bool pressed) {
     }
 }
 
+bool Kirby::canAutoFlap() const {
+    return currentForm == Form::Normal
+           || currentForm == Form::Sparky
+           || currentForm == Form::FireForm
+           || currentForm == Form::BeamForm;
+}
+
 
 
 
@@ -425,7 +432,7 @@ void Kirby::update() {
     if (autoFlapCooldown > 0) {
         autoFlapCooldown--;
     }
-    if (isUpPressed && currentForm == Form::Normal && !hitCeilingThisFrame && !isOnGround && !isInhaling && !hasObjectInMouth && vy > -2.0 && autoFlapCooldown <= 0) {
+    if (isUpPressed && canAutoFlap() && !hitCeilingThisFrame && !isOnGround && !isInhaling && !hasObjectInMouth && vy > -2.0 && autoFlapCooldown <= 0) {
         fly();
         autoFlapCooldown = 15;
     }

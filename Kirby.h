@@ -150,6 +150,7 @@ public:
     bool getHasBombInMouth() const { return hasBombInMouth; }
     bool isSparkyElectricAttack() const { return currentForm == Form::Sparky && isInhaling; }
     bool isNormal() const { return currentForm == Form::Normal; }
+    bool canAutoFlap() const;
     
     // [新增] 得到是否在地上的資訊
     bool getOnGround();
