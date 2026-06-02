@@ -758,6 +758,10 @@ void MainWindow::loadStage1(){
     bg1->setZValue(-10);
     bg2->setZValue(-20);
 
+    brick1->setZValue(10);
+    brick2->setZValue(10);
+    brick3->setZValue(10);
+
     // --- [4. 鋪設隱形地形碰撞 (Collisions)] ---
     // @note 這些是透明的 Block，用來阻擋卡比掉出地圖或穿牆
     // [修改] 將Block改為符合背景地圖的樣式
@@ -809,22 +813,6 @@ void MainWindow::loadStage1(){
     Block* Brick3 = new Block(3755, 725, 80, 80);
     scene->addItem(Brick3);
 
-    // [新增] 將方塊改成完全透明的，只留背景圖片
-    ground1->setOpacity(0.0);
-    wall1->setOpacity(0.0);
-    wall2->setOpacity(0.0);
-    wall3->setOpacity(0.0);
-    wall4->setOpacity(0.0);
-    wall5->setOpacity(0.0);
-    platform1->setOpacity(0.0);
-    platform2->setOpacity(0.0);
-    platform3->setOpacity(0.0);
-    platform4->setOpacity(0.0);
-    platform5->setOpacity(0.0);
-    platform6->setOpacity(0.0);
-    brick1->setOpacity(0.0);
-    brick2->setOpacity(0.0);
-    brick3->setOpacity(0.0);
     // --- [5. 實體物件生成：玩家與敵人 (Entities)] ---
     // 玩家 (卡比)
 
@@ -947,15 +935,24 @@ void MainWindow::loadStage2(){
     brick1->setPos(800, 810);
     scene->addItem(brick1);
 
+    Block* Brick1 = new Block(800, 810, 80, 80);
+    scene->addItem(Brick1);
+
     QGraphicsPixmapItem* brick2 = new QGraphicsPixmapItem(brick);
     brick2->setScale(scalebrick);
     brick2->setPos(5000, 730);
     scene->addItem(brick2);
 
+    Block* Brick2 = new Block(5000, 730, 80, 80);
+    scene->addItem(Brick2);
+
     QGraphicsPixmapItem* brick3 = new QGraphicsPixmapItem(brick);
     brick3->setScale(scalebrick);
     brick3->setPos(7500, 810);
     scene->addItem(brick3);
+
+    Block* Brick3 = new Block(7500, 810, 80, 80);
+    scene->addItem(Brick3);
 
     Block* ground1 = new Block(0, 890, 2720, 400);
     scene->addItem(ground1);
@@ -1069,9 +1066,9 @@ void MainWindow::loadStage2(){
     FloatingPlatform *Plat10 = new FloatingPlatform(7870, 630, 190, 30);
     scene->addItem(Plat10);
 
-    FloatingPlatform *Plat11 = new FloatingPlatform(2000, 550, 190, 30);
+    FloatingPlatform *Plat11 = new FloatingPlatform(2000, 550, 428, 53);
     scene->addItem(Plat11);
-    FloatingPlatform *Plat12 = new FloatingPlatform(2600, 350, 190, 30);
+    FloatingPlatform *Plat12 = new FloatingPlatform(2600, 350, 428, 53);
     scene->addItem(Plat12);
 
     player = new Kirby(); //呼叫 Kirby.h 中的 ctor
@@ -1288,10 +1285,13 @@ void MainWindow::loadStage3(){
 
     bg2->setZValue(-10);
 
+    Block* ground0 = new Block(0, 0, 200, 450);
+    scene->addItem(ground0);
+
     Block* ground1 = new Block(0, 450, 2358, 800);
     scene->addItem(ground1);
 
-    Block* ground2 = new Block(2350, 900, 150, 320);
+    Block* ground2 = new Block(2350, 960, 150, 320);
     scene->addItem(ground2);
     Block* ground3 = new Block(3550, 460, 770, 320);
     scene->addItem(ground3);
@@ -1301,6 +1301,8 @@ void MainWindow::loadStage3(){
     scene->addItem(ground5);
     Block* ground6 = new Block(7900, 0, 160, 1080);
     scene->addItem(ground6);
+    Block* ground7 = new Block(3400, 960, 150, 320);
+    scene->addItem(ground7);
 
     Block* lastground = new Block(7550, 700 , 240, 270);
     scene->addItem(lastground);

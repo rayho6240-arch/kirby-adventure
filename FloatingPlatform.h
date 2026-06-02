@@ -11,10 +11,11 @@ public:
     FloatingPlatform(qreal x, qreal y, qreal width, qreal height, QGraphicsItem *parent = nullptr)
         : Block(x, y, width, height)
     {
-        setBrush(QBrush(Qt::blue));
+        setBrush(QBrush(Qt::transparent));
         setPen(QPen(Qt::NoPen));
         setZValue(0);
         setFlag(QGraphicsItem::ItemIsMovable, false);
+        setOpacity(0.0);
     }
 
     void setPlatformColor(const QBrush &b) { setBrush(b); }
