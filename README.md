@@ -2,9 +2,9 @@
 
 ## Student Information
 
-* Student ID(s): E24XXXXXX, E24XXXXXX
-* Name(s): XXX, XXX
-* Last Update: 2026/06/02
+* Student ID(s): E24146644, E24146709
+* Name(s): 何家睿, 張翔富
+* Last Update: 2026/06/03
 
 ---
 
