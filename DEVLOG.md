@@ -225,3 +225,30 @@ Normal Kirby 按住 Down 時，角色會在站立與蹲下 sprite 之間快速�
 
 ---
 
+## 9. 避免 Game Over 時對已刪除的 `player` 存取導致崩潰
+
+- 日期：2026-06-03
+- commit hash：`TBD`
+- 作者：`rayho6240@gmail.com`
+- commit message：`fix: 避免 Game Over 時對已刪除的 player 存取導致 crash`
+- 分類：object lifetime / use-after-free / game state
+
+### 問題現象
+
+在玩家死亡進入 Game Over 時，`MainWindow::loadGameOver()` 會呼叫 `scene->clear()`，該呼叫會刪除場景上所有由 scene 所擁有的 `QGraphicsItem`（包含 `player`）。但同一影格（frame）內後續的 `gameLoop()` 還可能繼續執行並存取原本的 `player` 指標（例如 camera 跟隨或其他邏輯），若 `player` 被刪除，會造成 use-after-free 而導致程式崩潰。
+
+### 原因分析
+
+`scene->clear()` 會刪除 scene 上的物件但不會自動把外部保存的裸指標設為 `nullptr`。若程式在同一幀仍有程式碼依賴該指標（僅以非空指標檢查為條件），會發生存取已被刪除的記憶體。
+
+### 修復方式
+
+在 `MainWindow::loadGameOver()` 中，於呼叫 `scene->clear()` 並清理各類容器後，立即將 `player` 設為 `nullptr` 並設定 `isGameOver = true`，以確保後續邏輯不會再使用已被刪除的 `player` 指標。
+
+修改檔案：`mainwindow.cpp`
+
+### 穩定性影響
+
+這個修正避免了在 Game Over 期間的 use-after-free crash，使遊戲在玩家死亡並切換到結算畫面時更穩定。建議後續可一併在 `gameLoop()` 中更早跳出或在所有使用 `player` 前檢查 `currentState != GAMEOVER`，以作為額外保險。
+
+
