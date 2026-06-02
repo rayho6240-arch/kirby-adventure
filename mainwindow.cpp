@@ -65,22 +65,35 @@ MainWindow::MainWindow(QWidget *parent)
     
     // 💡 依序加入你所有的音樂（順序很重要！）
     // Index 0：主選單音樂
-    QString menuPath1 = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/../../kirby-adventure/bg_music/01_Main_Title.mp3");
-    QString menuPath2 = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/bg_music/01_Main_Title.mp3");
-    QString menuPath = QFile::exists(menuPath1) ? menuPath1 : menuPath2; // 嘗試兩個路徑，哪個存在就用哪個
+    QString menuPath = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/bg_music/01_Main_Title.mp3");
     playlist->addMedia(QUrl::fromLocalFile(menuPath));
     
     //Index 1：遊戲關卡背景音樂
-    QString stagePath1 = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/../../kirby-adventure/bg_music/91_Vegetable_Valley_(No Intro).mp3");
-    QString stagePath2 = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/bg_music/91_Vegetable_Valley_(No Intro).mp3");
-    QString stagePath = QFile::exists(stagePath1) ? stagePath1 : stagePath2; // 嘗試兩個路徑，哪個存在就用哪個
-    playlist->addMedia(QUrl::fromLocalFile(stagePath));
-    
-    // Index 2：結局動畫音樂
-    QString finishPath1 = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/../../kirby-adventure/bg_music/41_Goal.mp3");
-    QString finishPath2 = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/bg_music/41_Goal.mp3");
-    QString finishPath3 = QFile::exists(finishPath1) ? finishPath1 : finishPath2; // 嘗試兩個路徑，哪個存在就用哪個
-    playlist->addMedia(QUrl::fromLocalFile(finishPath3));
+    QString stage1Path = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/bg_music/91_Vegetable_Valley_(No Intro).mp3");
+    playlist->addMedia(QUrl::fromLocalFile(stage1Path));
+
+    QString stage2Path = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/bg_music/06_Ice_Cream_Island.mp3");
+    playlist->addMedia(QUrl::fromLocalFile(stage2Path));
+
+    QString stage3Path = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/bg_music/08_Butter_Buildings.mp3");
+    playlist->addMedia(QUrl::fromLocalFile(stage3Path));
+
+    QString stage4Path = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/bg_music/10_Grape_Garden.mp3");
+    playlist->addMedia(QUrl::fromLocalFile(stage4Path));
+
+    QString bossPath = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/bg_music/27_Nightmare_Battle_(Part 2).mp3");
+    playlist->addMedia(QUrl::fromLocalFile(bossPath));
+
+    QString finishPath = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/bg_music/41_Goal.mp3");
+    playlist->addMedia(QUrl::fromLocalFile(finishPath));
+
+    QString finishlongPath = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/bg_music/22_Kirby_Wins!_(Long).mp3");
+    playlist->addMedia(QUrl::fromLocalFile(finishlongPath));
+
+    QString finishshortPath = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/bg_music/23_Kirby_Wins!_(Short).mp3");
+    playlist->addMedia(QUrl::fromLocalFile(finishshortPath));
+
+
     
 
     // 設定循環模式
@@ -675,6 +688,7 @@ void MainWindow::loadStartMenu(){
     // 🎯 遊戲一開始，預設播放第 0 首（主選單音樂）
     playlist->setCurrentIndex(0);
     bgmPlayer->play();
+    playlist->setPlaybackMode(QMediaPlaylist::CurrentItemInLoop);
 
     // 停止遊戲迴圈，因為選單不需要更新物理運算
     timer->stop();
@@ -1144,6 +1158,9 @@ void MainWindow::loadStage2(){
     gameHUD = new HUD();
     scene->addItem(gameHUD);
 
+    playlist->setCurrentIndex(2);
+    bgmPlayer->play();
+
     connect(player, &Kirby::starFired, this, [=](StarBullet* star){
         bulletList.append(star); // 只要卡比一噴，就加進清單
     });
@@ -1222,7 +1239,7 @@ void MainWindow::loadFinish(){
     QString finalPath = QFile::exists(path1) ? path1 : path2;
     QPixmap firstPic(finalPath);
 
-    playlist->setCurrentIndex(2);
+    playlist->setCurrentIndex(6);
     bgmPlayer->play();
 
     if (!firstPic.isNull()) {
@@ -1257,7 +1274,57 @@ void MainWindow::finish_animation(){
     } else {
         qDebug() << "finish frame load failed:" << finalPath << "frame=" << finish_frame << "animationDir=" << animationDir << "total=" << totalFrames;
     }
-
+    switch (animationDir) {
+        case 1:
+            if (finish_frame == finish_dance[0] -30) {
+                playlist->setCurrentIndex(7);
+                bgmPlayer->play();
+                playlist->setPlaybackMode(QMediaPlaylist::CurrentItemOnce);
+            }
+            break;
+        case 2:
+            if (finish_frame == finish_dance[1] -30) {
+                playlist->setCurrentIndex(8);
+                bgmPlayer->play();
+                playlist->setPlaybackMode(QMediaPlaylist::CurrentItemOnce);
+            }
+            break;
+        case 3:
+            if (finish_frame == finish_dance[2] -30) {
+                playlist->setCurrentIndex(8);
+                bgmPlayer->play();
+                playlist->setPlaybackMode(QMediaPlaylist::CurrentItemOnce);
+            }
+            break;
+        case 4:
+            if (finish_frame == finish_dance[3] -30) {
+                playlist->setCurrentIndex(8);
+                bgmPlayer->play();
+                playlist->setPlaybackMode(QMediaPlaylist::CurrentItemOnce);
+            }
+            break;
+        case 5:
+            if (finish_frame == finish_dance[4] -30) {
+                playlist->setCurrentIndex(8);
+                bgmPlayer->play();
+                playlist->setPlaybackMode(QMediaPlaylist::CurrentItemOnce);
+            }
+            break;
+        case 6:
+            if (finish_frame == finish_dance[5] -30) {
+                playlist->setCurrentIndex(8);
+                bgmPlayer->play();
+                playlist->setPlaybackMode(QMediaPlaylist::CurrentItemOnce);
+            }
+            break;
+        case 7:
+            if (finish_frame == finish_dance[6] -30) {
+                playlist->setCurrentIndex(8);
+                bgmPlayer->play();
+                playlist->setPlaybackMode(QMediaPlaylist::CurrentItemOnce);
+            }
+            break;
+    }
     finish_frame++;
 }
 
@@ -1402,6 +1469,9 @@ void MainWindow::loadStage3(){
     gameHUD = new HUD();
     scene->addItem(gameHUD);
 
+    playlist->setCurrentIndex(3);
+    bgmPlayer->play();
+
     connect(player, &Kirby::starFired, this, [=](StarBullet* star){
         bulletList.append(star); // 只要卡比一噴，就加進清單
         qDebug() << "Captured a star! Total stars in list:" << bulletList.size();
@@ -1536,6 +1606,9 @@ void MainWindow::loadStage4(){
     // --- [5. 誕生 HUD 並加入場景][新增] ---
     gameHUD = new HUD();
     scene->addItem(gameHUD);
+
+    playlist->setCurrentIndex(4);
+    bgmPlayer->play();
 
     connect(player, &Kirby::starFired, this, [=](StarBullet* star){
         bulletList.append(star); // 只要卡比一噴，就加進清單
@@ -1712,6 +1785,9 @@ void MainWindow::loadBoss(){
     // --- [5. 誕生 HUD 並加入場景][新增] ---
     gameHUD = new HUD();
     scene->addItem(gameHUD);
+
+    playlist->setCurrentIndex(5);
+    bgmPlayer->play();
 
     connect(player, &Kirby::starFired, this, [=](StarBullet* star){
         bulletList.append(star); // 只要卡比一噴，就加進清單

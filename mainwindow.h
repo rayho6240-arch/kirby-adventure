@@ -117,8 +117,8 @@ private:
     Boss *boss = nullptr;
     QList<Bomb*> bombList;
     QList<BombStar*> bombStarList;
-    const double bossArenaLeft = 1932.0;
-    const double bossArenaRight = 3800.0;
+    const double bossArenaLeft = 2000.0;
+    const double bossArenaRight = 3600.0;
     const double bossGroundY = 1000.0;
 
     QList<Enemy*> enemyList;
@@ -184,6 +184,7 @@ private:
 
     int remain_Hp; // 計算從stage2到finish時剩餘總血量
     int finish_total[7] = {393 , 273 , 261 , 221 , 200 , 204 , 235}; // 每個結算動畫的總圖片數
+    int finish_dance[7] = {192 , 171 , 160 , 119 , 98 , 103 , 135};
 
     QMediaPlayer *bgmPlayer;
     QMediaPlaylist *playlist; // 💡 把播放清單移到這裡，讓全專案的函式都能用到
