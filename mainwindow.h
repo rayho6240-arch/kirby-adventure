@@ -115,9 +115,9 @@ private:
     Boss *boss = nullptr;
     QList<Bomb*> bombList;
     QList<BombStar*> bombStarList;
-    const double bossArenaLeft = 3200.0;
-    const double bossArenaRight = 4030.0;
-    const double bossGroundY = 890.0;
+    const double bossArenaLeft = 1932.0;
+    const double bossArenaRight = 3800.0;
+    const double bossGroundY = 1000.0;
 
     QList<Enemy*> enemyList;
 

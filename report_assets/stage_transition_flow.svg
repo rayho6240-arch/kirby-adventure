@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="420" viewBox="0 0 1280 420">
+  <rect width="1280" height="420" fill="#f7f7f3"/>
+  <style>
+    .box { fill: #ffffff; stroke: #2f3437; stroke-width: 2; rx: 8; }
+    .cut { fill: #eef3ff; stroke: #2f4f8f; stroke-width: 2; rx: 8; }
+    .txt { font-family: Arial, "Noto Sans TC", sans-serif; font-size: 24px; fill: #222; text-anchor: middle; }
+    .sub { font-size: 17px; fill: #555; }
+    .arrow { stroke: #333; stroke-width: 3; fill: none; marker-end: url(#arrow); }
+  </style>
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#333"/>
+    </marker>
+  </defs>
+  <text x="640" y="52" class="txt" style="font-size:30px;font-weight:700">Stage and Transition Flow</text>
+  <g transform="translate(55 120)">
+    <rect class="box" width="150" height="105"/>
+    <text x="75" y="45" class="txt">Stage 1</text>
+    <text x="75" y="75" class="txt sub">basic terrain</text>
+  </g>
+  <path class="arrow" d="M220 172 L300 172"/>
+  <g transform="translate(315 120)">
+    <rect class="box" width="150" height="105"/>
+    <text x="75" y="45" class="txt">Stage 2</text>
+    <text x="75" y="75" class="txt sub">slope / enemy</text>
+  </g>
+  <path class="arrow" d="M480 172 L560 172"/>
+  <g transform="translate(575 120)">
+    <rect class="box" width="150" height="105"/>
+    <text x="75" y="45" class="txt">Stage 3</text>
+    <text x="75" y="75" class="txt sub">platform route</text>
+  </g>
+  <path class="arrow" d="M740 172 L820 172"/>
+  <g transform="translate(835 120)">
+    <rect class="box" width="150" height="105"/>
+    <text x="75" y="45" class="txt">Stage 4</text>
+    <text x="75" y="75" class="txt sub">portal exit</text>
+  </g>
+  <path class="arrow" d="M1000 172 L1078 172"/>
+  <g transform="translate(1090 120)">
+    <rect class="cut" width="150" height="105"/>
+    <text x="75" y="42" class="txt">Cutscene</text>
+    <text x="75" y="72" class="txt sub">video frames</text>
+  </g>
+  <path class="arrow" d="M1165 230 L1165 292 L970 292"/>
+  <g transform="translate(800 252)">
+    <rect class="box" width="150" height="105"/>
+    <text x="75" y="45" class="txt">Boss</text>
+    <text x="75" y="75" class="txt sub">arena battle</text>
+  </g>
+  <path class="arrow" d="M790 305 L675 305"/>
+  <g transform="translate(510 252)">
+    <rect class="box" width="150" height="105"/>
+    <text x="75" y="45" class="txt">Finish</text>
+    <text x="75" y="75" class="txt sub">ending result</text>
+  </g>
+  <text x="640" y="390" class="txt sub">Portals are triggered by pressing Up at the stage exit area.</text>
+</svg>
