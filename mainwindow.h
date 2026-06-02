@@ -18,6 +18,8 @@
 
 #include <QMediaPlaylist>
 
+#include <QGraphicsPixmapItem>
+
 // ==========================================
 // 2. 自定義遊戲類別引入
 // ==========================================
@@ -159,6 +161,8 @@ private:
     void stage4ToBossVideo();
     void loadBoss();
     void loadSelectMenu();
+    
+    void addPlat(QGraphicsPixmapItem* Platform, qreal x, qreal y);
 
     bool isMenuOpen = false;
 
