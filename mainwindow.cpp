@@ -1167,6 +1167,10 @@ void MainWindow::loadGameOver(){
     bombStarList.clear();
     enemyList.clear();
     boss = nullptr;
+    // player 可能已被 scene 所擁有並在 clear() 中刪除，保險起見取消指標引用
+    player = nullptr;
+    // 設定旗標避免後續邏輯繼續存取玩家
+    isGameOver = true;
     scene->setSceneRect(0,0,1620,1080);
     gameover = new QGraphicsPixmapItem(QPixmap(":/Project2_Dataset/Image/background/game_over_continue.png"));
     scene->addItem(gameover);
