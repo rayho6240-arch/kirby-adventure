@@ -70,9 +70,9 @@ private:
     const double smallHopVx = 3.0;
     const double smallHopVy = -10.0;
     const int smallHopInterval = 25;
-    const double bigJumpVx = 10.0;
+    const double bigJumpVx = 15.0;
     const double bigJumpVy = -16.0;
-    const double jumpBackVx = 10.0;
+    const double jumpBackVx = 12.0;
     const double jumpBackVy = -16.0;
     const double verticalHopVy = -20.0;
     const double bombLaunchSpeed = 9.0;
