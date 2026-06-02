@@ -18,9 +18,9 @@
 
 整體程式以 `QGraphicsScene` 作為遊戲世界，`QGraphicsView` 作為顯示與攝影機視角，並透過 `QTimer` 以固定時間間隔驅動主要遊戲迴圈。玩家、敵人、子彈、Boss、地形與道具皆以 `QGraphicsItem` 系列類別呈現，使顯示、碰撞與座標管理能整合在同一套 Qt 架構中。
 
-[Insert Figure Here]
+[TODO: screenshot - 遊戲畫面總覽或開始畫面截圖]
 
-圖 1. 遊戲畫面總覽或開始畫面截圖
+圖 1-1. 遊戲畫面總覽或開始畫面截圖
 
 本報告著重於系統設計與核心機制，說明專案如何將角色控制、碰撞判定、斜坡地形、Boss 行為、音效播放、能力系統與場景切換整合為完整的遊戲流程。
 
@@ -42,11 +42,9 @@
 | 關卡流程 | Start Menu, Stage 1, Stage 2, Stage 3, Stage 4, transition cutscene, Boss, Game Over, Finish |
 | 新增系統 | portal stage switching, transition cutscene, Skill Menu |
 
-![Stage transition flow](report_assets/stage_transition_flow.svg)
+[TODO: screenshot - 遊戲主畫面或新版 stage 畫面，建議顯示 Kirby、HUD、地形與敵人]
 
-圖 2-1. Stage 與 transition 流程圖
-
-[TODO: screenshot - 遊戲主畫面或新版 stage 畫面]
+圖 2-1. 遊戲主畫面截圖
 
 ### 2.2 Player Controls
 
@@ -87,11 +85,11 @@
 | Boss Stage | Boss arena、炸彈與 BombStar 攻擊 | 完成主要挑戰 |
 | Game Over / Finish | 結束畫面與結果流程 | 處理失敗或通關狀態 |
 
-Stage 切換時會重新建立 scene 內的地形、敵人、道具、HUD 與玩家物件，但保留玩家的 HP、lives、目前型態與已解鎖技能。這樣可以避免跨場景物件殘留，同時讓玩家的進度在 stage 之間延續。
+各 stage 的設計重點放在地形節奏與敵人配置差異。Stage 1 偏向基礎操作，Stage 2 開始加入斜坡與能力敵人，Stage 3、Stage 4 則增加平台間距與高度落差，讓玩家在進入 Boss 前需要熟悉移動、能力與關卡出口判斷。
 
-[TODO: screenshot - Stage 3 地形]
+[TODO: screenshot - Stage 3 地形，建議截到多段平台與敵人配置]
 
-[TODO: screenshot - Stage 4 portal 位置]
+[TODO: screenshot - Stage 4 portal 位置，建議截到出口區域與 Kirby 站位]
 
 ---
 
@@ -114,7 +112,9 @@ Stage 切換時會重新建立 scene 內的地形、敵人、道具、HUD 與玩
 | UI | `HUD`, `AbilityMenu` | HP/lives 顯示與技能選擇 |
 | 音樂 / 過場 | `QMediaPlayer`, `QMediaPlaylist`, transition timer | 背景音樂切換與過場播放 |
 
-[TODO: screenshot - 架構圖或 Qt scene 物件關係圖]
+[TODO: flowchart - 架構圖或 Qt scene 物件關係圖，建議用流程圖，不建議用遊戲截圖]
+
+圖 3-1. 系統架構與主要 class 關係圖
 
 ### 3.2 Game Loop
 
@@ -131,15 +131,15 @@ Stage 切換時會重新建立 scene 內的地形、敵人、道具、HUD 與玩
 7. 判斷生命值與 Game Over。
 8. 讓攝影機跟隨玩家。
 
-[Insert Figure Here]
+[TODO: flowchart - Game loop 更新流程圖，建議標出 player / enemy / boss / projectile / HUD 的更新順序]
 
-圖 4. Game loop 更新流程圖
+圖 3-2. Game loop 更新流程圖
 
 ### 3.3 State Management
 
-遊戲使用 `GameState` enum 管理目前場景，包括選單、關卡、Game Over 與結束狀態。當玩家在特定位置按下 Up 或 Enter 時，`MainWindow` 會呼叫對應的 `loadStage` 函式重建場景。
+遊戲使用 `GameState` enum 管理目前流程，包含 start menu、一般 stage、transition cutscene、Boss、Game Over 與 Finish。`MainWindow` 會根據目前 state 決定鍵盤輸入的意義，例如 menu 狀態下 Enter 代表確認，playing 狀態下 Up 可能代表進入 portal，而 Skill Menu 開啟時左右鍵會改為選擇能力。
 
-此設計的優點是流程清楚，每個場景的初始化集中在獨立函式中，例如 `loadStartMenu()`、`loadStage1()`、`loadStage2()`、`loadGameOver()` 與 `loadFinish()`。當切換場景時，程式會清除 scene、重置物件列表，再載入新的背景、地形、敵人、玩家與 HUD。
+State management 的重點不只是切換畫面，也包含暫停與恢復 game loop、清除 scene 物件、保存玩家 HP / lives / form / unlocked abilities，以及避免 cutscene 播放時仍執行一般玩家操作。
 
 ---
 
@@ -160,9 +160,9 @@ Kirby 的移動由速度、重力與狀態旗標共同控制。角色具有水�
 
 角色物理不是直接依賴 Qt 的內建物理引擎，而是在 `Kirby::update()` 中自行計算速度、位置與碰撞修正。這讓角色可以支援卡比遊戲常見的特殊行為，例如吸入時無法移動、飛行時重力變小、胖卡比狀態有較大的 hitbox。
 
-[Insert Figure Here]
+[TODO: diagram or screenshot - Kirby 移動狀態與速度變化示意圖]
 
-圖 5. Kirby 移動狀態與速度變化示意圖
+圖 4-1. Kirby 移動狀態與速度變化示意圖
 
 ### 4.2 Collision Detection
 
@@ -180,9 +180,9 @@ Kirby 的移動由速度、重力與狀態旗標共同控制。角色具有水�
 
 玩家碰撞有一個值得注意的設計：顯示圖片大小與實際物理 hitbox 分開計算。程式會依照飛行、吐星、胖卡比等狀態調整物理寬高，再計算 offset，使視覺 sprite 與碰撞盒不必完全相同。這能讓動畫圖片較大時仍保持合理的操作手感。
 
-[Insert Figure Here]
+[TODO: diagram - Sprite 與實際 hitbox 關係示意圖]
 
-圖 6. Sprite 與實際 hitbox 關係示意圖
+圖 4-2. Sprite 與實際 hitbox 關係示意圖
 
 ### 4.3 Slope System
 
@@ -206,9 +206,9 @@ Kirby 的移動由速度、重力與狀態旗標共同控制。角色具有水�
 
 Stage 2 中大量使用斜坡組合地形，讓場景不只是平面平台，而能呈現更自然的上下坡路線。
 
-[Insert Figure Here]
+[TODO: diagram or debug screenshot - 斜坡 polygon 與表面高度插值示意圖]
 
-圖 7. 斜坡 polygon 與表面高度插值示意圖
+圖 4-3. 斜坡 polygon 與表面高度插值示意圖
 
 ### 4.4 Boss System
 
@@ -228,9 +228,9 @@ Boss 投擲炸彈時不直接在自身類別中新增場景物件，而是設定
 
 玩家吸入 Boss 炸彈後，會進入 `hasBombInMouth` 狀態，再按攻擊鍵可吐出 `BombStar`。`BombStar` 撞到 Boss 時造成傷害並播放爆炸流程，形成 Boss 戰的主要攻擊循環。
 
-[Insert Figure Here]
+[TODO: flowchart - Boss state machine 與 Bomb / BombStar 攻擊流程圖]
 
-圖 8. Boss 狀態機與炸彈攻擊流程圖
+圖 4-4. Boss 狀態機與炸彈攻擊流程圖
 
 ### 4.5 Sound System
 
@@ -244,22 +244,24 @@ Boss 投擲炸彈時不直接在自身類別中新增場景物件，而是設定
 
 程式也考慮了執行檔位置不同的問題，會嘗試兩種路徑尋找音樂檔案：一種是從 build 輸出資料夾往回找專案資料夾，另一種是直接從執行目錄中的 `bg_music` 資料夾讀取。這讓專案在 Qt Creator 或不同部署方式下較容易找到音樂資源。
 
-[Insert Figure Here]
+[TODO: flowchart - 場景與背景音樂切換示意圖]
 
-圖 9. 場景與背景音樂切換示意圖
+圖 4-5. 場景與背景音樂切換示意圖
 
 ### 4.6 Ability System
 
 能力系統由 Kirby 的 form / ability 狀態與 `AbilityMenu` 共同管理。Kirby 仍透過吸入敵人或特殊物件取得能力，並依目前能力決定可使用的攻擊方式。新版加入 Skill Menu 後，玩家不需要只依賴當下吸入狀態，也可以在已解鎖能力之間切換。
 
+本報告中，`ability` 指玩家已取得的能力種類，`form` 指 Kirby 目前套用的角色型態；`Sparky` 僅指敵人名稱，電擊能力統一稱為 `Spark`。
+
 `AbilityMenu` 目前包含 Normal、Beam、Fire、Spark 四個選項，內部以 `QVector<bool> unlocked` 紀錄每個能力是否已取得。尚未取得的能力會在選單中以暗色覆蓋顯示，並且按下 `Enter` 時不會生效。已取得的能力可使用左右鍵選取，再按 `Enter` 套用到 Kirby 的 form。
 
-| 能力 | 解鎖 / 取得來源 | 選單行為 | Kirby 狀態 |
-| --- | --- | --- | --- |
-| Normal | 預設可用 | 永遠可選 | 回到一般型態 |
-| Beam | 取得對應能力後解鎖 | locked 時暗色且不可選 | `BeamForm` |
-| Fire | 吸入 HotHead 或取得火焰能力後解鎖 | unlocked 後可選 | `FireForm` |
-| Spark | 吸入 Sparky 或取得電擊能力後解鎖 | unlocked 後可選 | `Sparky` / spark form |
+| 名稱 | 類型 | 解鎖 / 取得來源 | 選單行為 | Kirby form |
+| --- | --- | --- | --- | --- |
+| Normal | form | 預設可用 | 永遠可選 | `Normal` |
+| Beam | ability / form | [TODO: confirm - 補上 Beam 的實際解鎖來源，若目前尚未實作請標註為 reserved ability] | locked 時暗色且不可選 | `BeamForm` |
+| Fire | ability / form | 吸入 HotHead 或取得火焰能力後解鎖 | unlocked 後可選 | `FireForm` |
+| Spark | ability / form | 吸入 Sparky enemy 或取得電擊能力後解鎖 | unlocked 後可選 | `Sparky` |
 
 技能選單開啟時，`MainWindow` 會將一般操作切換成選單操作，避免玩家角色在選單中仍然移動或攻擊。按下 `Q` 可開啟選單並暫停遊戲，按下 `Enter` 後套用選取能力並恢復遊戲；按下 `V` 則直接丟棄目前能力，使 Kirby 回到 Normal 狀態。切換 stage 時，`currentUnlocked` 會保存已解鎖技能，避免重新載入 scene 後遺失能力進度。
 
@@ -275,7 +277,7 @@ Boss 投擲炸彈時不直接在自身類別中新增場景物件，而是設定
 
 切換場景時會先停止 timer，保存玩家 HP、lives、目前 form 與 Skill Menu unlocked 狀態，接著清除 scene、projectile list、enemy list 與 Boss 物件，再重新設定 `sceneRect`、背景、地形、敵人、道具、HUD 與玩家位置。完成後重新連接 Kirby 的 projectile signal，最後啟動 game loop。
 
-Stage 4 到 Boss 之間加入 transition cutscene。此階段不建立玩家操作物件，而是清除原 stage 後播放過場畫面，待過場播放完畢後將 `currentState` 設為 `STATE_BOSS` 並呼叫 `loadBoss()`。背景音樂也配合場景狀態切換，避免一般關卡音樂與 Boss / 結束流程混在一起。
+Stage 4 到 Boss 之間加入 transition cutscene。此階段不建立玩家操作物件，而是清除原 stage 後播放 frame-based video playback，待過場播放完畢後將 `currentState` 設為 `STATE_BOSS` 並呼叫 `loadBoss()`。這樣可以避免 cutscene timer 與 game loop 同時更新玩家或敵人。背景音樂也配合場景狀態切換，避免一般關卡音樂與 Boss / 結束流程混在一起。
 
 | 切換來源 | 觸發條件 | 下一狀態 |
 | --- | --- | --- |
@@ -284,7 +286,7 @@ Stage 4 到 Boss 之間加入 transition cutscene。此階段不建立玩家操�
 | Stage 3 | 玩家在出口區域按 `Up` | Stage 4 |
 | Stage 4 | 玩家在 portal 區域按 `Up` | Transition Cutscene |
 | Transition Cutscene | 過場播放結束 | Boss Stage |
-| Boss Stage | Boss 戰結束 | Finish |
+| Boss Stage | Boss 進入 dead state 後觸發結束流程 | Finish |
 
 ![Stage transition flow](report_assets/stage_transition_flow.svg)
 
@@ -298,23 +300,23 @@ Stage 4 到 Boss 之間加入 transition cutscene。此階段不建立玩家操�
 
 ### 5.1 State-Based Stage Loading
 
-新版關卡流程透過 `GameState` 將 Start Menu、Stage 1-4、transition cutscene、Boss、Game Over 與 Finish 分開管理。每個 stage 使用獨立的 `loadStage...()` function 建立地形、背景、敵人與道具，因此各關卡可以維持不同配置，也降低單一載入函式過長造成的維護困難。
+新版關卡流程透過 `GameState` 將 start menu、一般 stage、transition cutscene、Boss、Game Over 與 Finish 分開管理。這個設計的重點是讓輸入處理、game loop 更新與 scene loading 都能依目前 state 分流，而不是只靠單一布林值判斷遊戲是否正在進行。
 
 ### 5.2 Portal-Driven Scene Switching
 
-Stage 之間不是自動切換，而是在特定出口區域檢查玩家座標、落地狀態與 `Up` 鍵輸入。這種方式讓 portal 的判斷集中在 input handling 中，並能避免玩家只是經過出口區域就誤觸切換。
+Stage 之間不是自動切換，而是在特定出口區域檢查玩家座標、落地狀態與 `Up` 鍵輸入。Portal 判斷放在 input handling 中，可以避免玩家只是經過出口區域就誤觸切換，也讓每個 stage 的出口條件能依地形位置調整。
 
 ### 5.3 Transition Cutscene Before Boss
 
-Stage 4 進入 Boss 前加入 transition cutscene。過場播放時會停止一般 game loop，清除 stage 物件，並以 timer 逐格更新過場畫面。播放結束後再切換到 Boss state，讓 Boss 關卡載入與過場結束有明確邊界。
+Stage 4 進入 Boss 前加入 transition cutscene。過場播放時會停止一般 game loop，清除 stage 物件，並以 timer 逐格更新畫面。播放結束後才載入 Boss stage，避免 cutscene timer 和 gameplay timer 同時更新 scene。
 
 ### 5.4 Persistent Player State Across Stages
 
-每次切換 stage 前會保存玩家 HP、lives、目前 form 與 Skill Menu unlocked 狀態。重新建立 Kirby 物件後，再把這些狀態套回新場景中的玩家，使 scene 可以安全重建，同時保留玩家實際進度。
+每次切換 stage 前會保存玩家 HP、lives、目前 form 與 Skill Menu unlocked 狀態。重新建立 Kirby 物件後，再把這些狀態套回新場景中的玩家，避免舊 scene item 殘留，同時保留玩家進度。
 
 ### 5.5 Skill Menu With Locked Ability Feedback
 
-Skill Menu 使用獨立的 `AbilityMenu` item 繪製在 scene 上方。尚未取得的能力以半透明暗色遮罩表示，選取框則標示目前游標位置。這讓能力是否可用可以直接由 UI 表達，按下 `Enter` 時也會再檢查 unlocked 狀態，避免未解鎖能力被套用。
+Skill Menu 使用獨立的 `AbilityMenu` item 繪製在 scene 上方。尚未取得的 ability 以半透明暗色遮罩表示，選取框標示目前游標位置；按下 `Enter` 時仍會檢查 unlocked 狀態，避免 UI 顯示與實際 form 套用不一致。
 
 ### 5.6 Separation Between Main Control and Entity Behavior
 
@@ -332,17 +334,49 @@ Skill Menu 使用獨立的 `AbilityMenu` item 繪製在 scene 上方。尚未取
 
 新增 Stage 3、Stage 4 與 Boss 後，各 `loadStage...()` function 都需要建立背景、地形、玩家、HUD、敵人與 signal 連接，程式結構比原本兩個 stage 時更容易重複。後續可將共通流程整理成 `StageBuilder` 或 `LevelData`，讓每個 stage 只描述差異，例如背景、地形列表、敵人座標與 portal 條件。
 
+Debug case:
+
+| 項目 | 內容 |
+| --- | --- |
+| 問題 | 新增 stage 時若忘記重新連接 Kirby 的 `starFired` 或 `bombStarFired` signal，攻擊物件會產生但不會被主控 list 管理。 |
+| 原因 | 每個 `loadStage...()` 都重新建立 Kirby，舊的 signal connection 不會自動套用到新 player。 |
+| 解法 | 在每個 stage loading 結尾重新連接 projectile signal；後續可抽成共用 helper，避免漏接。 |
+
 ### 6.2 Scene Object Lifetime
 
 場景切換時需要同時處理 `scene->clear()`、projectile list、enemy list、Boss 指標與玩家指標。如果某個 list 沒有同步清除，可能造成殘留指標或物件重複更新。後續可加入統一的 scene cleanup function，集中管理清除順序與 pointer reset。
+
+Debug case:
+
+| 項目 | 內容 |
+| --- | --- |
+| 問題 | 切換 stage 後，舊 projectile 或 bomb list 仍可能在 game loop 中被 update。 |
+| 原因 | `scene->clear()` 只清除 scene item，若 list 沒有同步清空，主迴圈仍會遍歷舊指標。 |
+| 解法 | 切換場景時同時清除 `bulletList`、`bombList`、`bombStarList`、`enemyList`，並將 `boss` 設為 `nullptr`。 |
 
 ### 6.3 Transition Cutscene Synchronization
 
 過場動畫需要和 game loop、scene loading 以及背景音樂切換同步。如果 timer 停止或 state 更新順序不一致，可能出現過場尚未結束就能操作、或進入 Boss 後音樂沒有正確切換的問題。後續可將 cutscene 包成獨立 manager，提供 `playCutscene(name, nextState)` 之類的介面。
 
+Debug case:
+
+| 項目 | 內容 |
+| --- | --- |
+| 問題 | Stage 4 進入 Boss 前若一般 game loop 沒有停止，cutscene 播放期間仍可能更新玩家、敵人或 HUD。 |
+| 原因 | cutscene timer 和 game loop timer 都屬於 timer-driven update，若 state 分流不完整會同時作用在 scene 上。 |
+| 解法 | 進入 cutscene 前先停止 game loop、清除 gameplay item，cutscene 結束後再切到 `STATE_BOSS` 並載入 Boss stage。 |
+
 ### 6.4 Skill Menu Input State
 
 Skill Menu 開啟後，左右鍵與 Enter 的意義會從角色操作改成 UI 操作，因此 `isMenuOpen` 必須正確阻擋一般輸入與 game loop 更新。後續可把 menu 狀態納入更完整的 game state machine，讓 pause、menu、cutscene、playing 等狀態更明確。
+
+Debug case:
+
+| 項目 | 內容 |
+| --- | --- |
+| 問題 | Skill Menu 開啟後，左右鍵可能同時移動 Kirby 與切換 ability 選項。 |
+| 原因 | UI input 與 gameplay input 共用 `keyPressEvent()`，若沒有先判斷 `isMenuOpen`，事件會繼續往一般操作流程執行。 |
+| 解法 | 在 `keyPressEvent()` 中優先處理 Skill Menu 狀態。選單開啟時只接收 Left、Right、Enter、Q 等選單操作，並阻擋一般移動與攻擊輸入。 |
 
 ### 6.5 Ability System Expansion
 
@@ -352,16 +386,18 @@ Skill Menu 開啟後，左右鍵與 Enter 的意義會從角色操作改成 UI �
 
 目前仍有較多 `qDebug()` 用於觀察 HP、座標、Boss 與 projectile 狀態。後續可加入 debug flag 或 log level，讓 release 版本關閉大量輸出。同時也可針對 stage transition、能力解鎖保存、Skill Menu locked selection 等流程建立測試清單，避免新增關卡後破壞既有功能。
 
+[TODO: screenshot or log - 可補一張 Qt Creator Application Output，顯示 stage transition、Boss bomb spawn 或 Skill Menu selection 的 debug log。]
+
 ---
 
 ## 7. Conclusion
 
-本專案完成了一個具備完整遊戲流程的 Qt 2D 動作遊戲原型。系統以 `MainWindow` 作為主控，透過 `QGraphicsScene` 管理場景物件，並以 `QTimer` 驅動穩定的 game loop。玩家角色 Kirby 擁有移動、跳躍、飛行、吸入、吐星、能力轉換與受傷復活等核心行為；敵人、Boss、道具、地形與 HUD 也各自形成清楚的模組。
+本專案最後整合了多個原本分開實作的系統：Kirby movement、collision、enemy update、ability switching、stage loading、Boss battle、HUD 與 background music。實作過程中主要的工作不是單一功能本身，而是讓這些系統在同一個 game loop 和 `QGraphicsScene` 中保持同步。
 
-從技術角度來看，本專案的重點不只是顯示角色與背景，而是實作了多個動作遊戲需要的核心系統：分軸碰撞判定、動態 hitbox、polygon 斜坡、Boss 有限狀態機、場景狀態切換、背景音樂播放，以及基於吸入行為的能力系統。這些設計讓遊戲已具備從開始、遊玩、戰鬥到結束的完整結構。
+後期新增 Stage 3、Stage 4、transition cutscene 與 Skill Menu 後，scene management 成為主要問題。每次切換 stage 都必須重新建立地形、敵人、HUD 與玩家，同時保存 HP、lives、current form 和 unlocked abilities。若清除順序或狀態保存不完整，就容易出現殘留物件、能力遺失或 cutscene 與 gameplay 同時更新的問題。
 
-後續若要進一步提升，可優先將關卡資料、碰撞系統、音效系統與能力系統模組化，使新增關卡、敵人與能力時更容易維護。整體而言，本專案已展現 Qt/C++ 在 2D 遊戲開發上的可行性，也建立了可持續擴充的遊戲基礎。
+這份專案讓我更熟悉 Qt Graphics View 在 2D 遊戲中的限制與使用方式，尤其是碰撞修正、斜坡判定、timer-driven update、signal/slot projectile management，以及多場景切換時的狀態同步。後續若繼續擴充，最需要優先整理的是 stage data、scene cleanup、ability class 與 debug logging，讓新增關卡或能力時不必重複修改大量 `loadStage...()` 程式。
 
-[Insert Figure Here]
+[TODO: screenshot - 最終遊戲成果或系統整合展示圖]
 
-圖 12. 最終遊戲成果或系統整合展示圖
+圖 7-1. 最終遊戲成果或系統整合展示圖
