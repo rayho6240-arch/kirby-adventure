@@ -1,170 +1,227 @@
-# 🌟 Kirby's Adventure - C++ Qt Game Project
+# Bug Fix / Debug 開發日記
 
-這是一個使用 **C++** 與 **Qt Framework (Graphics View Framework)** 開發的橫向捲軸動作遊戲。本專案旨在重新製作經典遊戲《星之卡比》，並學習遊戲引擎的核心邏輯。
 
 ---
 
-## 🎮 開發進度紀錄 (Devlog)
+## 1. StarBullet 撞牆後不再穿牆
 
-### 4/30 day 1: 核心物理與鏡頭系統
-> **本週目標**：建立遊戲基礎框架，實作角色物理移動與攝影機追蹤。
+- 日期：2026-06-02
+- commit hash：`7bd31b32baeec8fe579240cff58b63c0c1f54aa2`
+- 作者：`rayho6240@gmail.com`
+- commit message：`fix: "修復星星撞牆問題"`
+- 分類：collision bug / projectile
 
-#### ✅ 完成功能
-* **60FPS Game Loop**: 使用 `QTimer` 實作穩定幀率刷新機制。
-* **角色物理系統**:
-    * **重力機制**: 實作自由落體與加速度運算。
-    * **地面碰撞**: 鎖定 Y 軸地板判定，防止角色穿模。
-* **玩家操作控制**:
-    * 實作非同步鍵盤監聽，支援流暢的 **左右移動** 與 **跳躍**。
-* **智能攝影機 (Camera System)**:
-    * 實作 **鏡頭自動跟隨 (Dynamic Tracking)**。
-    * 實作 **邊界鎖定 (Boundary Constraints)**，確保鏡頭不溢出場景範圍。
+### 問題現象
 
-#### ⚠️ 遇到挑戰
-* **問題 1**: 鏡頭捲動時會拍到場景外的黑色區域（黑影）。
-* **問題 2**: 角色在移動時會直接走出視窗，消失在視野中。
+Kirby 吐出的 `StarBullet` 在碰到 `Block` 或牆壁時可能穿過地形。直接套用 Fireball 的碰撞方式時，又會因為星星圖片和碰撞框太大，導致星星剛生成就被地板或附近 Block 消掉。
 
-#### 💡 解決方案
-* 透過 `scene->setSceneRect()` 明確定義世界寬度。
-* 在 `gameLoop` 中加入兩層判定：
-    1.  **角色層**: 限制 `nextX` 座標不得超過地圖邊界，產生「撞牆」效果。
-    2.  **鏡頭層**: 計算 `viewWidth`，確保鏡頭中心點維持在安全範圍內。
+### 原因推測
+
+從 diff 可以確認，原本 `StarBullet` 的視覺圖片範圍與碰撞範圍沒有分離。星星圖片很大，如果直接使用整張 pixmap 的 shape 做碰撞，會把視覺透明區或外圍也算進碰撞，造成誤判。
+
+### 修復方式
+
+在 `StarBullet` 新增 `shape()` override，使用 `boundingRect().adjusted(...)` 建立較小的實際 hitbox。`update()` 中改用 `scene()->collidingItems(this)` 檢查碰撞，並在碰到 `Block` 時將星星隱藏，交由原本 `bulletList` 清理流程移除。
+
+### 穩定性影響
+
+這個修復讓 projectile 與地形互動更一致，避免星星穿牆，也避免星星出生點太靠近 Kirby 或地面時被錯誤刪除。對戰鬥與關卡碰撞穩定性影響高。
+
 
 ---
 
-## 🛠️ 技術規格
-* **開發語言**: C++17
-* **框架**: Qt 6 (Graphics View Framework)
-* **構建工具**: qmake / CMake
-* **渲染頻率**: 60 FPS
+## 2. 變身 Kirby 長按 Up 無法自動拍翅
+
+- 日期：2026-06-02
+- commit hash：`000be08287c481b452e90cff0cfa301bf6ffebcf`
+- 作者：`rayho6240@gmail.com`
+- commit message：`fix: "修復變身卡比長按 Up 無法自動拍翅"`
+- 分類：UI input conflict / ability state
+
+### 問題現象
+
+Normal Kirby 可以長按 Up 自動拍翅，但 Sparky、FireForm、BeamForm 等變身狀態無法使用同樣的長按飛行手感。
+
+### 原因推測
+
+從 diff 可確認，原本 auto-flap 判斷寫死 `currentForm == Form::Normal`。`MainWindow::keyPressEvent()` 中 Up 鍵流程也只對 Normal 設定 `setUpPressed(true)`，因此其他型態即使具備飛行動作，也不會進入持續拍翅流程。
+
+### 修復方式
+
+新增 `Kirby::canAutoFlap()`，集中判斷 Normal、Sparky、FireForm、BeamForm 是否可自動拍翅。`Kirby::update()` 的 auto-flap 條件改用 `canAutoFlap()`，`MainWindow::keyPressEvent()` 的 Up 鍵處理也改用同一個介面。
+
+### 穩定性影響
+
+這讓不同能力型態的輸入行為統一，減少每個型態各自寫判斷造成的遺漏。對操作一致性與能力狀態維護有正面影響。
+
 
 ---
 
-## 🕹️ 操作說明
-| 按鍵 | 行動 |
-| :--- | :--- |
-| **← / →** | 左右移動 |
-| **↑** | 跳躍 |
+## 3. Enemy / Boss / Item 不可以站在斜坡上
+
+- 日期：2026-06-01
+- commit hash：`49ded095c284ae1c87a8d2e41f4c49d1f758950f`
+- 作者：`rayho6240@gmail.com`
+- commit message：`把beam 所有圖摳好+敵人與boss與item 可站在斜坡上`
+- 分類：collision bug
+
+### 問題現象
+
+Kirby 已經可以使用 `Slope::getSurfaceY()` 站在斜坡上，但 Enemy、Boss、Item 仍可能把斜坡當牆，或只支援平面 `Block` 落地，導致它們無法自然貼著斜坡站立。
+
+### 原因推測
+
+從 diff 可確認，`Enemy::handlePhysics()` 原本對 X 軸碰撞直接把所有 `Block` 類物件當牆處理，而 `Slope` 繼承自 `Block`。因此敵人接觸斜坡時，可能先被 X 軸碰撞邏輯反彈。Y 軸落地也沒有使用斜坡表面高度。Item 原本沒有獨立更新地形物理；Boss 的 `standingY()` 則只依固定 `groundY`。
+
+### 修復方式
+
+`Enemy.cpp` 在 X 軸碰撞時跳過 `Slope`，Y 軸碰撞時使用 `slope->getSurfaceY(footCenterX)` 對齊腳底。`Item` 新增簡單重力與地形落地邏輯，並在 `MainWindow::gameLoop()` 更新場景中的 Item。`Boss::standingY()` 改為若腳下有斜坡，優先使用斜坡表面高度。
+
+### 穩定性影響
+
+這讓不同遊戲物件共用相同的斜坡概念，避免 Kirby 能站、其他物件卻穿透或彈開的地形不一致。對 Stage 2 這類大量斜坡地圖的穩定性很重要。
+
 
 ---
 
-## 🖼️ 遊戲截圖 (Visuals)
-*(建議使用 **ScreenToGif** 錄製你的方塊移動展示，並將檔案放入專案後在此連結)*
+## 4. Bomb 吸入流程避免碰到 Kirby 時爆炸
+
+- 日期：2026-05-31
+- commit hash：`98b45f8d89a1ff3065b998df9b0007ecc589f24b`
+- 作者：`rayho6240@gmail.com`
+- commit message：`實作bomb 可以被順利吸入+吐出bombStar打到boss 會切換成爆炸照片`
+- 分類：collision bug / object lifetime / boss behavior
+
+### 問題現象
+
+Boss 丟出的 Bomb 在 Kirby 吸入時，可能尚未完成吸入就因為碰到 Kirby 本體而觸發爆炸。BombStar 打到 Boss 後也需要顯示爆炸圖，而不是立刻從畫面消失。
+
+### 原因推測
+
+從 diff 可確認，Bomb 原本只有一般物理、爆炸與 dead 狀態。沒有「正在被吸入」的中間狀態，因此 Bomb 接近 Kirby 時仍會進入一般 `collidesWithItem(player)` 爆炸分支。
+
+### 修復方式
+
+在 `Bomb` 中新增 `beingInhaled`、`startInhale()`、`isBeingInhaled()`、`moveToward()`。Bomb 進入吸入狀態後停止原本物理與碰撞爆炸，由 `MainWindow::gameLoop()` 將它拉向 Kirby 嘴巴，距離足夠近才完成吸入並移除。`BombStar` 也新增 `exploding` 與 `startExplosion()`，命中 Boss 後先顯示爆炸圖，再由原本清理流程移除。
+
+### 穩定性影響
+
+修復了吸入與傷害判定的優先順序問題，避免玩家明明在吸 Bomb 卻被炸到。也讓 BombStar 命中 Boss 的視覺回饋更清楚。
+
 
 ---
 
-## 🚀 下次預告 (Next Steps)
-- [ ] 導入 `QGraphicsPixmapItem` 將方塊更換為卡比美術素材。
-- [ ] 實作多平台地形碰撞偵測。
-- [ ] 基礎敵人 AI (Waddle Dee) 來回巡邏邏輯。
+## 5. Normal Kirby 飛行時穿過天花板
 
+- 日期：2026-05-28
+- commit hash：`8f2ecba265b4f6a8e56b08efa07efd4d26312431`
+- 作者：`rayho6240@gmail.com`
+- commit message：`fix: 修復 Normal Kirby 飛行穿過天花板問題`
+- 分類：collision bug / UI input conflict
 
+### 問題現象
 
+Normal Kirby 長按 Up 飛行時，撞到天花板後仍可能繼續往上移動，甚至出現 `y = -220` 等異常座標，看起來像被傳送回出生點。
 
-## 輔助開發指令
-我正在開發一個基於 C++ Qt GraphicsView 的《星之卡比》遊戲。
+### 原因推測
 
-**目前進度：**
-- 已實作 60FPS Game Loop。
-- 角色具有基礎物理（重力、地板判定、左右移動與跳躍）。
-- 攝影機具有邊界鎖定與跟隨功能。
-- 座標系：場景寬度約 5000，地板 Y 軸位於 800。
+diff 和 commit message 都指出，Y 軸碰撞雖然會把 `vy` 設成 0，但 auto-flap 在同一 frame 後段仍可能因為 Up 持續按住而再次呼叫 `fly()`，把 `vy` 改回負值。當 Kirby 已經跑到天花板上方後，`collidingItems()` 可能無法再偵測原本的 ceiling block。
 
-**程式碼結構：**
-- `MainWindow` 擁有 `QGraphicsScene* scene` 和 `QGraphicsRectItem* kirby`。
-- 核心邏輯在 `void gameLoop()` 中跑定時器。
+### 修復方式
 
-**現在的需求：**
-[在此輸入你當週的新任務，例如：我想要把方塊換成圖片，請教我如何使用 QGraphicsPixmapItem 並處理資源檔路徑]
+在 `Kirby::update()` 新增 `hitCeilingThisFrame`。撞到天花板時把 Kirby 推回天花板下方、停止向上速度、設定 `autoFlapCooldown`，並 `break` 離開碰撞處理。另加 top-boundary guard，若 `sceneBoundingRect().top() < 0` 就推回畫面內。auto-flap 條件也加入 `!hitCeilingThisFrame`。
 
-**請遵守：**
-1. 保持程式碼與現有的 `gameLoop` 邏輯相容。
-2. 保持程式碼簡潔，並解釋新增的變數作用。
+### 穩定性影響
 
+這個修復避免玩家逃逸出場景邊界，也讓長按 Up 的輸入與碰撞處理不再互相打架。對角色物理穩定性影響高。
 
-## prompt 範例
-你可以根據進度，直接複製以下特定需求的 Prompt：
----
-### 🔹 第 2 週：匯入美術素材
-我想將目前的 `QGraphicsRectItem` 換成 `QGraphicsPixmapItem`。請告訴我如何將 `kirby.png` 加入 Qt 資源檔（`.qrc`），並在代碼中正確載入圖片，同時確保圖片的中心點位於底部的正中央，以便於碰撞判定。
----
-### 🔹 第 3 週：建立平台與碰撞偵測
-我想在場景中加入多個不同高度的平台（`QGraphicsRectItem`）。請修改我的 `gameLoop`，讓卡比除了 $Y=800$ 的地板外，也能踩在這些平台上。請使用 `collidingItems()` 或是 `collidesWithItem()` 來實作基本的平台碰撞邏輯。
----
-### 🔹 第 4 週：敵人與 AI 巡邏
-我想加入一個簡單的敵人（Waddle Dee）。他應該會在兩個 X 座標點之間自動來回巡邏。請教我如何建立一個 `Enemy` 類別，並在 `gameLoop` 中處理他的移動以及與卡比的碰撞偵測。
-
-======================================================================================================
-
-
-# 專案開發日記：Project 2 - 星之卡比 (Kirby's Adventure)
-
-**日期：** 2026 年 5 月 7 日  
-**紀錄者：** [您的名字]  
-**專案進度：** 核心素材與動畫框架建置完成  
 
 ---
 
-## 📢 今日開發重點
-今日重點在於將視覺資源（Assets）系統化，並優化卡比與敵人的動畫處理邏輯。隨著素材庫的完善，我們為後續的關卡設計（Stage 1 & 2）與能力實作打下了堅實的基礎。
+## 6. 吐星後仍可觸發變身
 
-## ✅ 已完成事項
+- 日期：2026-05-28
+- commit hash：`3170a00976d196cdb52bf7fa342802effe2d7809`
+- 作者：`rayho6240@gmail.com`
+- commit message：`fix: 修復吐星後仍可變身的狀態殘留問題`
+- 分類：ability / skill menu state
 
-### 1. 全面更新圖片素材庫 (Asset Library)
-* **分類結構優化：** 按照角色、敵人、場景物件、道具進行資料夾分類。
-    * `/assets/kirby/` (包含：Walk, Jump, Inhale, Fire, Spark, Damaged 等序列幀)
-    * `/assets/enemies/` (Waddle Dee, Gordo, Hot Head, Sparky)
-    * `/assets/environment/` (Tiles, Portal, Goal, Blocks)
-* **規格標準化：** 確保所有素材比例符合遊戲畫面 **1620 × 1080** 的縮放需求，並預先定義好各動作的透明背景（PNG）裁切範圍。
+### 問題現象
 
-### 2. 動畫處理模式 (Animation Mode) 更新
-* **序列幀切換邏輯：** 棄用單張靜態顯示，改為根據狀態（State）自動切換序列幀。
-* **動畫計時器實作：** 利用 `QTimer` 或自定義的動畫類別，確保動作能以「兩張以上圖片交替」的方式呈現流暢效果（如：卡比走路時的足部擺動、火球的跳動）。
-* **狀態機連結：** 將動畫系統與卡比的狀態（Normal, Inhaling, Mouthful, Ability）深度綁定，當使用者變更狀態時，動畫會即時觸發對應的循環幀。
+Kirby 吐出 StarBullet 後，按 Down 仍可能觸發變身，像是嘴裡的能力狀態沒有被完全清掉。
 
-### 3. 訂定後續合作與開發方針
-為了確保在 **6/4 13:00** 截止日前準時完工，團隊達成了以下共識：
-* **開發架構：** 統一使用 `QGraphicsScene` 為核心，物件導向設計須確保 `Enemy` 基底類別的可擴充性。
-* **分工細化：**
-    * **A 部分：** 實作橫向捲軸、重力物理引擎與地圖拼湊（Stage 1/2）。
-    * **B 部分：** 實作卡比能力複製邏輯（Fire/Spark）、AI 行為判定與 UI 顯示。
-* **版本控管：** 每日開發結束後進行程式碼備份，並針對碰撞偵測（Collision Box）進行交叉測試。
+### 原因推測
 
----
-<img width="209" height="202" alt="die2" src="https://github.com/user-attachments/assets/64f3be59-6351-4561-9fa1-52de75427b94" />
+從 diff 可確認，原本 `Kirby::spit()` 只清除 `hasObjectInMouth` 和 full 狀態，但沒有把 `currentForm` 與 `currentAbility` 回復為 Normal / None。若吐星前處於 `SparkyFat` 或 `FireFat` 這類 pending ability 狀態，後續 Down 鍵仍可能被判定為可變身。
 
-## 🛠 技術細節與備註
-* **素材解析度：** 目前卡比的 Sprite 大小設定在 100-150px 區間，需注意與 1620 寬度的場景比例是否協調。
-* **動畫效能：** 動畫幀頻率設定為每 100ms-150ms 切換一張圖，以維持原版紅白機的復古動態感。
+### 修復方式
 
-## 📅 明日預期進度
-1. **地圖基礎建設：** 開始實作 Stage 1 的第一個 Frame (1620 pixels)。
-2. **基本碰撞測試：** 確保卡比能正確站在 Platform 上並能左右移動。
-3. **能力原型測試：** 嘗試實作 Hot Head 的火焰吐息動畫與 Kirby 的 Fire 狀態切換。
+在 `Kirby::spit()` 的恢復正常狀態流程中加入：
+
+```cpp
+currentForm = Form::Normal;
+currentAbility = CurrentAbility::None;
+```
+
+### 穩定性影響
+
+這是小 patch，但對能力狀態機很關鍵。它避免吐星與變身兩條流程互相污染，讓 Down 鍵重新回到蹲下語意。
+
+
 
 ---
-**專案死線倒數：** 28 天
+
+## 7. 深淵掉落後扣血與重生狀態清理
+
+- 日期：2026-05-28
+- commit hash：`bb9d941c4b25a23f15e4410be3a59dd1fb8b07cf`
+- 作者：`rayho6240@gmail.com`
+- commit message：`fix: 新增深淵掉落扣血與重生機制`
+- 分類：scene switching bug / object lifetime / cleanup
+
+### 問題現象
+
+Kirby 掉出場景後，若只重設位置，可能保留掉落速度或暫時狀態，導致重生後又繼續下墜、狀態異常或受傷流程不一致。
+
+### 原因推測
+
+從 diff 可確認，修復前 HP 歸零後的流程直接使用 `setPos(400,100)`。這只改位置，不會清除 `vx`、`vy`、飛行、蹲下、衝刺、吸入、平台下穿等暫時狀態。
+
+### 修復方式
+
+新增 `Kirby::respawnAt(qreal x, qreal y)`，統一重生時要做的清理：重設位置、速度、蹲下 / 飛行 / 衝刺 / 吸入 / spitting / platform flags，並給短暫無敵。`MainWindow::gameLoop()` 新增 `player->y() > 1400` 的深淵判定，掉落時呼叫既有 `takeDamage(1)`，若尚未 Game Over 則 `respawnAt(400,100)`。
+
+### 穩定性影響
+
+重生流程變得集中且可預期，避免 scene 中位置重設與角色狀態清理分散在不同地方。對 Game Over、生命、重生體驗都有幫助。
 
 
-===============================================
-5/10
-## 🚀 系統架構 Top-Down 梳理與核心註解更新
+---
 
-今天用「由上而下」的順序完整跑了一遍我們的遊戲架構，從程式進入點到最底層的物理運算都加上了詳細註解，方便大家快速上手專案！
+## 8. Normal Kirby 蹲下抖動
 
-**📌 閱讀與註解順序如下：**
+- 日期：2026-05-27
+- commit hash：`ee3bfff9a6a2c9f66b980b48d866fa73020ac4e8`
+- 作者：`rayho6240@gmail.com`
+- commit message：`fix: 修復 Normal Kirby 蹲下抖動問題`
+- 分類：collision bug / UI input conflict
 
-* **`main.cpp` & `MainWindow` (系統總管)**：
-    * 確認了系統進入點。未來的遊戲迴圈 (Game Loop) 以及所有物件的「生殺大權 (記憶體釋放)」都會集中在 MainWindow 統一管理。
-* **`Kirby.cpp` (主角系統)**：
-    * 理清了物理引擎精髓：X 軸跟 Y 軸分開算碰撞避免卡牆。
-    * 註解了吸入敵人的範圍判定與牽引力邏輯。
-* **`Block.h` (地形系統)**：
-    * 加上了 Qt 黑魔法 `UserType + 1` 的原理註解，這是讓每幀碰撞偵測不卡頓的效能關鍵。
-* **`Enemy.h` & `Enemy.cpp` (敵人基底)**：
-    * 將共用物理（撞牆回頭、重力）封裝。以後新增敵人直接繼承它，不用重寫物理程式碼。
-* **`WaddleDee.h` & `WaddleDee.cpp` (具體敵人)**：
-    * 示範完美繼承。特別標註在 `update()` 裡呼叫一次父類即可，避免重複呼叫物理引擎產生兩倍速 Bug。
-* **`StarBullet.h` & `StarBullet.cpp` (星星子彈)**：
-    * 註解了子彈方向判定。
-    * **⚠️ 待辦 (TODO)**：目前子彈飛出界外只是隱藏，之後要在 MainWindow 把這些看不到的子彈正式 `delete` 掉以防記憶體外洩。
+### 問題現象
+
+Normal Kirby 按住 Down 時，角色會在站立與蹲下 sprite 之間快速切換，看起來像抖動。Fire / Spark 蹲下沒有同樣問題。
+
+### 原因推測
+
+從 diff 和 commit message 可確認，Normal crouch sprite 更換 pixmap / alpha mask 後，`QGraphicsPixmapItem` 的碰撞形狀跟著改變。物理判定依賴 `collidingItems()` 與 `isOnGround`，蹲下瞬間可能短暫失去地板接觸，下一 frame 又切回站立，於是反覆抖動。
+
+### 修復方式
+
+在 `Kirby::updateSprite()` 中加入 Normal crouch 穩定化處理。Normal 且按住 Down 時改用 `BoundingRectShape`；實際選到 `down` action 時記錄舊的腳底 bottom Y，換圖與 offset 後再修正 `y()`，讓腳底位置保持固定。
+
+### 穩定性影響
+
+修復後，角色圖片切換不再破壞地板接觸判定。這讓動畫、碰撞與輸入狀態的關係更穩定，也降低玩家操作時的視覺抖動。
+
+
+---
+
