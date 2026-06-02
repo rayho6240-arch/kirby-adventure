@@ -1141,18 +1141,16 @@ void MainWindow::loadStage2(){
     }
 
     // --- [新增] Stage2 道具生成 (只生成一次) ---
-    if (!maximTomatoSpawned) {
-        MaximTomato *tomato = new MaximTomato();
-        tomato->setPos(1600, 500);
-        scene->addItem(tomato);
-        maximTomatoSpawned = true;
-    }
-    if (!oneUpSpawned) {
-        OneUp *oneup = new OneUp();
-        oneup->setPos(1700, 500);
-        scene->addItem(oneup);
-        oneUpSpawned = true;
-    }
+    
+    MaximTomato *tomato = new MaximTomato();
+    tomato->setPos(1600, 500);
+    scene->addItem(tomato);
+    maximTomatoSpawned = true;
+
+    OneUp *oneup = new OneUp();
+    oneup->setPos(1700, 500);
+    scene->addItem(oneup);
+    oneUpSpawned = true;
     
     // --- [5. 誕生 HUD 並加入場景][新增] ---
     gameHUD = new HUD();
