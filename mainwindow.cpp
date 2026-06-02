@@ -770,17 +770,20 @@ void MainWindow::loadStage1(){
     scene->addItem(player->abilityMenu);
 
     // 敵人 (Waddle Dee 軍隊)
-    // @note 用迴圈批次生成敵人，並加入 enemyList 統一管理
-    for (int i = 0; i < 3; ++i) {
-        WaddleDee *newDee = new WaddleDee();
-        newDee->setPos(800 + (i * 500), 500);
-        scene->addItem(newDee);
-        enemyList.append(newDee);
-    }
+
+    WaddleDee *Dee1 = new WaddleDee();
+    Dee1->setPos(800 , 500);
+    scene->addItem(Dee1);
+    enemyList.append(Dee1);
+
+    WaddleDee *Dee2 = new WaddleDee();
+    Dee2->setPos(1700 , 500);
+    scene->addItem(Dee2);
+    enemyList.append(Dee2);
 
     // 敵人 (WaddleDoo - 光束鞭攻擊)
     WaddleDoo *doo1 = new WaddleDoo(player);
-    doo1->setPos(1600, 520);
+    doo1->setPos(1300, 500);
     scene->addItem(doo1);
     enemyList.append(doo1);
 
