@@ -65,28 +65,35 @@ MainWindow::MainWindow(QWidget *parent)
     
     // 💡 依序加入你所有的音樂（順序很重要！）
     // Index 0：主選單音樂
-    QString menuPath1 = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/../../kirby-adventure/bg_music/01_Main_Title.mp3");
-    QString menuPath2 = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/bg_music/01_Main_Title.mp3");
-    QString menuPath = QFile::exists(menuPath1) ? menuPath1 : menuPath2; // 嘗試兩個路徑，哪個存在就用哪個
-    // 🎯 加上這行，在下方的 Application Output 視窗看它印出什麼
-    qDebug() << "真正的音樂路徑是：" << menuPath;
+    QString menuPath = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/bg_music/01_Main_Title.mp3");
     playlist->addMedia(QUrl::fromLocalFile(menuPath));
     
     //Index 1：遊戲關卡背景音樂
-    QString stagePath1 = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/../../kirby-adventure/bg_music/91_Vegetable_Valley_(No Intro).mp3");
-    QString stagePath2 = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/bg_music/91_Vegetable_Valley_(No Intro).mp3");
-    QString stagePath = QFile::exists(stagePath1) ? stagePath1 : stagePath2; // 嘗試兩個路徑，哪個存在就用哪個
-    // 🎯 加上這行，在下方的 Application Output 視窗看它印出什麼// 🎯 加上這行，在下方的 Application Output 視窗看它印出什麼
-    qDebug() << "真正的音樂路徑是：" << stagePath;
-    playlist->addMedia(QUrl::fromLocalFile(stagePath));
-    
-    // Index 2：結局動畫音樂
-    QString finishPath1 = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/../../kirby-adventure/bg_music/41_Goal.mp3");
-    QString finishPath2 = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/bg_music/41_Goal.mp3");
-    QString finishPath3 = QFile::exists(finishPath1) ? finishPath1 : finishPath2; // 嘗試兩個路徑，哪個存在就用哪個
-    // 🎯 加上這行，在下方的 Application Output 視窗看它印出什麼
-    qDebug() << "真正的音樂路徑是：" << finishPath3;
-    playlist->addMedia(QUrl::fromLocalFile(finishPath3));
+    QString stage1Path = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/bg_music/91_Vegetable_Valley_(No Intro).mp3");
+    playlist->addMedia(QUrl::fromLocalFile(stage1Path));
+
+    QString stage2Path = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/bg_music/06_Ice_Cream_Island.mp3");
+    playlist->addMedia(QUrl::fromLocalFile(stage2Path));
+
+    QString stage3Path = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/bg_music/08_Butter_Buildings.mp3");
+    playlist->addMedia(QUrl::fromLocalFile(stage3Path));
+
+    QString stage4Path = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/bg_music/10_Grape_Garden.mp3");
+    playlist->addMedia(QUrl::fromLocalFile(stage4Path));
+
+    QString bossPath = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/bg_music/27_Nightmare_Battle_(Part 2).mp3");
+    playlist->addMedia(QUrl::fromLocalFile(bossPath));
+
+    QString finishPath = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/bg_music/41_Goal.mp3");
+    playlist->addMedia(QUrl::fromLocalFile(finishPath));
+
+    QString finishlongPath = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/bg_music/22_Kirby_Wins!_(Long).mp3");
+    playlist->addMedia(QUrl::fromLocalFile(finishlongPath));
+
+    QString finishshortPath = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/bg_music/23_Kirby_Wins!_(Short).mp3");
+    playlist->addMedia(QUrl::fromLocalFile(finishshortPath));
+
+
     
 
     // 設定循環模式
@@ -119,8 +126,6 @@ MainWindow::~MainWindow() {
 void MainWindow::gameLoop() {
 
     //---[0. 輸贏]---有問題~~~
-    qDebug() << " 檢查卡比目前的血量：" << player->getCurrentHp();
-    qDebug() << "卡比目前位置:" << "X:" << player->x() << "Y:" << player->y();
     if (currentState == GAMEOVER) return;
 
     // --- [1. 更新玩家狀態] ---
@@ -128,8 +133,7 @@ void MainWindow::gameLoop() {
         player->update();
         player->processInhale(enemyList); // 讓卡比偵測是否吸入前方的敵人
 
-        if ((currentState == STATE_STAGE1 || currentState == STATE_STAGE2) && player->y() > 1400) {
-            qDebug() << "Kirby fell into abyss";
+        if ((currentState == STATE_STAGE1 || currentState == STATE_STAGE2 || currentState == STATE_STAGE3 || currentState == STATE_STAGE4 || currentState == STATE_BOSS) && player->y() > 1400) {
             if(player->getCurrentlives() > 1){
                 player->minusCurrentlives(); // 直接扣光血量
             } else {
@@ -186,7 +190,6 @@ void MainWindow::gameLoop() {
                 bomb->moveToward(mouthPos, inhalePullSpeed);
 
                 if (distance <= inhaleCompleteDistance) {
-                    qDebug() << "Bomb inhale completed";
                     player->inhaleBomb();
                     bomb->markInhaled();
                     scene->removeItem(bomb);
@@ -221,7 +224,6 @@ void MainWindow::gameLoop() {
         bombStar->update();
 
         if (!bombStar->isExploding() && boss && !boss->isDead() && bombStar->collidesWithItem(boss)) {
-            qDebug() << "BombStar hit Boss";
             boss->takeDamage(1);
             bombStar->startExplosion();
         }
@@ -336,10 +338,7 @@ void MainWindow::gameLoop() {
         loadGameOver();
     }
     else if(player->getCurrentHp() <= 0){
-        if( currentState == STATE_STAGE1 ){
-            player->respawnAt(400,100);
-        }
-        else if( currentState == STATE_STAGE2 ){
+        if( currentState == STATE_STAGE1 || currentState == STATE_STAGE2 || currentState == STATE_STAGE3 || currentState == STATE_STAGE4 || currentState == STATE_BOSS){
             player->respawnAt(400,100);
         }
         player->minusCurrentlives();
@@ -432,13 +431,6 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
                 currentState = STATE_STAGE3;
                 loadStage3();
                 return;
-                
-                /*currentState = STATE_FINISH;
-                // 計算當前剩餘總血量
-                remain_Hp = player->getCurrentHp() + player->getCurrentlives() * 3 - 3;
-                loadFinish();
-                return;
-                */
             }
         }
     }
@@ -458,6 +450,16 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
             if(key == Qt::Key_Up){
                 currentState = STATE_STAGE4_TO_BOSS_VIDEO;
                 loadStage4ToBossVideo();
+                return;
+            }
+        }
+    }
+    if(currentState == STATE_BOSS){
+        if(player->x() < 4580 && player->x() > 4470 && player->getOnGround() && player->y() > 700 && boss->isDead()){
+            if(key == Qt::Key_Up){
+                currentState = STATE_FINISH;
+                remain_Hp = player->getCurrentHp() + player->getCurrentlives() * 3 - 3;
+                loadFinish();
                 return;
             }
         }
@@ -686,6 +688,7 @@ void MainWindow::loadStartMenu(){
     // 🎯 遊戲一開始，預設播放第 0 首（主選單音樂）
     playlist->setCurrentIndex(0);
     bgmPlayer->play();
+    playlist->setPlaybackMode(QMediaPlaylist::CurrentItemInLoop);
 
     // 停止遊戲迴圈，因為選單不需要更新物理運算
     timer->stop();
@@ -723,9 +726,55 @@ void MainWindow::loadStage1(){
     bg2->setPos(0, 0);
     scene->addItem(bg2);
 
+    QPixmap plat(":/Project2_Dataset/Image/item/floor.png");
+    QGraphicsPixmapItem* plat1 = new QGraphicsPixmapItem(plat);
+    plat1->setPos(300, 650);
+    scene->addItem(plat1);
+
+    QGraphicsPixmapItem* plat2 = new QGraphicsPixmapItem(plat);
+    plat2->setPos(1000, 500);
+    scene->addItem(plat2);
+
+    QGraphicsPixmapItem* plat3 = new QGraphicsPixmapItem(plat);
+    plat3->setPos(2000, 400);
+    scene->addItem(plat3);
+
+    QGraphicsPixmapItem* plat4 = new QGraphicsPixmapItem(plat);
+    plat4->setPos(2700, 600);
+    scene->addItem(plat4);
+
+    QGraphicsPixmapItem* plat5 = new QGraphicsPixmapItem(plat);
+    plat5->setPos(3400, 300);
+    scene->addItem(plat5);
+
+    QGraphicsPixmapItem* plat6 = new QGraphicsPixmapItem(plat);
+    plat6->setPos(4000, 200);
+    scene->addItem(plat6);
+
+    QPixmap brick(":/Project2_Dataset/Image/item/brick.png");
+    qreal scalebrick = 80.0 / brick.width();
+    QGraphicsPixmapItem* brick1 = new QGraphicsPixmapItem(brick);
+    brick1->setScale(scalebrick);
+    brick1->setPos(1350, 725);
+    scene->addItem(brick1);
+
+    QGraphicsPixmapItem* brick2 = new QGraphicsPixmapItem(brick);
+    brick2->setScale(scalebrick);
+    brick2->setPos(2730, 725);
+    scene->addItem(brick2);
+
+    QGraphicsPixmapItem* brick3 = new QGraphicsPixmapItem(brick);
+    brick3->setScale(scalebrick);
+    brick3->setPos(3755, 725);
+    scene->addItem(brick3);
+
     // 將背景圖層放到最後方，避免遮擋玩家與敵人
     bg1->setZValue(-10);
     bg2->setZValue(-20);
+
+    brick1->setZValue(10);
+    brick2->setZValue(10);
+    brick3->setZValue(10);
 
     // --- [4. 鋪設隱形地形碰撞 (Collisions)] ---
     // @note 這些是透明的 Block，用來阻擋卡比掉出地圖或穿牆
@@ -751,14 +800,33 @@ void MainWindow::loadStage1(){
     Block* ceil = new Block(0, -100, 4860, 100);
     scene->addItem(ceil);
 
-    // [新增] 將方塊改成完全透明的，只留背景圖片
-    ground1->setOpacity(0.0);
-    wall1->setOpacity(0.0);
-    wall2->setOpacity(0.0);
-    wall3->setOpacity(0.0);
-    wall4->setOpacity(0.0);
-    wall5->setOpacity(0.0);
-    
+    FloatingPlatform* platform1 = new FloatingPlatform(300, 650, 428, 53);
+    scene->addItem(platform1);
+
+    FloatingPlatform* platform2 = new FloatingPlatform(1000, 500, 428, 53);
+    scene->addItem(platform2);
+
+    FloatingPlatform* platform3 = new FloatingPlatform(2000, 400, 428, 53);
+    scene->addItem(platform3);
+
+    FloatingPlatform* platform4 = new FloatingPlatform(2700, 600, 428, 53);
+    scene->addItem(platform4);
+
+    FloatingPlatform* platform5 = new FloatingPlatform(3400, 300, 428, 53);
+    scene->addItem(platform5);
+
+    FloatingPlatform* platform6 = new FloatingPlatform(4000, 200, 428, 53);
+    scene->addItem(platform6);
+
+    Block* Brick1 = new Block(1350, 725, 80, 80);
+    scene->addItem(Brick1);
+
+    Block* Brick2 = new Block(2730, 725, 80, 80);
+    scene->addItem(Brick2);
+
+    Block* Brick3 = new Block(3755, 725, 80, 80);
+    scene->addItem(Brick3);
+
     // --- [5. 實體物件生成：玩家與敵人 (Entities)] ---
     // 玩家 (卡比)
 
@@ -781,22 +849,6 @@ void MainWindow::loadStage1(){
     scene->addItem(Dee2);
     enemyList.append(Dee2);
 
-    // 敵人 (WaddleDoo - 光束鞭攻擊)
-    WaddleDoo *doo1 = new WaddleDoo(player);
-    doo1->setPos(1300, 500);
-    scene->addItem(doo1);
-    enemyList.append(doo1);
-
-    WaddleDoo *doo2 = new WaddleDoo(player);
-    doo2->setPos(2350, 520);
-    scene->addItem(doo2);
-    enemyList.append(doo2);
-
-    WaddleDoo *doo3 = new WaddleDoo(player);
-    doo3->setPos(4600, 520);
-    scene->addItem(doo3);
-    enemyList.append(doo3);
-
     // 敵人 (Gordo - 原地待機敵人)
     Gordo *gordo = new Gordo();
     gordo->setPos(1200, 600);
@@ -804,10 +856,15 @@ void MainWindow::loadStage1(){
     enemyList.append(gordo);
 
     // 敵人 (HotHead - 巡邏與噴火敵人)
-    HotHead *hothead = new HotHead(player);
-    hothead->setPos(2000, 500);
-    scene->addItem(hothead);
-    enemyList.append(hothead);
+    HotHead *hothead1 = new HotHead(player);
+    hothead1->setPos(2000, 500);
+    scene->addItem(hothead1);
+    enemyList.append(hothead1);
+
+    HotHead *hothead2 = new HotHead(player);
+    hothead2->setPos(4500, 500);
+    scene->addItem(hothead2);
+    enemyList.append(hothead2);
 
     // --- [5. 誕生 HUD 並加入場景][新增] ---
     gameHUD = new HUD();
@@ -875,6 +932,41 @@ void MainWindow::loadStage2(){
 
     bg2->setZValue(-10);
     Bg2->setZValue(-20);
+
+    QPixmap plat(":/Project2_Dataset/Image/item/floor.png");
+    QGraphicsPixmapItem* plat1 = new QGraphicsPixmapItem(plat);
+    plat1->setPos(2000, 550);
+    scene->addItem(plat1);
+
+    QGraphicsPixmapItem* plat2 = new QGraphicsPixmapItem(plat);
+    plat2->setPos(2600, 350);
+    scene->addItem(plat2);
+
+    QPixmap brick(":/Project2_Dataset/Image/item/brick.png");
+    qreal scalebrick = 80.0 / brick.width();
+    QGraphicsPixmapItem* brick1 = new QGraphicsPixmapItem(brick);
+    brick1->setScale(scalebrick);
+    brick1->setPos(800, 810);
+    scene->addItem(brick1);
+
+    Block* Brick1 = new Block(800, 810, 80, 80);
+    scene->addItem(Brick1);
+
+    QGraphicsPixmapItem* brick2 = new QGraphicsPixmapItem(brick);
+    brick2->setScale(scalebrick);
+    brick2->setPos(5000, 730);
+    scene->addItem(brick2);
+
+    Block* Brick2 = new Block(5000, 730, 80, 80);
+    scene->addItem(Brick2);
+
+    QGraphicsPixmapItem* brick3 = new QGraphicsPixmapItem(brick);
+    brick3->setScale(scalebrick);
+    brick3->setPos(7500, 810);
+    scene->addItem(brick3);
+
+    Block* Brick3 = new Block(7500, 810, 80, 80);
+    scene->addItem(Brick3);
 
     Block* ground1 = new Block(0, 890, 2720, 400);
     scene->addItem(ground1);
@@ -988,6 +1080,10 @@ void MainWindow::loadStage2(){
     FloatingPlatform *Plat10 = new FloatingPlatform(7870, 630, 190, 30);
     scene->addItem(Plat10);
 
+    FloatingPlatform *Plat11 = new FloatingPlatform(2000, 550, 428, 53);
+    scene->addItem(Plat11);
+    FloatingPlatform *Plat12 = new FloatingPlatform(2600, 350, 428, 53);
+    scene->addItem(Plat12);
 
     player = new Kirby(); //呼叫 Kirby.h 中的 ctor
     AbilityMenu *menu = new AbilityMenu();
@@ -1004,38 +1100,67 @@ void MainWindow::loadStage2(){
 
     scene->addItem(player);
 
-    boss = new Boss(bossArenaLeft, bossArenaRight, bossGroundY, player);
-    scene->addItem(boss);
-
     //新增敵人sparky
     for (int i = 0; i < 3; ++i) {
         Sparky *spark = new Sparky(player);
-        spark->setPos(800 + (i * 500), 500);
+        spark->setPos(800 + (i * 500), 400);
         scene->addItem(spark);
         enemyList.append(spark);
     }
 
+    Gordo *gordo1 = new Gordo();
+    gordo1->setPos(1200, 600);
+    scene->addItem(gordo1);
+    enemyList.append(gordo1);
+
+    Gordo *gordo2 = new Gordo();
+    gordo2->setPos(2400, 500);
+    scene->addItem(gordo2);
+    enemyList.append(gordo2);
+
+    Gordo *gordo3 = new Gordo();
+    gordo3->setPos(3600, 400);
+    scene->addItem(gordo3);
+    enemyList.append(gordo3);
+
+    Gordo *gordo4 = new Gordo();
+    gordo4->setPos(5300, 450);
+    scene->addItem(gordo4);
+    enemyList.append(gordo4);
+
+    Gordo *gordo5 = new Gordo();
+    gordo5->setPos(7000, 450);
+    scene->addItem(gordo5);
+    enemyList.append(gordo5);
+
+    for (int i = 0; i < 5; ++i) {
+        Sparky *spark1 = new Sparky(player);
+        spark1->setPos(4000 + (i * 500), 400);
+        scene->addItem(spark1);
+        enemyList.append(spark1);
+    }
+
     // --- [新增] Stage2 道具生成 (只生成一次) ---
-    if (!maximTomatoSpawned) {
-        MaximTomato *tomato = new MaximTomato();
-        tomato->setPos(1600, 830);
-        scene->addItem(tomato);
-        maximTomatoSpawned = true;
-    }
-    if (!oneUpSpawned) {
-        OneUp *oneup = new OneUp();
-        oneup->setPos(1700, 830);
-        scene->addItem(oneup);
-        oneUpSpawned = true;
-    }
+    
+    MaximTomato *tomato = new MaximTomato();
+    tomato->setPos(1600, 500);
+    scene->addItem(tomato);
+    maximTomatoSpawned = true;
+
+    OneUp *oneup = new OneUp();
+    oneup->setPos(1700, 500);
+    scene->addItem(oneup);
+    oneUpSpawned = true;
     
     // --- [5. 誕生 HUD 並加入場景][新增] ---
     gameHUD = new HUD();
     scene->addItem(gameHUD);
 
+    playlist->setCurrentIndex(2);
+    bgmPlayer->play();
+
     connect(player, &Kirby::starFired, this, [=](StarBullet* star){
         bulletList.append(star); // 只要卡比一噴，就加進清單
-        qDebug() << "Captured a star! Total stars in list:" << bulletList.size();
     });
     connect(player, &Kirby::bombStarFired, this, [=](BombStar* bombStar){
         bombStarList.append(bombStar);
@@ -1057,6 +1182,10 @@ void MainWindow::loadGameOver(){
     bombStarList.clear();
     enemyList.clear();
     boss = nullptr;
+    // player 可能已被 scene 所擁有並在 clear() 中刪除，保險起見取消指標引用
+    player = nullptr;
+    // 設定旗標避免後續邏輯繼續存取玩家
+    isGameOver = true;
     scene->setSceneRect(0,0,1620,1080);
     gameover = new QGraphicsPixmapItem(QPixmap(":/Project2_Dataset/Image/background/game_over_continue.png"));
     scene->addItem(gameover);
@@ -1108,13 +1237,11 @@ void MainWindow::loadFinish(){
     QString finalPath = QFile::exists(path1) ? path1 : path2;
     QPixmap firstPic(finalPath);
 
-    playlist->setCurrentIndex(2);
+    playlist->setCurrentIndex(6);
     bgmPlayer->play();
 
     if (!firstPic.isNull()) {
         finish_Item->setPixmap(firstPic.scaled(1620, 1080, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
-    } else {
-        qDebug() << "finish load failed:" << finalPath << "animationDir=" << animationDir << "remain_Hp=" << remain_Hp;
     }
 
     // 啟動動畫切換圖片計時器
@@ -1145,7 +1272,57 @@ void MainWindow::finish_animation(){
     } else {
         qDebug() << "finish frame load failed:" << finalPath << "frame=" << finish_frame << "animationDir=" << animationDir << "total=" << totalFrames;
     }
-
+    switch (animationDir) {
+        case 1:
+            if (finish_frame == finish_dance[0] -30) {
+                playlist->setCurrentIndex(7);
+                bgmPlayer->play();
+                playlist->setPlaybackMode(QMediaPlaylist::CurrentItemOnce);
+            }
+            break;
+        case 2:
+            if (finish_frame == finish_dance[1] -30) {
+                playlist->setCurrentIndex(8);
+                bgmPlayer->play();
+                playlist->setPlaybackMode(QMediaPlaylist::CurrentItemOnce);
+            }
+            break;
+        case 3:
+            if (finish_frame == finish_dance[2] -30) {
+                playlist->setCurrentIndex(8);
+                bgmPlayer->play();
+                playlist->setPlaybackMode(QMediaPlaylist::CurrentItemOnce);
+            }
+            break;
+        case 4:
+            if (finish_frame == finish_dance[3] -30) {
+                playlist->setCurrentIndex(8);
+                bgmPlayer->play();
+                playlist->setPlaybackMode(QMediaPlaylist::CurrentItemOnce);
+            }
+            break;
+        case 5:
+            if (finish_frame == finish_dance[4] -30) {
+                playlist->setCurrentIndex(8);
+                bgmPlayer->play();
+                playlist->setPlaybackMode(QMediaPlaylist::CurrentItemOnce);
+            }
+            break;
+        case 6:
+            if (finish_frame == finish_dance[5] -30) {
+                playlist->setCurrentIndex(8);
+                bgmPlayer->play();
+                playlist->setPlaybackMode(QMediaPlaylist::CurrentItemOnce);
+            }
+            break;
+        case 7:
+            if (finish_frame == finish_dance[6] -30) {
+                playlist->setCurrentIndex(8);
+                bgmPlayer->play();
+                playlist->setPlaybackMode(QMediaPlaylist::CurrentItemOnce);
+            }
+            break;
+    }
     finish_frame++;
 }
 
@@ -1177,10 +1354,13 @@ void MainWindow::loadStage3(){
 
     bg2->setZValue(-10);
 
-    Block* ground1 = new Block(0, 450, 2358, 400);
+    Block* ground0 = new Block(0, 0, 200, 450);
+    scene->addItem(ground0);
+
+    Block* ground1 = new Block(0, 450, 2358, 800);
     scene->addItem(ground1);
 
-    Block* ground2 = new Block(2351, 700, 1200, 320);
+    Block* ground2 = new Block(2350, 960, 150, 320);
     scene->addItem(ground2);
     Block* ground3 = new Block(3550, 460, 770, 320);
     scene->addItem(ground3);
@@ -1188,21 +1368,12 @@ void MainWindow::loadStage3(){
     scene->addItem(ground4);
     Block* ground5 = new Block(6630, 460, 1290, 230);
     scene->addItem(ground5);
+    Block* ground6 = new Block(7900, 0, 160, 1080);
+    scene->addItem(ground6);
+    Block* ground7 = new Block(3400, 960, 150, 320);
+    scene->addItem(ground7);
 
-    Block* top1 = new Block(137, -40, 40, 550);
-    scene->addItem(top1);
-    Block* top2 = new Block(150, 0, 150, 60);
-    scene->addItem(top2);
-    Block* top3 = new Block(457, 0, 150, 60);
-    scene->addItem(top3);
-    Block* top4 = new Block(600, 40 , 460, 150);
-    scene->addItem(top4);
-    Block* top5 = new Block(600, 40 , 460, 150);
-    scene->addItem(top5);
-    Block* top6 = new Block(1220, 40 , 200, 150);
-    scene->addItem(top6);
-
-    Block* lastground = new Block(7500, 700 , 240, 270);
+    Block* lastground = new Block(7550, 700 , 240, 270);
     scene->addItem(lastground);
 
     FloatingPlatform *Plat1 = new FloatingPlatform(5848, 830, 255, 52);
@@ -1238,15 +1409,44 @@ void MainWindow::loadStage3(){
 
     scene->addItem(player);
 
-    boss = new Boss(bossArenaLeft, bossArenaRight, bossGroundY, player);
-    scene->addItem(boss);
 
-    //新增敵人sparky
     for (int i = 0; i < 3; ++i) {
-        Sparky *spark = new Sparky(player);
-        spark->setPos(800 + (i * 500), 100);
-        scene->addItem(spark);
-        enemyList.append(spark);
+        WaddleDoo *doo1 = new WaddleDoo(player);
+        doo1->setPos(800 + (i * 500), 100);
+        scene->addItem(doo1);
+        enemyList.append(doo1);
+    }
+
+    for(int i = 0; i < 2; ++i) {
+        for(int j = 0; j < 7; ++j) {
+            Gordo *gordo1 = new Gordo();
+            gordo1->setPos(2800 + (i * 500), 200 + (j * 100));
+            scene->addItem(gordo1);
+            enemyList.append(gordo1);
+        }
+    }
+
+    for(int i = 0; i < 3; ++i) {
+        for(int j = 0; j < 6; ++j) {
+            Gordo *gordo2 = new Gordo();
+            gordo2->setPos(5000 + (i * 500), 200 + (j * 100));
+            scene->addItem(gordo2);
+            enemyList.append(gordo2);
+        }
+    }
+
+    for(int i = 1; i < 3; ++i){
+        Gordo *gordo3 = new Gordo();
+        gordo3->setPos(5500 + (i * 100), 200);
+        scene->addItem(gordo3);
+        enemyList.append(gordo3);
+    }
+
+    for(int i = 1; i < 6; ++i){
+        Gordo *gordo4 = new Gordo();
+        gordo4->setPos(6000 + (i * 100), 700);
+        scene->addItem(gordo4);
+        enemyList.append(gordo4);
     }
 
     // --- [新增] Stage2 道具生成 (只生成一次) ---
@@ -1266,6 +1466,9 @@ void MainWindow::loadStage3(){
     // --- [5. 誕生 HUD 並加入場景][新增] ---
     gameHUD = new HUD();
     scene->addItem(gameHUD);
+
+    playlist->setCurrentIndex(3);
+    bgmPlayer->play();
 
     connect(player, &Kirby::starFired, this, [=](StarBullet* star){
         bulletList.append(star); // 只要卡比一噴，就加進清單
@@ -1306,7 +1509,7 @@ void MainWindow::loadStage4(){
 
     bg2->setZValue(-10);
 
-    Block* ground0_1 = new Block(0, 890, 1069, 400);
+    Block* ground0_1 = new Block(0, 890, 1280, 400);
     scene->addItem(ground0_1);
     Block* ground0_2 = new Block(2158, 890, 2722, 400);
     scene->addItem(ground0_2);
@@ -1314,7 +1517,7 @@ void MainWindow::loadStage4(){
     scene->addItem(ground0_3);
     Block* ground0_1_1 = new Block(1503, 990, 660, 60);
     scene->addItem(ground0_1_1);
-    Block* ground0_2_1 = new Block(4830, 990, 721, 60);
+    Block* ground0_2_1 = new Block(4830, 1020, 721, 60);
     scene->addItem(ground0_2_1);
 
     Block* ground1 = new Block(1281, 620, 250, 350);
@@ -1353,8 +1556,6 @@ void MainWindow::loadStage4(){
 
     scene->addItem(player);
 
-    boss = new Boss(bossArenaLeft, bossArenaRight, bossGroundY, player);
-    scene->addItem(boss);
 
     //新增敵人sparky
     for (int i = 0; i < 3; ++i) {
@@ -1362,6 +1563,28 @@ void MainWindow::loadStage4(){
         spark->setPos(800 + (i * 500), 100);
         scene->addItem(spark);
         enemyList.append(spark);
+
+        WaddleDoo *doo = new WaddleDoo(player);
+        doo->setPos(900 + (i * 500), 100);
+        scene->addItem(doo);
+        enemyList.append(doo);
+    }
+
+    for (int i = 0; i < 3; ++i) {
+        Sparky *spark1 = new Sparky(player);
+        spark1->setPos(3000 + (i * 500), 100);
+        scene->addItem(spark1);
+        enemyList.append(spark1);
+
+        HotHead *hot1 = new HotHead(player);
+        hot1->setPos(2900 + (i * 500), 100);
+        scene->addItem(hot1);
+        enemyList.append(hot1);
+
+        WaddleDoo *doo1 = new WaddleDoo(player);
+        doo1->setPos(3100 + (i * 500), 100);
+        scene->addItem(doo1);
+        enemyList.append(doo1);
     }
 
     // --- [新增] Stage2 道具生成 (只生成一次) ---
@@ -1381,6 +1604,9 @@ void MainWindow::loadStage4(){
     // --- [5. 誕生 HUD 並加入場景][新增] ---
     gameHUD = new HUD();
     scene->addItem(gameHUD);
+
+    playlist->setCurrentIndex(4);
+    bgmPlayer->play();
 
     connect(player, &Kirby::starFired, this, [=](StarBullet* star){
         bulletList.append(star); // 只要卡比一噴，就加進清單
@@ -1411,14 +1637,14 @@ void MainWindow::loadStage4ToBossVideo(){
 
     scene->setSceneRect(0, 0, 1620, 1080);
 
-    stage4ToBossFrame = 3;
+    stage4ToBossFrame = 0;
     stage4ToBossItem = new QGraphicsPixmapItem();
     stage4ToBossItem->setPos(0, 0);
     scene->addItem(stage4ToBossItem);
     view->centerOn(810, 540);
 
-    QString videoDir = QCoreApplication::applicationDirPath() + "/4tobossVideo";
-    QString framePath = QDir::cleanPath(videoDir + "/" + QString("frame_%1.jpg").arg(stage4ToBossFrame, 3, 10, QChar('0')));
+    QString videoDir = QCoreApplication::applicationDirPath() + "/stage_transition";
+    QString framePath = QDir::cleanPath(videoDir + "/" + QString("%1.png").arg(stage4ToBossFrame));
     QPixmap firstPic(framePath);
     if (!firstPic.isNull()) {
         stage4ToBossItem->setPixmap(firstPic.scaled(1620, 1080, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
@@ -1429,19 +1655,19 @@ void MainWindow::loadStage4ToBossVideo(){
 
     stage4ToBossTimer = new QTimer(this);
     connect(stage4ToBossTimer, &QTimer::timeout, this, &MainWindow::stage4ToBossVideo);
-    stage4ToBossTimer->start(30);
+    stage4ToBossTimer->start(10);
 }
 
 void MainWindow::stage4ToBossVideo(){
-    if (stage4ToBossFrame > 94) {
+    if (stage4ToBossFrame > 79) {
         stage4ToBossTimer->stop();
         currentState = STATE_BOSS;
         loadBoss();
         return;
     }
 
-    QString videoDir = QCoreApplication::applicationDirPath() + "/4tobossVideo";
-    QString framePath = QDir::cleanPath(videoDir + "/" + QString("frame_%1.jpg").arg(stage4ToBossFrame, 3, 10, QChar('0')));
+    QString videoDir = QCoreApplication::applicationDirPath() + "/stage_transition";
+    QString framePath = QDir::cleanPath(videoDir + "/" + QString("%1.png").arg(stage4ToBossFrame));
     QPixmap framePic(framePath);
     if (!framePic.isNull()) {
         stage4ToBossItem->setPixmap(framePic.scaled(1620, 1080, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
@@ -1533,12 +1759,11 @@ void MainWindow::loadBoss(){
     boss = new Boss(bossArenaLeft, bossArenaRight, bossGroundY, player);
     scene->addItem(boss);
 
-    //新增敵人sparky
-    for (int i = 0; i < 3; ++i) {
-        Sparky *spark = new Sparky(player);
-        spark->setPos(800 + (i * 500), 100);
-        scene->addItem(spark);
-        enemyList.append(spark);
+    for (int i = 0; i < 2; ++i) {
+        WaddleDee *dee4 = new WaddleDee();
+        dee4->setPos(800 + (i * 500), 100);
+        scene->addItem(dee4);
+        enemyList.append(dee4);
     }
 
     // --- [新增] Stage2 道具生成 (只生成一次) ---
@@ -1558,6 +1783,9 @@ void MainWindow::loadBoss(){
     // --- [5. 誕生 HUD 並加入場景][新增] ---
     gameHUD = new HUD();
     scene->addItem(gameHUD);
+
+    playlist->setCurrentIndex(5);
+    bgmPlayer->play();
 
     connect(player, &Kirby::starFired, this, [=](StarBullet* star){
         bulletList.append(star); // 只要卡比一噴，就加進清單
