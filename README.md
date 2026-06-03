@@ -20,23 +20,59 @@
 
 ## How to Run
 
-1. Open the project using Qt Creator.
-2. Build the project using the Qt 5.12.12 MinGW 64-bit kit.
-3. Execute the generated `.exe` file.
+There are two ways to run this project:
 
-### Important Resource Placement
+### **method 1.**  Extract `demo.zip` and run `KirbyAdventure.exe`
+
+download `demo.zip` at follow link:  
+src:   https://drive.google.com/file/d/1SmYTbCPTWD3dlUVE0T1Q8O7VVebhYmN6/view?usp=sharing
+
+1. UNZIP `demo.zip` to any folder.
+2. Open the folder.
+3. Locate the game executable `KirbyAdventure.exe` (or a similarly named `.exe`).
+4. Double-click the executable to start the game.     
+
+
+
+### **method 2.** Open `game/kirby-adventure.pro` in Qt Creator and build/run
+
+1. Open Qt Creator.
+2. Select `File` > `Open File or Project...`.
+3. Navigate to the `game` folder and select `kirby-adventure.pro`.
+4. Choose the appropriate Qt kit, such as `Qt 5.12.12 MinGW 64-bit`.
+5. Click `Configure Project`.
+6. Click the `Build` button or press `Ctrl+B` to build.
+7. After the build completes, click `Run` or press `Ctrl+R` to launch the game.
+
+
+
+
+### **!!** Important Resource Placement (for method 2) **!!**
 
 The following folders/files must be placed in the **same directory as the executable (`.exe`)**:
 
+src: https://drive.google.com/drive/folders/1ppwK49KR3e4hzd5XtsGcKVZdFC6MQC67?usp=sharing
+
+* UNZIP three files, then import to the folder same as .exe
 * Transition cutscene videos
 * Ending videos
-* Background music / sound effect resources
+* Background music resources
 
 If these files are missing or placed in the wrong location:
+* The game will crash  
 
-* cutscenes may not play correctly
-* background music may fail to load
-* ending animations may not appear
+
+```text
+root/
+├── build_environment/          --> set up by Qt Creator IDE
+│   ├── *.exe
+│   ├── bg_music/               --> downloaded from Google Drive
+│   ├── stage_transition/       --> downloaded from Google Drive
+│   └── finish_animation/       --> downloaded from Google Drive
+│
+└── game/
+    └── *.pro
+```
 
 ---
 
@@ -66,7 +102,7 @@ If these files are missing or placed in the wrong location:
 * Some cutscene and ending resources are loaded dynamically from external files.
   Make sure all media folders remain in the correct directory.
 
-* The Skill Menu only allows selecting abilities that have already been unlocked during gameplay.
+
 
 ---
 
@@ -74,4 +110,4 @@ If these files are missing or placed in the wrong location:
 
 * Qt 5.12.12
 * Qt Multimedia module
-* Required image / audio / video resource files
+* Required image set / audio  resource files
