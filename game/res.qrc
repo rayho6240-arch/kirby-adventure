@@ -1,0 +1,208 @@
+<RCC>
+    <qresource prefix="/">
+        <file>Project2_Dataset/Image/Kirby_normal/kirby_run_1_L.png</file>
+        <file>Project2_Dataset/Image/Kirby_normal/kirby_run_1_R.png</file>
+        <file>Project2_Dataset/Image/Kirby_normal/kirby_run_2_L.png</file>
+        <file>Project2_Dataset/Image/Kirby_normal/kirby_run_2_R.png</file>
+        <file>Project2_Dataset/Image/Kirby_normal/kirby_run_3_L.png</file>
+        <file>Project2_Dataset/Image/Kirby_normal/kirby_run_3_R.png</file>
+        <file>Project2_Dataset/Image/Kirby_normal/kirby_run_4_L.png</file>
+        <file>Project2_Dataset/Image/Kirby_normal/kirby_run_4_R.png</file>
+        <file>Project2_Dataset/Image/Kirby_normal/kirby_stop_L.png</file>
+        <file>Project2_Dataset/Image/Kirby_normal/kirby_stop_R.png</file>
+        <file>Project2_Dataset/Image/Kirby_normal/kirby_attack_L.png</file>
+        <file>Project2_Dataset/Image/Kirby_normal/kirby_attack_R.png</file>
+        <file>Project2_Dataset/Image/Kirby_normal/kirby_attack_star(2).png</file>
+        <file>Project2_Dataset/Image/Kirby_normal/kirby_attack_star_L(1).png</file>
+        <file>Project2_Dataset/Image/Kirby_normal/kirby_attack_star_R(1).png</file>
+        <file>Project2_Dataset/Image/Kirby_normal/kirby_back.png</file>
+        <file>Project2_Dataset/Image/Kirby_normal/kirby_down_L.png</file>
+        <file>Project2_Dataset/Image/Kirby_normal/kirby_down_R.png</file>
+        <file>Project2_Dataset/Image/Kirby_normal/kirby_fly_1_L.png</file>
+        <file>Project2_Dataset/Image/Kirby_normal/kirby_fly_1_R.png</file>
+        <file>Project2_Dataset/Image/Kirby_normal/kirby_fly_2_L.png</file>
+        <file>Project2_Dataset/Image/Kirby_normal/kirby_fly_2_R.png</file>
+        <file>Project2_Dataset/Image/Kirby_normal/kirby_jump(1).png</file>
+        <file>Project2_Dataset/Image/Kirby_normal/kirby_jump(2).png</file>
+        <file>Project2_Dataset/Image/Kirby_normal/kirby_jump(3).png</file>
+        <file>Project2_Dataset/Image/Kirby_normal/kirby_run_5_R.png</file>
+        <file>Project2_Dataset/Image/Kirby_normal/kirby_run_5_L.png</file>
+        <file>Project2_Dataset/Image/Kirby_normal/kirby_run_6_L.png</file>
+        <file>Project2_Dataset/Image/Kirby_normal/kirby_run_6_R.png</file>
+        <file>Project2_Dataset/Image/Kirby_normal/kirby_run_7_R.png</file>
+        <file>Project2_Dataset/Image/Kirby_normal/kirby_run_7_L.png</file>
+        <file>Project2_Dataset/Image/background/Stage1(1).png</file>
+        <file>Project2_Dataset/Image/background/Stage1(2).png</file>
+        <file>Project2_Dataset/Image/background/Stage1(3).png</file>
+        <file>Project2_Dataset/Image/background/stage-1.jpg</file>
+        <file>Project2_Dataset/Image/background/stage-1-bg.jpg</file>
+        <file>Project2_Dataset/Image/Kirby_normal/kirby_inhale_L.png</file>
+        <file>Project2_Dataset/Image/Kirby_normal/kirby_inhale_R.png</file>
+        <file>Project2_Dataset/Image/Kirby_normal/kirby_inhale_1_L.png</file>
+        <file>Project2_Dataset/Image/Kirby_normal/kirby_inhale_1_R.png</file>
+        <file>Project2_Dataset/Image/Kirby_normal/kirby_inhale_2_L.png</file>
+        <file>Project2_Dataset/Image/Kirby_normal/kirby_inhale_2_R.png</file>
+        <file>Project2_Dataset/Image/Waddle Dee/Waddle_Dee_6.png</file>
+        <file>Project2_Dataset/Image/background/stage-1_1.png</file>
+        <file>Project2_Dataset/Image/Waddle Dee/Waddle_Dee_0.png</file>
+        <file>Project2_Dataset/Image/Waddle Dee/Waddle_Dee_1.png</file>
+        <file>Project2_Dataset/Image/Waddle Dee/Waddle_Dee_2.png</file>
+        <file>Project2_Dataset/Image/Waddle Dee/Waddle_Dee_3.png</file>
+        <file>Project2_Dataset/Image/Waddle Dee/Waddle_Dee_4.png</file>
+        <file>Project2_Dataset/Image/Waddle Dee/Waddle_Dee_5.png</file>
+        <file>Project2_Dataset/Image/background/start.png</file>
+        <file>Project2_Dataset/Image/background/stage2_merged_nowater.jpg</file>
+        <file>Project2_Dataset/Image/Sparky/Sparky_attack_1.png</file>
+        <file>Project2_Dataset/Image/Sparky/Sparky_attack_2.png</file>
+        <file>Project2_Dataset/Image/Sparky/Sparky_left_1.png</file>
+        <file>Project2_Dataset/Image/Sparky/Sparky_left_2.png</file>
+        <file>Project2_Dataset/Image/Sparky/Sparky_ritht_1.png</file>
+        <file>Project2_Dataset/Image/Sparky/Sparky_ritht_2.png</file>
+        <file>Project2_Dataset/Image/background/game_over_continue.png</file>
+        <file>Project2_Dataset/Image/background/game_over_quit.png</file>
+        <file>Project2_Dataset/Image/Kirby_spark/Kirby_spark_attack(1).png</file>
+        <file>Project2_Dataset/Image/Kirby_spark/Kirby_spark_attack(2).png</file>
+        <file>Project2_Dataset/Image/Kirby_spark/Kirby_spark_attack(3).png</file>
+        <file>Project2_Dataset/Image/Kirby_spark/Kirby_spark_board.png</file>
+        <file>Project2_Dataset/Image/Kirby_spark/Kirby_spark_down_L.png</file>
+        <file>Project2_Dataset/Image/Kirby_spark/Kirby_spark_down_R.png</file>
+        <file>Project2_Dataset/Image/Kirby_spark/Kirby_spark_fly(1)_L.png</file>
+        <file>Project2_Dataset/Image/Kirby_spark/Kirby_spark_fly(1)_R.png</file>
+        <file>Project2_Dataset/Image/Kirby_spark/Kirby_spark_fly(2)_L.png</file>
+        <file>Project2_Dataset/Image/Kirby_spark/Kirby_spark_fly(2)_R.png</file>
+        <file>Project2_Dataset/Image/Kirby_spark/Kirby_spark_run(1)_L.png</file>
+        <file>Project2_Dataset/Image/Kirby_spark/Kirby_spark_run(1)_R.png</file>
+        <file>Project2_Dataset/Image/Kirby_spark/Kirby_spark_run(2)_L.png</file>
+        <file>Project2_Dataset/Image/Kirby_spark/Kirby_spark_run(2)_R.png</file>
+        <file>Project2_Dataset/Image/Kirby_spark/Kirby_spark_stop_L.png</file>
+        <file>Project2_Dataset/Image/Kirby_spark/Kirby_spark_stop_R.png</file>
+        <file>Project2_Dataset/Image/Gordo/Gordo(0).png</file>
+        <file>Project2_Dataset/Image/Gordo/Gordo(1).png</file>
+        <file>Project2_Dataset/Image/Hot Head/Hot_head_attack_L.png</file>
+        <file>Project2_Dataset/Image/Hot Head/Hot_head_attack_R.png</file>
+        <file>Project2_Dataset/Image/Hot Head/Hot_head_fire(1).png</file>
+        <file>Project2_Dataset/Image/Hot Head/Hot_head_fire(2)_L.png</file>
+        <file>Project2_Dataset/Image/Hot Head/Hot_head_fire(2)_R.png</file>
+        <file>Project2_Dataset/Image/Hot Head/Hot_head_fire(3)_L.png</file>
+        <file>Project2_Dataset/Image/Hot Head/Hot_head_fire(3)_R.png</file>
+        <file>Project2_Dataset/Image/Hot Head/Hot_head_run_L(2).png</file>
+        <file>Project2_Dataset/Image/Hot Head/Hot_head_run_R(2).png</file>
+        <file>Project2_Dataset/Image/Hot Head/Hot_head_stop_L(1).png</file>
+        <file>Project2_Dataset/Image/Hot Head/Hot_head_stop_R(1).png</file>
+        <file>Project2_Dataset/Image/Kirby_fire/kirbyfire_attack_L.png</file>
+        <file>Project2_Dataset/Image/Kirby_fire/kirbyfire_attack_R.png</file>
+        <file>Project2_Dataset/Image/Kirby_fire/kirbyfire_board.png</file>
+        <file>Project2_Dataset/Image/Kirby_fire/kirbyfire_down_L.png</file>
+        <file>Project2_Dataset/Image/Kirby_fire/kirbyfire_down_R.png</file>
+        <file>Project2_Dataset/Image/Kirby_fire/kirbyfire_fire(1)_L.png</file>
+        <file>Project2_Dataset/Image/Kirby_fire/kirbyfire_fire(1)_R.png</file>
+        <file>Project2_Dataset/Image/Kirby_fire/kirbyfire_fire(2)_L.png</file>
+        <file>Project2_Dataset/Image/Kirby_fire/kirbyfire_fire(2)_R.png</file>
+        <file>Project2_Dataset/Image/Kirby_fire/kirbyfire_fire(3)_L.png</file>
+        <file>Project2_Dataset/Image/Kirby_fire/kirbyfire_fire(3)_R.png</file>
+        <file>Project2_Dataset/Image/Kirby_fire/kirbyfire_fly(1)_L.png</file>
+        <file>Project2_Dataset/Image/Kirby_fire/kirbyfire_fly(1)_R.png</file>
+        <file>Project2_Dataset/Image/Kirby_fire/kirbyfire_fly(2)_L.png</file>
+        <file>Project2_Dataset/Image/Kirby_fire/kirbyfire_fly(2)_R.png</file>
+        <file>Project2_Dataset/Image/Kirby_fire/kirbyfire_run(1)_L.png</file>
+        <file>Project2_Dataset/Image/Kirby_fire/kirbyfire_run(1)_R.png</file>
+        <file>Project2_Dataset/Image/Kirby_fire/kirbyfire_run(2)_L.png</file>
+        <file>Project2_Dataset/Image/Kirby_fire/kirbyfire_run(2)_R.png</file>
+        <file>Project2_Dataset/Image/Kirby_fire/kirbyfire_run(3)_L.png</file>
+        <file>Project2_Dataset/Image/Kirby_fire/kirbyfire_run(3)_R.png</file>
+        <file>Project2_Dataset/Image/Kirby_fire/kirbyfire_stop_L.png</file>
+        <file>Project2_Dataset/Image/Kirby_fire/kirbyfire_stop_R.png</file>
+        <file>Project2_Dataset/Image/item/1UP.png</file>
+        <file>Project2_Dataset/Image/item/brick.png</file>
+        <file>Project2_Dataset/Image/item/door.png</file>
+        <file>Project2_Dataset/Image/item/floor.png</file>
+        <file>Project2_Dataset/Image/item/goal_door.png</file>
+        <file>Project2_Dataset/Image/item/HP_0.png</file>
+        <file>Project2_Dataset/Image/item/HP_1.png</file>
+        <file>Project2_Dataset/Image/item/life.png</file>
+        <file>Project2_Dataset/Image/item/Maxim Tomato.png</file>
+        <file>Project2_Dataset/Image/inhalingBubble/inhale_smoke(1).png</file>
+        <file>Project2_Dataset/Image/inhalingBubble/inhale_smoke(2).png</file>
+        <file>Project2_Dataset/Image/inhalingBubble/inhale_smoke(3).png</file>
+        <file>Project2_Dataset/Image/inhalingBubble/inhale_smoke(4).png</file>
+        <file>Project2_Dataset/Image/inhalingBubble/inhale_smoke(5).png</file>
+        <file>Project2_Dataset/Image/background/stage2_augment.jpg</file>
+        <file>Project2_Dataset/Image/item/Hp-1.png</file>
+        <file>Project2_Dataset/Image/item/Hp-2.png</file>
+        <file>Project2_Dataset/Image/item/Hp-3.png</file>
+        <file>Project2_Dataset/Image/item/lives-0.png</file>
+        <file>Project2_Dataset/Image/item/lives-1.png</file>
+        <file>Project2_Dataset/Image/item/lives-2.png</file>
+        <file>Project2_Dataset/Image/Waddle Doo/attack_0.png</file>
+        <file>Project2_Dataset/Image/Waddle Doo/attack_1.png</file>
+        <file>Project2_Dataset/Image/Waddle Doo/attack_2.png</file>
+        <file>Project2_Dataset/Image/Waddle Doo/attack_3.png</file>
+        <file>Project2_Dataset/Image/Waddle Doo/attack_4.png</file>
+        <file>Project2_Dataset/Image/Waddle Doo/attack_5.png</file>
+        <file>Project2_Dataset/Image/Waddle Doo/attack_6.png</file>
+        <file>Project2_Dataset/Image/Waddle Doo/attack_7.png</file>
+        <file>Project2_Dataset/Image/Waddle Doo/attack_8.png</file>
+        <file>Project2_Dataset/Image/Waddle Doo/attack_9.png</file>
+        <file>Project2_Dataset/Image/Waddle Doo/attack_10.png</file>
+        <file>Project2_Dataset/Image/Waddle Doo/attack_11.png</file>
+        <file>Project2_Dataset/Image/Waddle Doo/attack_12.png</file>
+        <file>Project2_Dataset/Image/Waddle Doo/attack_13.png</file>
+        <file>Project2_Dataset/Image/Waddle Doo/attack_14.png</file>
+        <file>Project2_Dataset/Image/Waddle Doo/attack_15.png</file>
+        <file>Project2_Dataset/Image/Waddle Doo/walk_1.png</file>
+        <file>Project2_Dataset/Image/Waddle Doo/walk_2.png</file>
+        <file>Project2_Dataset/Image/Waddle Doo/walk_3.png</file>
+        <file>Project2_Dataset/Image/Waddle Doo/walk_4.png</file>
+        <file>Project2_Dataset/Image/Waddle Doo/walk_5.png</file>
+        <file>Project2_Dataset/Image/Waddle Doo/attack_star.png</file>
+        <file>Project2_Dataset/Image/Waddle Doo/attack_WaddleDoo.1.png</file>
+        <file>Project2_Dataset/Image/Waddle Doo/attack_WaddleDoo.2.png</file>
+        <file>Project2_Dataset/Image/boss/boss_jump(1).png</file>
+        <file>Project2_Dataset/Image/bomb/bomb(1).png</file>
+        <file>Project2_Dataset/Image/bomb/explore_(1).png</file>
+        <file>Project2_Dataset/Image/bomb/bombStar_L.png</file>
+        <file>Project2_Dataset/Image/bomb/bombStar_R.png</file>
+        <file alias="Project2_Dataset/Image/boss/faceL/jump_faceL_(2)_L.png">Project2_Dataset/Image/boss/faceL/jump_faceL(2)_L.png</file>
+        <file>Project2_Dataset/Image/boss/faceL/jump_faceL_(1)_L.png</file>
+        <file alias="Project2_Dataset/Image/boss/faceL/jump_faceL_(1)_R.png">Project2_Dataset/Image/boss/faceL/jump_faceL_(1)_R.png.png</file>
+        <file>Project2_Dataset/Image/boss/faceL/jump_faceL_(2)_R.png</file>
+        <file>Project2_Dataset/Image/boss/faceR/jump_faceR_(1)_L.png</file>
+        <file alias="Project2_Dataset/Image/boss/faceR/jump_faceR_(1)_R.png">Project2_Dataset/Image/boss/faceR/jump_faceR_(1)_R.png.png</file>
+        <file>Project2_Dataset/Image/boss/faceR/jump_faceR_(2)_L.png</file>
+        <file alias="Project2_Dataset/Image/boss/faceR/jump_faceR_(2)_R.png">Project2_Dataset/Image/boss/faceR/jump_faceR_(2)_R.png.png</file>
+        <file>Project2_Dataset/Image/boss/drop_(1)_L.png</file>
+        <file>Project2_Dataset/Image/boss/drop_(1)_R.png</file>
+        <file>Project2_Dataset/Image/boss/drop_(2)_L.png</file>
+        <file>Project2_Dataset/Image/boss/drop_(2)_R.png</file>
+        <file>Project2_Dataset/Image/Kirby_Beam/beam_star.png</file>
+        <file>Project2_Dataset/Image/Kirby_Beam/kirby_beam_attack1_L.png</file>
+        <file>Project2_Dataset/Image/Kirby_Beam/kirby_beam_attack1_R.png</file>
+        <file>Project2_Dataset/Image/Kirby_Beam/kirby_beam_attack2_L.png</file>
+        <file>Project2_Dataset/Image/Kirby_Beam/kirby_beam_attack2_R.png</file>
+        <file>Project2_Dataset/Image/Kirby_Beam/kirby_beam_down_L.png</file>
+        <file>Project2_Dataset/Image/Kirby_Beam/kirby_beam_down_R.png</file>
+        <file>Project2_Dataset/Image/Kirby_Beam/kirby_beam_fly_L_1.png</file>
+        <file>Project2_Dataset/Image/Kirby_Beam/kirby_beam_fly_L_2.png</file>
+        <file>Project2_Dataset/Image/Kirby_Beam/kirby_beam_fly_R_1.png</file>
+        <file>Project2_Dataset/Image/Kirby_Beam/kirby_beam_fly_R_2.png</file>
+        <file>Project2_Dataset/Image/Kirby_Beam/kirby_beam_run_L_1.png</file>
+        <file>Project2_Dataset/Image/Kirby_Beam/kirby_beam_run_L_2.png</file>
+        <file>Project2_Dataset/Image/Kirby_Beam/kirby_beam_run_L_3.png</file>
+        <file>Project2_Dataset/Image/Kirby_Beam/kirby_beam_run_L_4.png</file>
+        <file>Project2_Dataset/Image/Kirby_Beam/kirby_beam_run_L_5.png</file>
+        <file>Project2_Dataset/Image/Kirby_Beam/kirby_beam_run_R_1.png</file>
+        <file>Project2_Dataset/Image/Kirby_Beam/kirby_beam_run_R_2.png</file>
+        <file>Project2_Dataset/Image/Kirby_Beam/kirby_beam_run_R_3.png</file>
+        <file>Project2_Dataset/Image/Kirby_Beam/kirby_beam_run_R_4.png</file>
+        <file>Project2_Dataset/Image/Kirby_Beam/kirby_beam_run_R_5.png</file>
+        <file>Project2_Dataset/Image/Kirby_Beam/kirby_beam_stop_L.png</file>
+        <file>Project2_Dataset/Image/Kirby_Beam/kirby_beam_stop_R.png</file>
+        <file>Project2_Dataset/Image/background/stage3.jpg</file>
+        <file>Project2_Dataset/Image/background/stage4.jpg</file>
+        <file>Project2_Dataset/Image/background/stage-boss.jpg</file>
+        <file>Project2_Dataset/Image/Kirby_Beam/kirby_beam.png</file>
+        <file>Project2_Dataset/Image/Kirby_fire/kirby_fire.png</file>
+        <file>Project2_Dataset/Image/Kirby_normal/kirby_normal.png</file>
+        <file>Project2_Dataset/Image/Kirby_spark/kirby_spark.png</file>
+    </qresource>
+</RCC>
